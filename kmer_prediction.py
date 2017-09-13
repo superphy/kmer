@@ -11,16 +11,22 @@ bovine_file_path = '/home/james/Bovine/'
 
 def convert_fasta_to_kmer_count_array(file, k):
     max_kmers = 4**k
-    p = Profile.from_fasta(open(file), length=k, name='kmer')
+    f = open(file)
+    p = Profile.from_fasta(f, length=k, name='kmer')
+    f.close()
 
     #Saves the kPAL 'Profile as a hdf5 file'
-    p.save(h5py.File("temp.hdf5", "w"), 'kmer')
+    f = h5py.File("temp.hdf5", "w")
+    p.save(f, 'kmer')
+    f.close()
 
     #Open the saved file using h5py
     kmer_counts = h5py.File("temp.hdf5", "r")
 
     #Access the h5py group 'profiles'
     grp = kmer_counts['profiles']
+
+
     dataset = grp.require_dataset('kmer', shape=(max_kmers,), dtype='int64', exact=False)
 
     #Create np array to manipulate the dataset
@@ -28,6 +34,7 @@ def convert_fasta_to_kmer_count_array(file, k):
 
     #read the hdf5 file into the array
     dataset.read_direct(arr, np.s_[0:max_kmers], np.s_[0:max_kmers])
+    kmer_counts.close()
 
     return arr
 

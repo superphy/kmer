@@ -1,12 +1,11 @@
 from kpal.klib import Profile
 import h5py
-import numpy as np
 from math import log
 
 def query_kmer(hdf5_file, *kmers):
     '''
-    Queries a numpy array, to find the kmer count of a specific base pair
-    sequence.
+    Queries an HDF5 file to find the kmer count of one or more base pair
+    sequences.
 
     Args:
         hdf5_file:  An HDF5 file containing the results of a kmer count
