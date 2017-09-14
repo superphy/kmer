@@ -4,6 +4,7 @@ from random import randrange
 import os
 from math import ceil
 from numpy import base_repr
+import lmdb
 
 #Call the jellyfish command line function
 #count: count kmers
@@ -20,10 +21,22 @@ bovine_train_path = '/home/rylan/Data/human_bovine/bovine_train/'
 human_test_path = '/home/rylan/Data/human_bovine/human_test/'
 bovine_test_path = '/home/rylan/Data/human_bovine/bovine_test/'
 
+def kmer(number, k):
+    number = base_repr(number, base=4, padding=k)
+    number = number[-3:]
+
+    num = ['A' if x == '0'
+            else 'C' if x == '1'
+            else 'G' if x == '2'
+            else 'T' for x in list(number)]
+
+    return ''.join(num)
+
+
 def fasta_to_kmer(filename, k):
     size = int(ceil((4**k)/(0.75*1000000)))
 
-    args = ['jellyfish', 'count', '-m','%d'%k, '-s','%dM'%size, '-t','20', '-C', '%s'%filename, '-o','test.jf']
+    args = ['jellyfish', 'count', '-m','%d'%k, '-s','%dM'%size, '-t','20', '%s'%filename, '-o','test.jf']
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
 
@@ -31,8 +44,52 @@ def fasta_to_kmer(filename, k):
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
     out, err = p.communicate()
 
-    arr = [int(x) for x in ''.join(out).split() if x.isdigit()] #Fast up to a k-value of 10
+    arr = ''.join(out).split()
+    arr = [arr[i:i+2] for i in range(0, len(arr), 2)]
+    non_zero = len(arr)
+    database = lmdb.open('database')
+
+    with database.begin(write=True) as db:
+        #Get rid of previous kmer counts in the database
+        remove_old = database.open_db()
+        db.drop(remove_old)
+        #Add the new kmer counts
+        for line in arr:
+            db.put(line[0], line[1])
+
+        #Insert the missing counts
+        count = 0
+        for i in range((4**k)):
+            if db.put(kmer(i,k), '0', overwrite=False):
+                count+=1
+
+        arr = []
+        cursor = db.cursor()
+        for key, value in cursor:
+            arr.append(value)
+
+        #print db.stat()
+
+    database.close()
+    print "Total: %d Jellyfish: %d Changed: %d" % (4**k, non_zero, count)
+
+    #arr = [int(x) for x in ''.join(out).split() if x.isdigit()] #Fast up to a k-value of 10
     return arr
+
+
+# def fasta_to_kmer(filename, k):
+#     size = int(ceil((4**k)/(0.75*1000000)))
+#
+#     args = ['jellyfish', 'count', '-m','%d'%k, '-s','%dM'%size, '-t','20', '-C', '%s'%filename, '-o','test.jf']
+#     p = subprocess.Popen(args, bufsize=-1)
+#     p.communicate()
+#
+#     args = ['jellyfish', 'dump', '-c', 'test.jf']
+#     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
+#     out, err = p.communicate()
+#
+#     arr = [int(x) for x in ''.join(out).split() if x.isdigit()] #Fast up to a k-value of 10
+#     return arr
 
 def prepare_data_sub(human, bovine, k):
     h_kmer = []
@@ -91,7 +148,7 @@ def prepare_data(k):
 
 def main():
     print "Preparing Data...."
-    X,Y,Z,ZPrime = prepare_data(7)
+    X,Y,Z,ZPrime = prepare_data(6)
 
     print "\nCreating Support Vector Machine....\n"
     machine = svm.SVC()

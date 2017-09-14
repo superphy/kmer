@@ -1,0 +1,4 @@
+*.jf
+*.pyc
+*.fasta
+/database/*
