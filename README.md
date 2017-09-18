@@ -1,11 +1,13 @@
-### kmer Prediction
+### kmer prediction
 
-Using kmer counts to predict if an e. coli genome orginate from humans or bovines. 
+Using kmer counts to predict if an e. coli genome orginated from humans or bovines. 
 
 ### To Run
 
 **Step One** Run 'python setup\_database.py'
+
 **Step Two** Since this is a work in progress update the file paths at the top of jellyfish\_test.py to point to the appropriate locations on your computer.
+
 **Step Three** Run 'python jellyfish\_test.py' 
 
 
