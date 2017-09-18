@@ -4,11 +4,11 @@ Using kmer counts to predict if an e. coli genome orginated from humans or bovin
 
 ### To Run
 
-**Step One:** Run `python setup\_database.py`
+**Step One:** Run `python setup_database.py`
 
 **Step Two:** Since this is a work in progress update the file paths at the top of jellyfish\_test.py to point to the appropriate locations on your computer.
 
-**Step Three:** Run `python jellyfish\_test.py` 
+**Step Three:** Run `python jellyfish_test.py` 
 
 
 ### Note
