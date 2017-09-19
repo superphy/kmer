@@ -34,11 +34,14 @@ def set_db(k):
             i+=1
     environment.close()
 
+def run(sizes):
+    for size in sizes:
+        print "Setting up database for k = %d"%size
+        set_db(size)
+
 def main():
-    for i in sys.argv:
-        if i.isdigit():
-            print "Setting up database for k = %d"%i
-            set_db(i)
+    x = [int(x) for x in sys.argv if x.isdigit()]
+    run(x)
 
 if __name__ == "__main__":
     main()

@@ -99,10 +99,9 @@ def prepare_data(k):
 
     return data, answers
 
-def main():
+def run(k):
     start_time = timer()
 
-    k = int(sys.argv[1])
     print "Preparing Data...."
     X,Y = prepare_data(k)
 
@@ -125,10 +124,16 @@ def main():
             count += 1
 
     ans = (count*100)//len(Z)
-    print "Percent Correct: %d" % ans
+
     end_time = timer()
 
-    print "Time: %d"%(end_time-start_time)
+    return ans, (end_time-start_time)
+
+def main():
+    k = int(sys.argv[1])
+    pc, time = run(k)
+    print "Percent Correct: %d"%pc
+    print "Time Elapsed: %d"%time
 
 if __name__ == "__main__":
     main()

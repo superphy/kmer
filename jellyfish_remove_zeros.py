@@ -107,7 +107,7 @@ def shuffle(arrA, arrB, A, B):
         return test, answers
 
 
-def main():
+def run(k):
     start_time = timer()
 
     environment = lmdb.open('database', map_size=int(2e9))
@@ -115,7 +115,6 @@ def main():
     database = environment.open_db(dupsort=False)
 
     with environment.begin(write=True, db=database) as transaction:
-        k = int(sys.argv[1])
 
         print "Setting up files...."
         human_files = os.listdir(human_path)
@@ -187,12 +186,17 @@ def main():
                 count+=1
 
         ans = (count*100)//len(Z)
-        print "Percent Correct: %d"%ans
 
     environment.close()
 
     end_time = timer()
-    print "Time: %d" % (end_time-start_time)
+    return ans, (end_time-start_time)
+
+def main():
+    k = int(sys.argv[1])
+    pc, time = run(k)
+    print "Percent Correct: %d"%pc
+    print "Time Elapsed: %d"%time
 
 if __name__ == "__main__":
     main()
