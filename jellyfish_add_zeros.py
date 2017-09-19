@@ -6,6 +6,7 @@ from math import ceil
 from numpy import base_repr
 import lmdb
 import sys
+from timeit import default_timer as timer
 
 #Call the jellyfish command line function
 #count: count kmers
@@ -32,10 +33,9 @@ def fasta_to_kmer(filename, k):
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
     out, err = p.communicate()
     #'Transform results into usable format'
-    arr = ''.join(out).split()
-    arr = [arr[i:i+2] for i in range(0, len(arr), 2)] #SLOW
+    arr = [x.split(' ') for x in out.split('\n') if x]
 
-    environment = lmdb.open('database', map_size=int(2e9), max_dbs=12)
+    environment = lmdb.open('kmer_counts', map_size=int(2e9), max_dbs=12)
 
     database = environment.open_db('k%d'%k, dupsort=False)
 
@@ -110,6 +110,8 @@ def prepare_data(k):
     return training_data, training_answers, test_data, test_answers
 
 def main():
+    start_time = timer()
+
     k = int(sys.argv[1])
     print "Preparing Data...."
     X,Y,Z,ZPrime = prepare_data(k)
@@ -129,6 +131,9 @@ def main():
 
     ans = (count*100)//len(Z)
     print "Percent Correct: %d" % ans
+    end_time = timer()
+
+    print "Time: %d"%(end_time-start_time)
 
 if __name__ == "__main__":
     main()

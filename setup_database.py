@@ -1,5 +1,6 @@
 import lmdb
 from numpy import base_repr
+import sys
 
 def kmer_rckmer(number, k):
     number = base_repr(number, base=4, padding=k)
@@ -19,11 +20,12 @@ def kmer_rckmer(number, k):
 
 
 def set_db(k):
-    environment = lmdb.open('database', map_size=int(2e9), max_dbs=12)
+    environment = lmdb.open('kmer_counts', map_size=int(2e9), max_dbs=12)
     database = environment.open_db('k%d'%k, dupsort=False)
     with environment.begin(write=True, db = database) as transaction:
+        transaction.drop(database, delete=False)
         i = 0
-        while i < (4**k)/2:
+        while i < 4**k:
             kmer, rc_kmer = kmer_rckmer(i, k)
             if kmer <= rc_kmer:
                 transaction.put(kmer, '0')
@@ -33,13 +35,10 @@ def set_db(k):
     environment.close()
 
 def main():
-    k = 1
-    while k <= 12:
-        print "Settingup database for k = %d"%k
-        set_db(k)
-        k+=1
-
-
+    for i in sys.argv:
+        if i.isdigit():
+            print "Setting up database for k = %d"%i
+            set_db(i)
 
 if __name__ == "__main__":
     main()

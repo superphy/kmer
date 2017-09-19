@@ -2,3 +2,5 @@
 *.pyc
 *.fasta
 /database/*
+/kmer_counts/*
+excerpts.py
