@@ -18,10 +18,8 @@ from timeit import default_timer as timer
 #-o <>: specify output file, default mer_counts.jf
 # subprocess.call('jellyfish count -m 3 -s 100M -t 10 /home/james/Bovine/107-1-1.fasta', shell=True)
 
-human_train_path = '/home/rylan/Data/human_bovine/human_train/'
-bovine_train_path = '/home/rylan/Data/human_bovine/bovine_train/'
-human_test_path = '/home/rylan/Data/human_bovine/human_test/'
-bovine_test_path = '/home/rylan/Data/human_bovine/bovine_test/'
+human_path = '/home/rboothman/Data/human_bovine/human/'
+bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
 
 def fasta_to_kmer(filename, k):
     #'Count kmers'
@@ -90,31 +88,28 @@ def prepare_data_sub(human, bovine, k):
 
 def prepare_data(k):
     print "Setting up files...."
-    human_train_files = os.listdir(human_train_path)
-    human_train_files = [human_train_path + x for x in human_train_files]
+    human_files = os.listdir(human_path)
+    human_files = [human_path + x for x in human_files]
 
-    bovine_train_files = os.listdir(bovine_train_path)
-    bovine_train_files = [bovine_train_path + x for x in bovine_train_files]
-
-    bovine_test_files = os.listdir(bovine_test_path)
-    bovine_test_files = [bovine_test_path + x for x in bovine_test_files]
-
-    human_test_files = os.listdir(human_test_path)
-    human_test_files = [human_test_path + x for x in human_test_files]
+    bovine_files = os.listdir(bovine_path)
+    bovine_files = [bovine_path + x for x in bovine_files]
 
     print "\nGenerating Training Data....\n"
-    training_data, training_answers = prepare_data_sub(human_train_files, bovine_train_files, k)
-    print "\nGenerating Test Data....\n"
-    test_data, test_answers = prepare_data_sub(human_test_files, bovine_test_files, k)
+    data, answers = prepare_data_sub(human_files, bovine_files, k)
 
-    return training_data, training_answers, test_data, test_answers
+    return data, answers
 
 def main():
     start_time = timer()
 
     k = int(sys.argv[1])
     print "Preparing Data...."
-    X,Y,Z,ZPrime = prepare_data(k)
+    X,Y = prepare_data(k)
+
+    Z = X[35::-1]
+    ZPrime = Y[35::-1]
+    X = X[0::34]
+    Y = Y[0::34]
 
     print "\nCreating Support Vector Machine....\n"
     machine = svm.SVC()

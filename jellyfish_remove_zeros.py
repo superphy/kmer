@@ -6,10 +6,8 @@ import lmdb
 import sys
 from timeit import default_timer as timer
 
-human_train_path = '/home/rylan/Data/human_bovine/human_train/'
-bovine_train_path = '/home/rylan/Data/human_bovine/bovine_train/'
-human_test_path = '/home/rylan/Data/human_bovine/human_test/'
-bovine_test_path = '/home/rylan/Data/human_bovine/bovine_test/'
+human_path = '/home/rboothman/Data/human_bovine/human/'
+bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
 
 def start(filename, k, transaction, database):
     args = ['jellyfish', 'count', '-m','%d'%k, '-s','10M', '-t','30', '-C', '%s'%filename, '-o','test.jf']
@@ -120,96 +118,75 @@ def main():
         k = int(sys.argv[1])
 
         print "Setting up files...."
-        human_train_files = os.listdir(human_train_path)
-        human_train_files = [human_train_path + x for x in human_train_files]
+        human_files = os.listdir(human_path)
+        human_files = [human_path + x for x in human_files]
 
-        bovine_train_files = os.listdir(bovine_train_path)
-        bovine_train_files = [bovine_train_path + x for x in bovine_train_files]
+        bovine_files = os.listdir(bovine_path)
+        bovine_files = [bovine_path + x for x in bovine_files]
 
-        human_test_files = os.listdir(human_test_path)
-        human_test_files = [human_test_path + x for x in human_test_files]
-
-        bovine_test_files = os.listdir(bovine_test_path)
-        bovine_test_files = [bovine_test_path + x for x in bovine_test_files]
         print "Done Setting up files"
 
         counter = 0
         print "Starting first pass...."
-        human_train_arrays = []
-        human_train_arrays.append(start(human_train_files[0], k, transaction, database))
-        human_train_files.pop(0)
+        human_arrays = []
+        human_arrays.append(start(human_files[0], k, transaction, database))
+        human_files.pop(0)
         counter += 1
         print "Done %d"%counter
-        for filename in human_train_files:
-            human_train_arrays.append(firstpass(filename, k, transaction))
+        for filename in human_files:
+            human_arrays.append(firstpass(filename, k, transaction))
             counter += 1
             print "Done %d"%counter
-        bovine_train_arrays = []
-        for filename in bovine_train_files:
-            bovine_train_arrays.append(firstpass(filename, k, transaction))
+        bovine_arrays = []
+        for filename in bovine_files:
+            bovine_arrays.append(firstpass(filename, k, transaction))
             counter += 1
             print "Done %d"%counter
-        human_test_arrays = []
-        for filename in human_test_files:
-            human_test_arrays.append(firstpass(filename, k, transaction))
-            counter += 1
-            print "Done %d"%counter
-        bovine_test_arrays = []
-        for filename in bovine_test_files:
-            bovine_test_arrays.append(firstpass(filename, k, transaction))
-            counter += 1
-            print "Done %d"%counter
+
         print "Done first pass"
 
         print "Starting second pass...."
         counter = 0
-        bovine_test_arrays[-1] = second_start(bovine_test_arrays[-1], k, transaction, database)
+        bovine_arrays[-1] = second_start(bovine_arrays[-1], k, transaction, database)
         counter += 1
         print "Done %d"%counter
-        i = len(bovine_test_arrays)-2
+        i = len(bovine_arrays)-2
         while i >= 0:
-            bovine_test_arrays[i] = secondpass(bovine_test_arrays[i], k, transaction)
+            bovine_arrays[i] = secondpass(bovine_arrays[i], k, transaction)
             i-=1
             counter += 1
             print "Done %d"%counter
-        i = len(human_test_arrays)-1
+        i = len(human_arrays)-1
         while i >= 0:
-            human_test_arrays[i] = secondpass(human_test_arrays[i], k, transaction)
+            human_arrays[i] = secondpass(human_arrays[i], k, transaction)
             i-=1
             counter += 1
             print "Done %d"%counter
-        i = len(bovine_train_arrays)-1
-        while i >= 0:
-            bovine_train_arrays[i] = secondpass(bovine_train_arrays[i], k, transaction)
-            i-=1
-            counter += 1
-            print "Done %d"%counter
-        i = len(human_train_arrays)-1
-        while i >= 0:
-            human_train_arrays[i] = secondpass(human_train_arrays[i], k, transaction)
-            i-=1
-            counter += 1
-            print "Done %d"%counter
+
         print "Done secondpass"
 
         print "Shuffling input...."
-        training, answers = shuffle(human_train_arrays, bovine_train_arrays, "Human", "Bovine")
+        X, Y = shuffle(human_arrays, bovine_arrays, "Human", "Bovine")
 
-        test, test_answers = shuffle(human_test_arrays, bovine_test_arrays, "Human", "Bovine")
         print "Done Shuffling input"
+
+        Z = X[35::-1]
+        ZPrime = Y[35::-1]
+        X = X[0::34]
+        Y = Y[0::34]
 
         machine = svm.SVC()
         print "Training SVM...."
-        machine.fit(training, answers)
+        machine.fit(X, Y)
         print "Making Predictions...."
-        output = machine.predict(test)
+        output = machine.predict(Z)
 
         count = 0
-        for i in range(len(test)):
-            if test_answers[i] == output[i]:
+        for i in range(len(Z)):
+            if ZPrime[i] == output[i]:
                 count+=1
 
-        ans = (count*100)//len(test)
+        ans = (count*100)//len(Z)
         print "Percent Correct: %d"%ans
 
     environment.close()
