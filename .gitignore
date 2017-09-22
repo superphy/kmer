@@ -4,3 +4,4 @@
 /database/*
 /kmer_counts/*
 excerpts.py
+*.txt

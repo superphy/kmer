@@ -9,8 +9,8 @@ from timeit import default_timer as timer
 human_path = '/home/rboothman/Data/human_bovine/human/'
 bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
 
-def start(filename, k, limit, transaction, database):
-    args = ['jellyfish', 'count', '-m','%d'%k, '-s','10M', '-t','30', '-C', '%s'%filename, '-o','test.jf', '-L', '%d'%limit]
+def start(filename, k, limit, txn, data):
+    args = ['jellyfish','count','-m','%d'%k,'-s','10M','-t','30','-C','%s'%filename,'-o','test.jf','-L','%d'%limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
     # Get results from kmer count
@@ -20,19 +20,20 @@ def start(filename, k, limit, transaction, database):
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
 
-    transaction.drop(database)
+    txn.drop(data)
     for line in arr:
-        transaction.put(line[0], line[1])
+        txn.put(line[0], line[1])
     array = []
-    cursor = transaction.cursor()
+    cursor = txn.cursor()
+    #array = [[key, val] for key, val in txn.cursor()]
     for key, value in cursor:
         array.append([key, value])
-        transaction.put(key, '-1')
+        txn.put(key, '-1')
 
     return array
 
-def firstpass(filename, k, limit, transaction):
-    args = ['jellyfish', 'count', '-m','%d'%k, '-s','10M', '-t','30', '-C', '%s'%filename, '-o','test.jf', '-L', '%d'%limit]
+def firstpass(filename, k, limit, txn):
+    args = ['jellyfish','count','-m','%d'%k,'-s','10M','-t','30','-C','%s'%filename,'-o','test.jf','-L','%d'%limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
     # Get results from kmer count
@@ -43,38 +44,38 @@ def firstpass(filename, k, limit, transaction):
     arr = [x.split(' ') for x in out.split('\n') if x]
 
     for line in arr:
-        if transaction.get(line[0], default=False):
-            transaction.put(line[0], line[1], overwrite=True, dupdata=False)
+        if txn.get(line[0], default=False):
+            txn.put(line[0], line[1], overwrite=True, dupdata=False)
 
     array = []
-    cursor = transaction.cursor()
+    cursor = txn.cursor()
     for key, value in cursor:
         if value == '-1':
-            transaction.delete(key)
+            txn.delete(key)
         else:
             array.append([key, value])
-            transaction.put(key, '-1')
+            txn.put(key, '-1')
 
     return array
 
-def second_start(arr, k, transaction, database):
-    transaction.drop(database)
+def second_start(arr, k, txn, data):
+    txn.drop(data)
     for line in arr:
-        transaction.put(line[0], line[1])
+        txn.put(line[0], line[1])
     array = []
-    cursor = transaction.cursor()
+    cursor = txn.cursor()
     for key, value in cursor:
         array.append(int(value))
 
     return array
 
-def secondpass(arr, k, transaction):
+def secondpass(arr, k, txn):
     for line in arr:
-        if transaction.get(str(line[0]), default=False):
-            transaction.put(line[0], line[1], overwrite=True, dupdata=False)
+        if txn.get(str(line[0]), default=False):
+            txn.put(line[0], line[1], overwrite=True, dupdata=False)
 
     array = []
-    cursor = transaction.cursor()
+    cursor = txn.cursor()
     for key, value in cursor:
         array.append(int(value))
 
@@ -114,11 +115,11 @@ def output(counter):
 def run(k, limit):
     start_time = timer()
 
-    environment = lmdb.open('database', map_size=int(2e9))
+    env = lmdb.open('database', map_size=int(2e9))
 
-    database = environment.open_db(dupsort=False)
+    data = env.open_db(dupsort=False)
 
-    with environment.begin(write=True, db=database) as transaction:
+    with env.begin(write=True, db=data) as txn:
 
         human_files = os.listdir(human_path)
         human_files = [human_path + x for x in human_files]
@@ -130,35 +131,35 @@ def run(k, limit):
 
         print "First Pass"
         human_arrays = []
-        human_arrays.append(start(human_files[0], k, limit, transaction, database))
+        human_arrays.append(start(human_files[0], k, limit, txn, data))
         human_files.pop(0)
         counter += 1
 
         for filename in human_files:
             if counter%4 == 0:
                 output(counter)
-            human_arrays.append(firstpass(filename, k, limit, transaction))
+            human_arrays.append(firstpass(filename, k, limit, txn))
             counter += 1
 
         bovine_arrays = []
         for filename in bovine_files:
             if counter%4 == 0:
                 output(counter)
-            bovine_arrays.append(firstpass(filename, k, limit, transaction))
+            bovine_arrays.append(firstpass(filename, k, limit, txn))
             counter += 1
 
         output(counter)
 
         print "\nSecond Pass"
         counter = 0
-        bovine_arrays[-1] = second_start(bovine_arrays[-1], k, transaction, database)
+        bovine_arrays[-1] = second_start(bovine_arrays[-1], k, txn, data)
         counter += 1
 
         i = len(bovine_arrays)-2
         while i >= 0:
             if counter%4 == 0:
                 output(counter)
-            bovine_arrays[i] = secondpass(bovine_arrays[i], k, transaction)
+            bovine_arrays[i] = secondpass(bovine_arrays[i], k, txn)
             i-=1
             counter += 1
 
@@ -166,7 +167,7 @@ def run(k, limit):
         while i >= 0:
             if counter%4 == 0:
                 output(counter)
-            human_arrays[i] = secondpass(human_arrays[i], k, transaction)
+            human_arrays[i] = secondpass(human_arrays[i], k, txn)
             i-=1
             counter += 1
 
@@ -175,10 +176,12 @@ def run(k, limit):
 
         X, Y = shuffle(human_arrays, bovine_arrays, "Human", "Bovine")
 
-        Z = X[-18:]
-        ZPrime = Y[-18:]
-        X = X[:-18]
-        Y = Y[:-18]
+        cutoff = int(0.2*len(X))
+
+        Z = X[-cutoff:]
+        ZPrime = Y[-cutoff:]
+        X = X[:-cutoff]
+        Y = Y[:-cutoff]
 
         machine = svm.SVC()
         try:
@@ -189,7 +192,7 @@ def run(k, limit):
             print E
             return -1 -1
 
-    environment.close()
+    env.close()
 
     end_time = timer()
 

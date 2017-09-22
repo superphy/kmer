@@ -8,7 +8,7 @@ Since jellyfish (the kmer counter used in this program) does not output kmers th
 
 **Step One:** Decide on the length of kmer you want to use. Call it k
 
-**Step Two:** Run `python setup_database.py k ` *If you want to use multiple lenghts they can all be passed in at once*
+**Step Two:** Run `python setup_database.py k ` *If you want to use multiple lengths they can all be passed in at once*
 
 **Step Three:** Since this is a work in progress update the file paths at the top of jellyfish\_add\_zeros.py to point to the appropriate locations on your computer.
 
@@ -20,7 +20,7 @@ Since jellyfish (the kmer counter used in this program) does not output kmers th
 
 **Step Two:** Since this is a work in progress update the file paths at the top of jellyfish\_add\_zeros.py to point to the appropriate locations on your computer.
 
-**Step Four:** Run `python jellyfish_remove_zeros.py k`
+**Step Three:** Run `python jellyfish_remove_zeros.py k`
 
 ### To use jellyfish\_remove\_zeros.py jellyfish\_add\_zeros.py or setup\_database.py in another script
 
@@ -30,7 +30,11 @@ Since jellyfish (the kmer counter used in this program) does not output kmers th
 
 `from setup_database import run as set_db`
 
-### Note
+### Note 1
+
+The setup\_database.py script should only need to be run once when you first want to use a k-value after that you should just need to run the jellyfish\_add\_zeros.py script, but if something goes wrong while a script is accessing a database, the databse may need to be reset, at which point setup\_database.py will need to be run again.
+
+### Note 2
 
 query\_kmer.py and kmer\_prediction.py can be ignored since they are from before the switch was made to jellyfish.
 
