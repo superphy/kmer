@@ -109,7 +109,7 @@ def shuffle(arrA, arrB, A, B):
 
 def output(counter):
     sys.stdout.write('\r')
-    sys.stdout.write("[%-22s] %d%%" % ('='*(counter/4), (counter*100)/88))
+    sys.stdout.write("[%-44s] %d%%" % ('='*(counter/2), (counter*100)/88))
     sys.stdout.flush()
 
 def run(k, limit):
@@ -136,14 +136,14 @@ def run(k, limit):
         counter += 1
 
         for filename in human_files:
-            if counter%4 == 0:
+            if counter%2 == 0:
                 output(counter)
             human_arrays.append(firstpass(filename, k, limit, txn))
             counter += 1
 
         bovine_arrays = []
         for filename in bovine_files:
-            if counter%4 == 0:
+            if counter%2 == 0:
                 output(counter)
             bovine_arrays.append(firstpass(filename, k, limit, txn))
             counter += 1
@@ -157,7 +157,7 @@ def run(k, limit):
 
         i = len(bovine_arrays)-2
         while i >= 0:
-            if counter%4 == 0:
+            if counter%2 == 0:
                 output(counter)
             bovine_arrays[i] = secondpass(bovine_arrays[i], k, txn)
             i-=1
@@ -165,7 +165,7 @@ def run(k, limit):
 
         i = len(human_arrays)-1
         while i >= 0:
-            if counter%4 == 0:
+            if counter%2 == 0:
                 output(counter)
             human_arrays[i] = secondpass(human_arrays[i], k, txn)
             i-=1
