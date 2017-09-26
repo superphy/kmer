@@ -1,5 +1,8 @@
 import subprocess
 from sklearn import svm
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import StratifiedShuffleSplit as ssSplit
+from sklearn.model_selection import GridSearchCV
 from random import randrange
 import os
 import lmdb
@@ -10,7 +13,8 @@ human_path = '/home/rboothman/Data/human_bovine/human/'
 bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
 
 def start(filename, k, limit, txn, data):
-    args = ['jellyfish','count','-m','%d'%k,'-s','10M','-t','30','-C','%s'%filename,'-o','test.jf','-L','%d'%limit]
+    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
+            '%s' % filename, '-o', 'test.jf', '-L', '%d' % limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
     # Get results from kmer count
@@ -33,7 +37,8 @@ def start(filename, k, limit, txn, data):
     return array
 
 def firstpass(filename, k, limit, txn):
-    args = ['jellyfish','count','-m','%d'%k,'-s','10M','-t','30','-C','%s'%filename,'-o','test.jf','-L','%d'%limit]
+    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
+            '%s' % filename, '-o', 'test.jf', '-L', '%d' % limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
     # Get results from kmer count
@@ -107,9 +112,10 @@ def shuffle(arrA, arrB, A, B):
         countB+=1
     return test, answers
 
-def output(counter):
+def print_status(counter, total):
+    percent = (counter*100)/total
     sys.stdout.write('\r')
-    sys.stdout.write("[%-44s] %d%%" % ('='*(counter/2), (counter*100)/88))
+    sys.stdout.write("[%-44s] %d%%" % ('='*((percent*44)/100), percent))
     sys.stdout.flush()
 
 def run(k, limit):
@@ -121,89 +127,113 @@ def run(k, limit):
 
     with env.begin(write=True, db=data) as txn:
 
-        human_files = os.listdir(human_path)
-        human_files = [human_path + x for x in human_files]
+        h_files = os.listdir(human_path)
+        h_files = [human_path + x for x in h_files]
 
-        bovine_files = os.listdir(bovine_path)
-        bovine_files = [bovine_path + x for x in bovine_files]
+        b_files = os.listdir(bovine_path)
+        b_files = [bovine_path + x for x in b_files]
+
+        files = h_files + b_files
 
         counter = 0
+        total = len(files)
 
         print "First Pass"
-        human_arrays = []
-        human_arrays.append(start(human_files[0], k, limit, txn, data))
-        human_files.pop(0)
+        arrays = []
+        arrays.append(start(files[0], k, limit, txn, data))
+        files.pop(0)
         counter += 1
 
-        for filename in human_files:
-            if counter%2 == 0:
-                output(counter)
-            human_arrays.append(firstpass(filename, k, limit, txn))
+        for filename in files:
+            print_status(counter, total)
+            arrays.append(firstpass(filename, k, limit, txn))
             counter += 1
 
-        bovine_arrays = []
-        for filename in bovine_files:
-            if counter%2 == 0:
-                output(counter)
-            bovine_arrays.append(firstpass(filename, k, limit, txn))
-            counter += 1
-
-        output(counter)
+        print_status(counter, total)
 
         print "\nSecond Pass"
         counter = 0
-        bovine_arrays[-1] = second_start(bovine_arrays[-1], k, txn, data)
+        arrays[-1] = second_start(arrays[-1], k, txn, data)
         counter += 1
 
-        i = len(bovine_arrays)-2
+        i = len(arrays)-2
         while i >= 0:
-            if counter%2 == 0:
-                output(counter)
-            bovine_arrays[i] = secondpass(bovine_arrays[i], k, txn)
+            print_status(counter, total)
+            arrays[i] = secondpass(arrays[i], k, txn)
             i-=1
             counter += 1
 
-        i = len(human_arrays)-1
-        while i >= 0:
-            if counter%2 == 0:
-                output(counter)
-            human_arrays[i] = secondpass(human_arrays[i], k, txn)
-            i-=1
-            counter += 1
-
-        output(counter)
+        print_status(counter, total)
         print "\n"
 
-        X, Y = shuffle(human_arrays, bovine_arrays, "Human", "Bovine")
+        labels=["H" for x in range(len(h_files))]+["B" for x in range(len(b_files))]
 
-        cutoff = int(0.2*len(X))
+        sss = ssSplit(n_splits=5, test_size=0.2, random_state=42)
 
-        Z = X[-cutoff:]
-        ZPrime = Y[-cutoff:]
-        X = X[:-cutoff]
-        Y = Y[:-cutoff]
+        for indices in sss.split(arrays, labels):
+            X = [arrays[x] for x in indices[0]]
+            Y = [labels[x] for x in indices[0]]
+            Z = [arrays[x] for x in indices[1]]
+            ZPrime = [labels[x] for x in indices[1]]
 
-        machine = svm.SVC()
-        try:
-            machine.fit(X, Y)
-            ans = 100*machine.score(Z, ZPrime)
+            # Scale all data to range [0,1] since SVMs are not scale invariant
+            scaler = MinMaxScaler()
+            print "Scaling data"
+            X = scaler.fit_transform(X)
+            Z = scaler.transform(Z)
 
-        except (ValueError, TypeError) as E:
-            print E
-            return -1 -1
+            print "Creating Support Vector Machines"
+            linear = svm.SVC(kernel='linear')
+
+            c_range = np.logspace(-2, 10, 13)
+            gamma_range = np.logspace(-9, 3, 13)
+            param_grid = dict(gamma=gamma_range, c=c_range)
+            grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv)
+            grid.fit(arrays, labels)
+
+            gamma = grid.best_params_['gamma']
+            C = grid.best_params_['gamma']
+
+            rbf = svm.SVC(kernel='rbf' ,gamma=gamma, C=c)
+
+            try:
+                print "Training Linear Machine..."
+                linear.fit(X, Y)
+                linear_ans = 100*linear.score(Z, ZPrime)
+                print linear_ans
+
+                print "Training RBF Macine..."
+                rbf.fit(X, Y)
+                rbf_ans = 100*rbf.score(Z, ZPrime)
+                print rbf_ans
+
+            except (ValueError, TypeError) as E:
+                print E
+                return -1 -1
 
     env.close()
 
     end_time = timer()
 
-    return ans, (end_time-start_time)
+    return linear_ans, rbf_ans
 
 def main():
-    k = int(sys.argv[1])
-    l = int(sys.argv[2])
-    pc, time = run(k, l)
-    print "Percent Correct: %d"%pc
-    print "Time Elapsed: %d"%time
+    if len(sys.argv) == 3:
+        k = int(sys.argv[1])
+        l = int(sys.argv[2])
+        la, rb = run(k, l)
+        print "Linear: %d%%" % la
+        print "RBF: %d%%" % rb
+    else:
+        output = """
+        Error: Not enough arguments, requires exactly 2
+        First Argument: kmer length
+        Second Argument: Minimum kmer count required for a kmer to be output
+
+        Example: python %s 10 5
+        Counts kmers with length 10 removing any that appear fewer than 5 times
+        """ % sys.argv[0]
+        print output
 
 if __name__ == "__main__":
     main()
