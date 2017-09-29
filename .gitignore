@@ -3,5 +3,6 @@
 *.fasta
 /database/*
 /kmer_counts/*
-excerpts.py
-*.txt
+/database2/*
+/Results/*
+/deprecated/*

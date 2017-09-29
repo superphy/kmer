@@ -1,46 +1,33 @@
 ### kmer prediction
 
-Using kmer counts to predict if an e. coli genome orginated from humans or bovines.
+Using kmer counts as inputs to Support Vector Machines to predict if a genome is positive or negative for a phenotype.
 
-Since jellyfish (the kmer counter used in this program) does not output kmers that have a count of zero and SVM's require that every input be of the same length the output from jellyfish cannot be directly input into an SVM. TO overcome this problem two methods have been implemented here. The first removes any kmer with a zero count in one genome from every genome, this method is implemented in jellyfish\_remove\_zeros.py. The second method adds in all the missing kmers with a count of zero to each genome, this method is implemented in jellyfish\_add\_zeros.py.  
+Since jellyfish (the kmer counter used in this program) does not output kmers that have a count of zero and SVM's require that every input be of the same length the output from jellyfish cannot be directly input into an SVM. To overcome this problem only kmers that have a non-zero count in every genome are input into the svm.
 
-### To run jellyfish\_add\_zeros.py from the command line
+ecoli_human_bovine.py, salmonella.py, and run.py are scripts for testing kmer_prediction.py on various inputs. kmer_prediction.py is the meat and potatoes of this program.
 
-**Step One:** Decide on the length of kmer you want to use. Call it k
+### To run kmer_prediction.py from the command line
 
-**Step Two:** Run `python setup_database.py k ` *If you want to use multiple lengths they can all be passed in at once*
+`python kmer_prediction.py k l repetitions positive_path negative_path prediction_path`
 
-**Step Three:** Since this is a work in progress update the file paths at the top of jellyfish\_add\_zeros.py to point to the appropriate locations on your computer.
+- k: Length of kmer to use
+- l: Minimum count required for a kmer to be output
+- repetitions: Number of times to train and test the model. Ignored if prediction_path is not none.
+- positive_path: Path to a directory containing fasta files for genomes positive for the phenotype.
+- negative_path: Path to a directory containing fast files for genomes negative for the phenotype.
+- prediction_path: None or Path to a directory contiaining fasta files for genomes that you would like to predict if they are positive or negative for a    phenotype. If None the file in positive_path and negative_path are shuffled and split into training and testing groups and the percentage that the model guesses correct is output. If prediction_path is not None a binary list is output, where a 1 means that the genome belongs to the positive_path group and 0 means that the genome belongs to the negative_path group.
 
-**Step Four:** Run `python jellyfish_add_zeros.py k`
+### To use kmer_prediction in another script
 
-### To run jellyfish\_remove\_zeros.py from the command line
+`from kmer_prediction import run`
+` output = run(k, l, repetitions, positive_path, negative_path, prediction_path)`
 
-**Step One:** Decide on the length of kmer you want to use. Call it k
-
-**Step Two:** Since this is a work in progress update the file paths at the top of jellyfish\_add\_zeros.py to point to the appropriate locations on your computer.
-
-**Step Three:** Run `python jellyfish_remove_zeros.py k`
-
-### To use jellyfish\_remove\_zeros.py jellyfish\_add\_zeros.py or setup\_database.py in another script
-
-`from jellyfish_remove_zeros import run as remove_zeros`
-
-`from jellyfish_add_zeros import run as add_zeros`
-
-`from setup_database import run as set_db`
-
-### Note 1
-
-The setup\_database.py script should only need to be run once when you first want to use a k-value after that you should just need to run the jellyfish\_add\_zeros.py script, but if something goes wrong while a script is accessing a database, the databse may need to be reset, at which point setup\_database.py will need to be run again.
-
-### Note 2
-
-query\_kmer.py and kmer\_prediction.py can be ignored since they are from before the switch was made to jellyfish.
+Where the parameters for run have the same specifications as the command line arguments when running kmer_prediction.py from the command line
 
 ### Dependencies
 
-- Scikit-learn
-- lmdb
-- numpy
-- jellyfish *You do not need to install the python wrapper for jellyfish, just the command line tool*
+To install the dependecies run `conda create --name <env> --file conda-specs.txt`
+
+You will need to install jellyfish separately. See https://github.com/gmarcais/Jellyfish for installation instructions. *You do not need to install the python binding for jellyfish, just the command line tool*
+
+If you receive an import error stating that python can't find the module lmdb, run `pip install lmdb` with the conda environment activated.
