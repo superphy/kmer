@@ -1,29 +1,28 @@
-from jellyfish_remove_x import run
-import sys
+from kmer_prediction import run
+import os
 
-k_vals = [x for x in range(13, 22)]
-lower_limits = [1, 5, 10, 15, 20, 25]
+human_path = '/home/rboothman/Data/human_bovine/human/'
+bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
 
+k_vals = [x for x in range(20, 21)]
+lower_limits = [x for x in range(9, 10)]
 
-f1 = open('run_times.txt', 'a')
-f2 = open('percentages.txt', 'a')
+def setup_files():
+    h_files = os.listdir(human_path)
+    h_files = [human_path + x for x in h_files]
 
-for k in k_vals:
-    for l in lower_limits:
-        f1.write("\nk:\t%d\nl:\t%d\n" % (k, l))
-        f2.write("\nk:\t%d\nl:\t%d\n" % (k, l))
-        run_times = []
-        percentages = []
-        for x in range(5):
-            percent, time = run(k, l)
+    b_files = os.listdir(bovine_path)
+    b_files = [bovine_path + x for x in b_files]
 
-            print "K:\t%d\nL:\t%d\nTime:\t%d\n%%:\t%d" % (k, l, time, percent)
+    return h_files, b_files
 
-            run_times.append(time)
-            percentages.append(percent)
-
-        f1.write("%s\n" % ' '.join([str(x) for x in run_times]))
-        f2.write("%s\n" % ' '.join([str(x) for x in percentages]))
-
-f1.close()
-f2.close()
+with open('TestParamsResults.txt', 'a') as f:
+    for k in k_vals:
+        for l in lower_limits:
+            string = "\nk:\t%d\nl:\t%d\n" % (k, l)
+            print string
+            f.write(string)
+            h_files, b_files = setup_files()
+            output = run(k, l, 10, h_files, b_files, None)
+            print output
+            f.write(str(output))
