@@ -1,13 +1,10 @@
 import subprocess
 from sklearn import svm
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import StratifiedShuffleSplit as ssSplit
-from sklearn.model_selection import GridSearchCV
-from random import randrange
 import os
 import lmdb
 import sys
-from timeit import default_timer as timer
 
 human_path = '/home/rboothman/Data/human_bovine/human/'
 bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
@@ -86,40 +83,13 @@ def secondpass(arr, k, txn):
 
     return array
 
-def shuffle(arrA, arrB, A, B):
-    countA = 0
-    countB = 0
-    test = []
-    answers = []
-
-    while countA < len(arrA) and countB < len(arrB):
-        rand = randrange(0,10)
-        if rand%2 == 0:
-            test.append(arrA[countA])
-            answers.append(A)
-            countA+=1
-        else:
-            test.append(arrB[countB])
-            answers.append(B)
-            countB+=1
-    while countA < len(arrA):
-        test.append(arrA[countA])
-        answers.append(A)
-        countA+=1
-    while countB < len(arrB):
-        test.append(arrB[countB])
-        answers.append(B)
-        countB+=1
-    return test, answers
-
 def print_status(counter, total):
     percent = (counter*100)/total
     sys.stdout.write('\r')
     sys.stdout.write("[%-44s] %d%%" % ('='*((percent*44)/100), percent))
     sys.stdout.flush()
 
-def run(k, limit):
-    start_time = timer()
+def run(k, limit, num_splits):
 
     env = lmdb.open('database', map_size=int(2e9))
 
@@ -138,7 +108,6 @@ def run(k, limit):
         counter = 0
         total = len(files)
 
-        print "First Pass"
         arrays = []
         arrays.append(start(files[0], k, limit, txn, data))
         files.pop(0)
@@ -150,8 +119,8 @@ def run(k, limit):
             counter += 1
 
         print_status(counter, total)
+        print ""
 
-        print "\nSecond Pass"
         counter = 0
         arrays[-1] = second_start(arrays[-1], k, txn, data)
         counter += 1
@@ -168,7 +137,21 @@ def run(k, limit):
 
         labels=["H" for x in range(len(h_files))]+["B" for x in range(len(b_files))]
 
-        sss = ssSplit(n_splits=5, test_size=0.2, random_state=42)
+        sss = ssSplit(n_splits=num_splits, test_size=0.2, random_state=42)
+
+        linear = svm.SVC(kernel='linear')
+        rbf = svm.SVC(kernel='rbf' ,gamma=float(1e-09), C=10000.0)
+        poly4 = svm.SVC(kernel='poly', degree=4, coef0=0.0)
+        default = svm.SVC()
+
+
+        linearA = []
+        linearB = []
+        rbfC = []
+        poly4C = []
+        defaultC = []
+
+        i = 1
 
         for indices in sss.split(arrays, labels):
             X = [arrays[x] for x in indices[0]]
@@ -177,35 +160,39 @@ def run(k, limit):
             ZPrime = [labels[x] for x in indices[1]]
 
             # Scale all data to range [0,1] since SVMs are not scale invariant
-            scaler = MinMaxScaler()
-            print "Scaling data"
-            X = scaler.fit_transform(X)
-            Z = scaler.transform(Z)
+            scalerA = MinMaxScaler()
+            scalerB = StandardScaler()
+            Xa = scalerA.fit_transform(X)
+            Za = scalerA.transform(Z)
 
-            print "Creating Support Vector Machines"
-            linear = svm.SVC(kernel='linear')
-
-            c_range = np.logspace(-2, 10, 13)
-            gamma_range = np.logspace(-9, 3, 13)
-            param_grid = dict(gamma=gamma_range, c=c_range)
-            grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv)
-            grid.fit(arrays, labels)
-
-            gamma = grid.best_params_['gamma']
-            C = grid.best_params_['gamma']
-
-            rbf = svm.SVC(kernel='rbf' ,gamma=gamma, C=c)
+            Xb = scalerB.fit_transform(X)
+            Zb = scalerB.transform(Z)
 
             try:
-                print "Training Linear Machine..."
-                linear.fit(X, Y)
-                linear_ans = 100*linear.score(Z, ZPrime)
-                print linear_ans
+                linear.fit(Xa, Y)
+                ans = linear.score(Za, ZPrime)
+                linearA.append(ans)
+                print "linear MinMax: %f" % ans
 
-                print "Training RBF Macine..."
+                linear.fit(Xb, Y)
+                ans = linear.score(Zb, ZPrime)
+                linearB.append(ans)
+                print "linear standard: %f" % ans
+
                 rbf.fit(X, Y)
-                rbf_ans = 100*rbf.score(Z, ZPrime)
-                print rbf_ans
+                ans=rbf.score(Z, ZPrime)
+                rbfC.append(ans)
+                print "RBF no scaling: %f" % ans
+
+                poly4.fit(X, Y)
+                ans=poly4.score(Z, ZPrime)
+                poly4C.append(ans)
+                print "poly degree 4 no scaling: %f" % ans
+
+                default.fit(X, Y)
+                ans=default.score(Z, ZPrime)
+                defaultC.append(ans)
+                print "default no scaling: %f" % ans
 
             except (ValueError, TypeError) as E:
                 print E
@@ -213,25 +200,45 @@ def run(k, limit):
 
     env.close()
 
-    end_time = timer()
+    return [sum(linearA)/num_splits, sum(linearB)/num_splits, sum(rbfC)/num_splits,
+            sum(poly4C)/num_splits, sum(defaultC)/num_splits]
 
-    return linear_ans, rbf_ans
+def get_method(index):
+    if index == 0:
+        return 'linear MinMaxScaler'
+    elif index == 1:
+        return 'linear StandardScaler'
+    elif index == 2:
+        return 'RBF Not scaled'
+    elif index == 3:
+        return 'Default Not Scaled'
+    elif index == 4:
+        return 'Poly degree 4 Not Scaled'
 
 def main():
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 4:
         k = int(sys.argv[1])
         l = int(sys.argv[2])
-        la, rb = run(k, l)
-        print "Linear: %d%%" % la
-        print "RBF: %d%%" % rb
+        rep = int(sys.argv[3])
+        output = run(k, l, rep)
+        labels = [get_method(i) for i in range(len(output))]
+        string = ''
+        for i in range(len(output)):
+            string += labels[i] + ': ' + str(output[i]) + '\n'
+        print string
+
     else:
         output = """
-        Error: Not enough arguments, requires exactly 2
+        Error: Wrong number of arguments, requires exactly 3
         First Argument: kmer length
         Second Argument: Minimum kmer count required for a kmer to be output
+        Third Argument: Number of times to repeat the training and testing of
+                        the model, if greater than 1 returns the average of all
+                        runs.
 
-        Example: python %s 10 5
+        Example: python %s 10 5 5
         Counts kmers with length 10 removing any that appear fewer than 5 times
+        then performs the training and testing of the model 5 times.
         """ % sys.argv[0]
         print output
 
