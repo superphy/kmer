@@ -29,13 +29,15 @@ def start(filename, k, limit, env, txn, data):
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
 
-    txn.drop(data)
-    current = env.open_db('%s'%filename)
+    txn.drop(data, delete=False)
+    string = '%s'%filename
+    current = env.open_db(string, txn=txn)
+
     for line in arr:
         txn.put(line[0], line[1])
         txn.put(line[0], line[1], db=current)
 
-def firstpass(filename, k, limit, evn, txn):
+def firstpass(filename, k, limit, env, txn):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
@@ -58,7 +60,8 @@ def firstpass(filename, k, limit, evn, txn):
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
 
-    current = env.open_db('%s'%filename)
+    string = '%s'%filename
+    current = env.open_db(string, txn=txn)
 
     for line in arr:
         if txn.get(line[0], default=False):
@@ -72,7 +75,7 @@ def firstpass(filename, k, limit, evn, txn):
             txn.put(key, value, db=current)
             txn.put(key, '-1')
 
-def second_start(arr, k, evn, txn, data):
+def second_start(filename, k, env, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
@@ -84,17 +87,14 @@ def second_start(arr, k, evn, txn, data):
     smallest kmer and index 1 holds the count for the next lexicagraphically
     smallest kmer etc.
     """
-    txn.drop(data)
-    for line in arr:
-        txn.put(line[0], line[1])
-    array = []
-    cursor = txn.cursor()
-    for key, value in cursor:
-        array.append(int(value))
+    string = '%s'%filename
+    current = env.open_db(string, txn=txn)
+    txn.drop(data, delete=False)
+    cursor = txn.cursor(db=current)
+    for key, val in cursor:
+        txn.put(key, val)
 
-    return array
-
-def secondpass(arr, k, evn, txn):
+def secondpass(filename, k, env, txn):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
@@ -104,16 +104,13 @@ def secondpass(arr, k, evn, txn):
     Returns a list of the same specifications as the list returned by
     kmer_prediction.second_satart()
     """
-    for line in arr:
-        if txn.get(str(line[0]), default=False):
-            txn.put(line[0], line[1], overwrite=True, dupdata=False)
+    string = '%s'%filename
+    current = env.open_db(string, txn=txn)
+    cursor = txn.cursor(db = current)
 
-    array = []
-    cursor = txn.cursor()
-    for key, value in cursor:
-        array.append(int(value))
-
-    return array
+    for key, val in cursor:
+        if not txn.get(key, default=False):
+            txn.delete(key, val, db = current)
 
 def print_status(counter, total):
     """
@@ -135,7 +132,7 @@ def set_up_files(filepath):
         filepath += '/'
     return [filepath + x for x in os.listdir(filepath)]
 
-def setup_data(files, k, limit, txn, data):
+def setup_data(files, k, limit, env, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
@@ -148,35 +145,30 @@ def setup_data(files, k, limit, txn, data):
     """
     counter = 0
     total = len(files)
-
-    arrays = []
-    arrays.append(start(files[0], k, limit, txn, data))
-    files.pop(0)
+    start(files[0], k, limit, env, txn, data)
+    temp = files.pop(0)
     counter += 1
-
     for filename in files:
         print_status(counter, total)
-        arrays.append(firstpass(filename, k, limit, txn))
+        firstpass(filename, k, limit, env, txn)
         counter += 1
+
+    files.insert(0, temp)
 
     print_status(counter, total)
     print ""
-
     counter = 0
-    arrays[-1] = second_start(arrays[-1], k, txn, data)
+    second_start(files[-1], k, env, txn, data)
     counter += 1
-
-    i = len(arrays)-2
+    i = len(files)-2
     while i >= 0:
         print_status(counter, total)
-        arrays[i] = secondpass(arrays[i], k, txn)
+        secondpass(files[i], k, env, txn)
         i-=1
         counter += 1
 
     print_status(counter, total)
     print "\n"
-
-    return arrays
 
 def make_predictions(train_data, train_labels, test_data, test_labels):
     """
@@ -211,11 +203,11 @@ def run(k, limit, num_splits, pos, neg, predict):
 
     Parameters:
         k:          The length of kmer to input
-        l:          A lower limit on how many times a kmer needs to be present in a
-                    genome in order to be ouput.
+        l:          A lower limit on how many times a kmer needs to be present
+                    in a genome in order to be ouput.
         num_splits: How many times to train and test the model. Ignored if
                     predict is not None.
-        pos:          Path to a directory containing fasta files for genomes that
+        pos:        Path to a directory containing fasta files for genomes that
                     are positive for a phenotype.
         neg:        Path to a directory containing fasta files for genomes that
                     are negative for a phenotype.
@@ -234,8 +226,7 @@ def run(k, limit, num_splits, pos, neg, predict):
     """
 
     env = lmdb.open('database', map_size=int(2e9), max_dbs=400)
-
-    data = env.open_db('current', dupsort=False)
+    data = env.open_db('master', dupsort=False)
 
     with env.begin(write=True, db=data) as txn:
 
@@ -244,7 +235,16 @@ def run(k, limit, num_splits, pos, neg, predict):
         else:
             files = pos + neg + predict
 
-        arrays = setup_data(files, k, limit, txn, data)
+        setup_data(files, k, limit, env, txn, data)
+
+        arrays = []
+        for f in files:
+            array = []
+            current = env.open_db('%s'%f, txn = txn)
+            cursor = txn.cursor(db=current)
+            for key, val in cursor:
+                array.append(int(val))
+            arrays.append(array)
 
         labels=[1 for x in range(len(pos))]+[0 for x in range(len(neg))]
 
@@ -264,7 +264,7 @@ def run(k, limit, num_splits, pos, neg, predict):
             return avg/num_splits
 
         else:
-            sss = ssSplit(n_splits = num_splits, test_size = 0.5, random_state=42)
+            sss = ssSplit(n_splits=num_splits, test_size = 0.5, random_state=42)
 
             output = []
 
@@ -310,13 +310,13 @@ def main():
         Fifth Argument: Path to a directory containing fasta files negative for
                         a phenotype.
         Sixth Argument: (Optional) Path to a directory containing fasta files
-                        that you want to predict whether or not they are positive
-                        for the phenotype. If supplied, all the files contianed
-                        in the fourth and fifth parameter will be used to train
-                        the model. If not supplied the files contained in the
-                        fourth and fifth argument will be shuffled and 80%% will
-                        be used to train the model and the rest will be used to
-                        test the model.
+                        that you want to predict whether or not they are
+                        positive for the phenotype. If supplied, all the files
+                        contianed in the fourth and fifth parameter will be used
+                        to train the model. If not supplied the files contained
+                        in the fourth and fifth argument will be shuffled and
+                        80%% will be used to train the model and the rest will
+                        be used to test the model.
 
         Example: python %s 10 5 5 /home/data/pos/ /home/data/neg/
         Counts kmers with length 10 removing any that appear fewer than 5 times
