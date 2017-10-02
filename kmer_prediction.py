@@ -6,7 +6,7 @@ import os
 import lmdb
 import sys
 
-def start(filename, k, limit, txn, data):
+def start(filename, k, limit, env, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
@@ -30,18 +30,12 @@ def start(filename, k, limit, txn, data):
     arr = [x.split(' ') for x in out.split('\n') if x]
 
     txn.drop(data)
+    current = env.open_db('%s'%filename)
     for line in arr:
         txn.put(line[0], line[1])
-    array = []
-    cursor = txn.cursor()
-    #array = [[key, val] for key, val in txn.cursor()]
-    for key, value in cursor:
-        array.append([key, value])
-        txn.put(key, '-1')
+        txn.put(line[0], line[1], db=current)
 
-    return array
-
-def firstpass(filename, k, limit, txn):
+def firstpass(filename, k, limit, evn, txn):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
@@ -64,22 +58,21 @@ def firstpass(filename, k, limit, txn):
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
 
+    current = env.open_db('%s'%filename)
+
     for line in arr:
         if txn.get(line[0], default=False):
             txn.put(line[0], line[1], overwrite=True, dupdata=False)
 
-    array = []
     cursor = txn.cursor()
     for key, value in cursor:
         if value == '-1':
             txn.delete(key)
         else:
-            array.append([key, value])
+            txn.put(key, value, db=current)
             txn.put(key, '-1')
 
-    return array
-
-def second_start(arr, k, txn, data):
+def second_start(arr, k, evn, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
@@ -101,7 +94,7 @@ def second_start(arr, k, txn, data):
 
     return array
 
-def secondpass(arr, k, txn):
+def secondpass(arr, k, evn, txn):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
@@ -206,7 +199,7 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
             ans = linear.score(Z, test_labels)
             return ans
         else:
-            return linear.predict(Za)
+            return linear.predict(Z)
     except (ValueError, TypeError) as E:
         print E
         return -1
@@ -235,14 +228,14 @@ def run(k, limit, num_splits, pos, neg, predict):
         Predict is None:        Percentage of predictions that the model got
                                 right. If num_splits greater than 1, this is the
                                 average of all runs.
-        Predict is not None:    Returns a binary a array, where 1 means the
+        Predict is not None:    Returns a binary array, where 1 means the
                                 genome belongs to the pos group and 0 means the
                                 genome belongs to the neg group.
     """
 
-    env = lmdb.open('database', map_size=int(2e9))
+    env = lmdb.open('database', map_size=int(2e9), max_dbs=400)
 
-    data = env.open_db(dupsort=False)
+    data = env.open_db('current', dupsort=False)
 
     with env.begin(write=True, db=data) as txn:
 
@@ -271,14 +264,20 @@ def run(k, limit, num_splits, pos, neg, predict):
             return avg/num_splits
 
         else:
-            sss = ssSplit(n_splits = 1, test_size = 0.0, random_state=42)
+            sss = ssSplit(n_splits = num_splits, test_size = 0.5, random_state=42)
+
+            output = []
 
             for indices in sss.split(arrays[:(len(pos)+len(neg))], labels):
                 X = [arrays[x] for x in indices[0]]
+                X.extend([arrays[x] for x in indices[1]])
                 Y = [labels[x] for x in indices[0]]
+                Y.extend([labels[x] for x in indices[1]])
                 Z = arrays[(len(pos)+len(neg)):]
 
-                return make_predictions(X, Y, Z, None)
+                output.append(make_predictions(X, Y, Z, None))
+
+            return output
 
         env.close()
 
