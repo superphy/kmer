@@ -10,13 +10,11 @@ def start(filename, k, limit, env, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
-    Performs a kmer count on filename, counting kmers witha length of k and
-    removing any kmer that has a count less than limit. Clears the database
-    data and then writes each kmer as a key with value -1 to data.
-
-    Returns a lexicographically sorted list of lists. Where each element in the
-    outer list has a first element that is a kmer and a second element that is
-    the count corresponding to that kmer.
+    Performs a kmer count on filename, counting kmers with a length of k and
+    removing any kmer that has a count less than limit. Resets the master
+    database data and then writes each kmer as a key with value -1 to data.
+    Creates a new database called filename, writes each kmer/count pair to the
+    new databse as a key value pair.
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
             '%s' % filename, '-o', 'test.jf', '-L', '%d' % limit]
@@ -42,12 +40,11 @@ def firstpass(filename, k, limit, env, txn):
     Helper method for kmer_prediction.run(), should not be used on its own.
 
     Performs a kmer count on filename, counting kmers with a length of k and
-    removing any kmer that has a count less than limit. Only saves kmers that
-    are already present in the database that txn points to. Removes any kmer
-    from the databse that is not present in filename.
-
-    Returns a list with the same specifications as the list returned by
-    kmer_prediction.start()
+    removing any kmer that has a count less than limit. Creates a new database
+    called filename and writes each kmer/count pair from the kmer count to the
+    new database. Only writes kmers that are already present in the master
+    database that txn points to. Removes any kmer from the master database that
+    is not present in filename.
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
             '%s' % filename, '-o', 'test.jf', '-L', '%d' % limit]
@@ -79,13 +76,7 @@ def second_start(filename, k, env, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
-    Clears the database data and then writes every kmer present in arr to the
-    database.
-
-    Returns a list of lexicographically sorted kmer counts. The kmers themselves
-    are not output, instead index 0 holds the count for the lexicographically
-    smallest kmer and index 1 holds the count for the next lexicagraphically
-    smallest kmer etc.
+    Resets the master database so that it matches the database named filename.
     """
     string = '%s'%filename
     current = env.open_db(string, txn=txn)
@@ -98,11 +89,8 @@ def secondpass(filename, k, env, txn):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
-    Removes every kmer from arr that is not present in the database pointed to
-    by txn.
-
-    Returns a list of the same specifications as the list returned by
-    kmer_prediction.second_satart()
+    Removes every kmer from the database named filename that is not present in
+    the master database.
     """
     string = '%s'%filename
     current = env.open_db(string, txn=txn)
