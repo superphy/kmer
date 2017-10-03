@@ -1,6 +1,6 @@
 import subprocess
 from sklearn import svm
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedShuffleSplit as ssSplit
 import os
 import lmdb
@@ -64,6 +64,7 @@ def firstpass(filename, k, limit, env, txn):
 
     string = '%s'%filename
     current = env.open_db(string, txn=txn)
+    txn.drop(current, delete= False)
 
     for line in arr:
         if txn.get(line[0], default=False):
@@ -263,11 +264,12 @@ def run(k, limit, num_splits, pos, neg, predict):
                 ZPrime = [labels[x] for x in indices[1]]
 
                 avg += make_predictions(X, Y, Z, ZPrime)
+                print avg
 
             return avg/num_splits
 
         else:
-            sss = ssSplit(n_splits=1, test_size = 0.5, random_state=42)
+            sss = ssSplit(n_splits=1, test_size = 0.5, random_state=13)
 
             for indices in sss.split(arrays[:(len(pos)+len(neg))], labels):
                 X = [arrays[x] for x in indices[0]]
