@@ -6,6 +6,8 @@ import os
 import lmdb
 import sys
 
+
+
 def start(filename, k, limit, env, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
@@ -35,6 +37,8 @@ def start(filename, k, limit, env, txn, data):
         txn.put(line[0], line[1])
         txn.put(line[0], line[1], db=current)
 
+
+
 def firstpass(filename, k, limit, env, txn):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
@@ -50,6 +54,7 @@ def firstpass(filename, k, limit, env, txn):
             '%s' % filename, '-o', 'test.jf', '-L', '%d' % limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
+
     # Get results from kmer count
     args = ['jellyfish', 'dump', '-c', 'test.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
@@ -72,6 +77,8 @@ def firstpass(filename, k, limit, env, txn):
             txn.put(key, value, db=current)
             txn.put(key, '-1')
 
+
+
 def second_start(filename, k, env, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
@@ -84,6 +91,8 @@ def second_start(filename, k, env, txn, data):
     cursor = txn.cursor(db=current)
     for key, val in cursor:
         txn.put(key, val)
+
+
 
 def secondpass(filename, k, env, txn):
     """
@@ -100,6 +109,8 @@ def secondpass(filename, k, env, txn):
         if not txn.get(key, default=False):
             txn.delete(key, val, db = current)
 
+
+
 def print_status(counter, total):
     """
     Outputs a progress bar.
@@ -108,6 +119,8 @@ def print_status(counter, total):
     sys.stdout.write('\r')
     sys.stdout.write("[%-44s] %d%%" % ('='*((percent*44)/100), percent))
     sys.stdout.flush()
+
+
 
 def set_up_files(filepath):
     """
@@ -120,16 +133,15 @@ def set_up_files(filepath):
         filepath += '/'
     return [filepath + x for x in os.listdir(filepath)]
 
+
+
 def setup_data(files, k, limit, env, txn, data):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
 
     Takes a list of paths to fasta files, a kmer length, a lower limit on how
     many times a kmer needs to occur in order for it to be output, and an lmdb
-    transaction and corresponding database.
-
-    Returns a list where each element of the list is a list of kmer counts for a
-    genome contained in one of the fasta files.
+    environment, transaction and database.
     """
     counter = 0
     total = len(files)
@@ -158,6 +170,8 @@ def setup_data(files, k, limit, env, txn, data):
     print_status(counter, total)
     print "\n"
 
+
+
 def make_predictions(train_data, train_labels, test_data, test_labels):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
@@ -167,7 +181,6 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     predictions that the svm got correct.
     """
     linear = svm.SVC(kernel='linear')
-    output = []
 
     scaler = MinMaxScaler()
     X = scaler.fit_transform(train_data)
@@ -183,6 +196,8 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     except (ValueError, TypeError) as E:
         print E
         return -1
+
+
 
 def run(k, limit, num_splits, pos, neg, predict):
     """
@@ -213,7 +228,7 @@ def run(k, limit, num_splits, pos, neg, predict):
                                 genome belongs to the neg group.
     """
 
-    env = lmdb.open('database', map_size=int(2e9), max_dbs=400)
+    env = lmdb.open('database', map_size=int(160e9), max_dbs=400)
     data = env.open_db('master', dupsort=False)
 
     with env.begin(write=True, db=data) as txn:
@@ -252,22 +267,21 @@ def run(k, limit, num_splits, pos, neg, predict):
             return avg/num_splits
 
         else:
-            sss = ssSplit(n_splits=num_splits, test_size = 0.5, random_state=42)
-
-            output = []
+            sss = ssSplit(n_splits=1, test_size = 0.5, random_state=42)
 
             for indices in sss.split(arrays[:(len(pos)+len(neg))], labels):
                 X = [arrays[x] for x in indices[0]]
                 X.extend([arrays[x] for x in indices[1]])
                 Y = [labels[x] for x in indices[0]]
                 Y.extend([labels[x] for x in indices[1]])
-                Z = arrays[(len(pos)+len(neg)):]
 
-                output.append(make_predictions(X, Y, Z, None))
+            Z = arrays[len(pos) + len(neg):]
 
-            return output
+            return make_predictions(X, Y, Z, None)
 
         env.close()
+
+
 
 def main():
     """
@@ -312,6 +326,8 @@ def main():
         fasta files contained in the positive and negative directories.
         """ % sys.argv[0]
         print output
+
+
 
 if __name__ == "__main__":
     main()
