@@ -266,7 +266,7 @@ def run(k, limit, num_splits, pos, neg, predict):
                 avg += make_predictions(X, Y, Z, ZPrime)
                 print avg
 
-            return avg/num_splits
+            output = avg/num_splits
 
         else:
             sss = ssSplit(n_splits=1, test_size = 0.5, random_state=13)
@@ -278,11 +278,9 @@ def run(k, limit, num_splits, pos, neg, predict):
                 Y.extend([labels[x] for x in indices[1]])
 
             Z = arrays[len(pos) + len(neg):]
-
-            return make_predictions(X, Y, Z, None)
-
-        env.close()
-
+            output = make_predictions(X, Y, Z, None)
+    env.close()
+    return output
 
 
 def main():
