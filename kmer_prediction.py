@@ -1,5 +1,6 @@
 import subprocess
-from sklearn import svm
+from keras.models import Sequential
+from keras.layers import Dense, Activation
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedShuffleSplit as ssSplit
 import os
@@ -185,16 +186,20 @@ def sensitivity_specificity(predicted_values, true_values):
     true_neg = len([x for x in true_values if x == 0])
     false_pos = 0
     false_neg = 0
+    err_rate = 0
     for i in range(len(predicted_values)):
         if true_values[i] == 0 and predicted_values[i] == 1:
             false_pos += 1
+            err_rate += 1
         if true_values[i] == 1 and predicted_values[i] == 0:
             false_neg += 1
+            err_rate += 1
 
     sensitivity = (1.0*true_pos)/(true_pos + false_neg)
     specificity = (1.0*true_neg)/(true_neg + false_pos)
+    score = len(predicted_values - 1.0*err_rate)/len(predicted_values)
 
-    return sensitivity, specificity
+    return score, sensitivity, specificity
 
 
 
@@ -208,18 +213,25 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     """
     # stochastic = SGDClassifier(penalty='l1', loss='perceptron', alpha=0.01,
     #                         tol=float(1e-3), max_iter=1000)
-    linear = svm.SVC(kernel='linear')
+    model = Sequential([
+            Dense(32, input_shape=(len(train_data),)),
+            Activation('relu'),
+            Dense(10),
+            Activation('softmax')
+            ])
+    model.compile(optimizer = 'rmsprop',
+                loss = 'categorical_crossentropy',
+                metrics = ['accuracy'])
 
     scaler = MinMaxScaler()
     X = scaler.fit_transform(train_data)
     Z = scaler.transform(test_data)
 
     try:
-        linear.fit(X, train_labels)
+        model.fit(X, train_labels, epochs=10, batch_size=32)
         if test_labels:
-            results = linear.predict(Z)
-            score = linear.score(Z, test_labels)
-            sensitivity,specificity=sensitivity_specificity(results,test_labels)
+            results = model.predict(Z, batch_size=32)
+            score,sensitivity,specificity=sensitivity_specificity(results,test_labels)
             return score, sensitivity, specificity
         else:
             return linear.predict(Z)
