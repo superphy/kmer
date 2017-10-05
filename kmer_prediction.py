@@ -297,7 +297,7 @@ def run(k, limit, num_splits, pos, neg, predict):
 
                 score,sensitivity,specificity = make_predictions(X,Y,Z,ZPrime)
                 score_total += score
-                sensitivity_total += sensitivity_total
+                sensitivity_total += sensitivity
                 specificity_total += specificity
 
             output = (score_total/num_splits, sensitivity_total/num_splits,
