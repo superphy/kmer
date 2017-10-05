@@ -173,6 +173,31 @@ def setup_data(files, k, limit, env, txn, data):
 
 
 
+def sensitivity_specificity(predicted_values, true_values):
+    """
+    Helper method for kmer_prediction.run(), should not be used on its own.
+
+    Takes two arrays, one is the predicted_values from running a prediction, the other is
+    the true values. Returns the sensitivity and the specificity of the machine
+    learning model.
+    """
+    true_pos = len([x for x in true_values if x == 1])
+    true_neg = len([x for x in true_values if x == 0])
+    false_pos = 0
+    false_neg = 0
+    for i in range(len(predicted_values)):
+        if true_values[i] == 0 and predicted_values[i] == 1:
+            false_pos += 1
+        if true_values[i] == 1 and predicted_values[i] == 0:
+            false_neg += 1
+
+    sensitivity = (1.0*true_pos)/(true_pos + false_neg)
+    specificity = (1.0*true_neg)/(true_neg + false_pos)
+
+    return sensitivity, specificity
+
+
+
 def make_predictions(train_data, train_labels, test_data, test_labels):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
@@ -181,6 +206,8 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     None returns predictions on test_data, other wise returns a percentage of
     predictions that the svm got correct.
     """
+    # stochastic = SGDClassifier(penalty='l1', loss='perceptron', alpha=0.01,
+    #                         tol=float(1e-3), max_iter=1000)
     linear = svm.SVC(kernel='linear')
 
     scaler = MinMaxScaler()
@@ -190,8 +217,10 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     try:
         linear.fit(X, train_labels)
         if test_labels:
-            ans = linear.score(Z, test_labels)
-            return ans
+            results = linear.predict(Z)
+            score = linear.score(Z, test_labels)
+            sensitivity,specificity=sensitivity_specificity(results,test_labels)
+            return score, sensitivity, specificity
         else:
             return linear.predict(Z)
     except (ValueError, TypeError) as E:
@@ -221,9 +250,10 @@ def run(k, limit, num_splits, pos, neg, predict):
                     shuffled and split so that 80%% are used to train the model
                     and 20%% to test a model.
     Returns:
-        Predict is None:        Percentage of predictions that the model got
-                                right. If num_splits greater than 1, this is the
-                                average of all runs.
+        Predict is None:        A tuple with three values: percentage of
+                                predictions correctly made, the sensitivity, and
+                                the specificity. If num_splits greater than 1,
+                                these are averages from all runs.
         Predict is not None:    Returns a binary array, where 1 means the
                                 genome belongs to the pos group and 0 means the
                                 genome belongs to the neg group.
@@ -255,7 +285,9 @@ def run(k, limit, num_splits, pos, neg, predict):
         if not predict:
             sss = ssSplit(n_splits=num_splits, test_size=0.2, random_state=42)
 
-            avg = 0.0
+            score_total = 0.0
+            sensitivity_total = 0.0
+            specificity_total = 0.0
 
             for indices in sss.split(arrays, labels):
                 X = [arrays[x] for x in indices[0]]
@@ -263,10 +295,13 @@ def run(k, limit, num_splits, pos, neg, predict):
                 Z = [arrays[x] for x in indices[1]]
                 ZPrime = [labels[x] for x in indices[1]]
 
-                avg += make_predictions(X, Y, Z, ZPrime)
-                print avg
+                score,sensitivity,specificity = make_predictions(X,Y,Z,ZPrime)
+                score_total += score
+                sensitivity_total += sensitivity_total
+                specificity_total += specificity
 
-            output = avg/num_splits
+            output = (score_total/num_splits, sensitivity_total/num_splits,
+                    specificity_total/num_splits)
 
         else:
             sss = ssSplit(n_splits=1, test_size = 0.5, random_state=13)
@@ -279,8 +314,10 @@ def run(k, limit, num_splits, pos, neg, predict):
 
             Z = arrays[len(pos) + len(neg):]
             output = make_predictions(X, Y, Z, None)
+
     env.close()
     return output
+
 
 
 def main():
