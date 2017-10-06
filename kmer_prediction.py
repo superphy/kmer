@@ -211,14 +211,15 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     # stochastic = SGDClassifier(penalty='l1', loss='perceptron', alpha=0.01,
     #                         tol=float(1e-3), max_iter=1000)
     linear = svm.SVC(kernel='linear')
+    linearB = svm.SVC(kernel='linear')
 
-    # X = np.asarray(train_data, dtype='float64')
-    # Z = np.asarray(test_data, dtype='float64')
-    # meanX = X.np.matrix.mean()
-    # meanZ = Z.np.matrix.mean()
-    #
-    # X = binarize(X, meanX)
-    # Z = binarize(Z, meanZ)
+    Xb = np.asarray(train_data, dtype='float64')
+    Zb = np.asarray(test_data, dtype='float64')
+    meanX = Xb.mean()
+    meanZ = Zb.mean()
+
+    Xb = binarize(Xb, meanX)
+    Zb = binarize(Zb, meanZ)
 
 
     scaler = MinMaxScaler()
@@ -227,11 +228,15 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
 
     try:
         linear.fit(X, train_labels)
+        linearB.fit(Xb, train_labels)
         if test_labels:
             results = linear.predict(Z)
             score = linear.score(Z, test_labels)
+            resultsB = linearB.predict(Z)
+            scoreB = linearB.score(Zb, test_labels)
             sensitivity,specificity=sensitivity_specificity(results,test_labels)
-            return score, sensitivity, specificity
+            sensB, specB = sensitivity_specificity(resultsB, test_labels)
+            return score, scoreB, sensitivity, specificity, sensB, specB
         else:
             return linear.predict(Z)
     except (ValueError, TypeError) as E:
@@ -297,8 +302,11 @@ def run(k, limit, num_splits, pos, neg, predict):
             sss = ssSplit(n_splits=num_splits, test_size=0.2, random_state=42)
 
             score_total = 0.0
-            sensitivity_total = 0.0
-            specificity_total = 0.0
+            scoreB_total = 0.0
+            sens_total = 0.0
+            spec_total = 0.0
+            sensB_total = 0.0
+            specB_total = 0.0
 
             for indices in sss.split(arrays, labels):
                 X = [arrays[x] for x in indices[0]]
@@ -306,13 +314,17 @@ def run(k, limit, num_splits, pos, neg, predict):
                 Z = [arrays[x] for x in indices[1]]
                 ZPrime = [labels[x] for x in indices[1]]
 
-                score,sensitivity,specificity = make_predictions(X,Y,Z,ZPrime)
+                score,scoreB, sens, spec, sensB, specB = make_predictions(X,Y,Z,ZPrime)
                 score_total += score
-                sensitivity_total += sensitivity
-                specificity_total += specificity
+                scoreB_total += scoreB
+                sens_total += sens
+                spec_total += spec
+                sensB_total += sensB
+                specB_total += specB
 
-            output = (score_total/num_splits, sensitivity_total/num_splits,
-                    specificity_total/num_splits)
+            output = (score_total/num_splits, sens_total/num_splits,
+                    spec_total/num_splits, scoreB_total/num_splits,
+                    sensB_total/num_splits, specB_total/num_splits)
 
         else:
             sss = ssSplit(n_splits=1, test_size = 0.5, random_state=13)
