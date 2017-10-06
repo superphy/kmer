@@ -5,6 +5,8 @@ from sklearn.model_selection import StratifiedShuffleSplit as ssSplit
 import os
 import lmdb
 import sys
+import numpy as np
+from sklearn.preprocessing import binarize
 
 
 
@@ -209,6 +211,15 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     # stochastic = SGDClassifier(penalty='l1', loss='perceptron', alpha=0.01,
     #                         tol=float(1e-3), max_iter=1000)
     linear = svm.SVC(kernel='linear')
+
+    # X = np.asarray(train_data, dtype='float64')
+    # Z = np.asarray(test_data, dtype='float64')
+    # meanX = X.np.matrix.mean()
+    # meanZ = Z.np.matrix.mean()
+    #
+    # X = binarize(X, meanX)
+    # Z = binarize(Z, meanZ)
+
 
     scaler = MinMaxScaler()
     X = scaler.fit_transform(train_data)
