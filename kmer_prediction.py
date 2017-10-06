@@ -226,16 +226,14 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
             Activation('sigmoid')
             ])
     modelB = Sequential([
-            Dense(32, input_dim = train_data.shape[1]),
+            Dense(2, input_dim = train_data.shape[1]),
             Activation('relu'),
             Dense(1),
             Activation('sigmoid')
             ])
     modelC = Sequential([
-            Dense(32, input_dim = train_data.shape[1]),
-            Activation('relu'),
-            Dense(1),
-            Activation('sigmoid')
+            Dense(1, input_dim = train_data.shape[1]),
+            Activation('sigmoid'),
             ])
     modelA.compile(optimizer = 'sgd',
                 loss = 'binary_crossentropy',
@@ -252,9 +250,9 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     Z = scaler.transform(test_data)
 
     try:
-        modelA.fit(X, train_labels, epochs=50, batch_size=5, verbose=0)
+        modelA.fit(X, train_labels, epochs=50, batch_size=10, verbose=0)
         modelB.fit(X, train_labels, epochs=50, batch_size=10, verbose=0)
-        modelC.fit(X, train_labels, epochs=50, batch_size=20, verbose=0)
+        modelC.fit(X, train_labels, epochs=50, batch_size=10, verbose=0)
         if test_labels:
             test_labels = np.asarray(test_labels)
             test_labels = test_labels.reshape(test_labels.shape[0], 1)
