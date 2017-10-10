@@ -66,7 +66,7 @@ def firstpass(filename, k, limit, env, txn):
 
     string = '%s'%filename
     current = env.open_db(string, txn=txn)
-    txn.drop(current, delete= False)
+    txn.drop(current, delete=False)
 
     for line in arr:
         if txn.get(line[0], default=False):
@@ -199,6 +199,25 @@ def sensitivity_specificity(predicted_values, true_values):
     return sensitivity, specificity
 
 
+def dual_predictions(resultsA, resultsB):
+    length = len(resultsA)
+    output = []
+    for i in range(length):
+        if resultsA[i] == resultsB[i]:
+            output.append(resultsA[i])
+        else:
+            output.append(0)
+    return output
+
+def score_output(correct, predictions):
+    length = len(correct)
+    count = 0.0
+    for i in range(length):
+        if correct[i] == predictions[i]:
+            count += 1.0
+    return count/length
+
+
 
 def make_predictions(train_data, train_labels, test_data, test_labels):
     """
@@ -222,9 +241,11 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     Zb = binarize(Zb, meanZ)
 
 
-    scaler = MinMaxScaler()
+    scaler = MinMaxScaler(feature_range=(-1, 1))
     X = scaler.fit_transform(train_data)
     Z = scaler.transform(test_data)
+    Xb = scaler.fit_transform(Xb)
+    Zb = scaler.transform(Zb)
 
     try:
         linear.fit(X, train_labels)
@@ -234,9 +255,10 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
             score = linear.score(Z, test_labels)
             resultsB = linearB.predict(Z)
             scoreB = linearB.score(Zb, test_labels)
-            sensitivity,specificity=sensitivity_specificity(results,test_labels)
-            sensB, specB = sensitivity_specificity(resultsB, test_labels)
-            return score, scoreB, sensitivity, specificity, sensB, specB
+            score_dual = score_output(test_labels, dual_predictions(results, resultsB))
+            # sensitivity,specificity=sensitivity_specificity(results,test_labels)
+            # sensB, specB = sensitivity_specificity(resultsB, test_labels)
+            return score, scoreB, score_dual
         else:
             return linear.predict(Z)
     except (ValueError, TypeError) as E:
@@ -303,10 +325,7 @@ def run(k, limit, num_splits, pos, neg, predict):
 
             score_total = 0.0
             scoreB_total = 0.0
-            sens_total = 0.0
-            spec_total = 0.0
-            sensB_total = 0.0
-            specB_total = 0.0
+            score_dual = 0.0
 
             for indices in sss.split(arrays, labels):
                 X = [arrays[x] for x in indices[0]]
@@ -314,17 +333,13 @@ def run(k, limit, num_splits, pos, neg, predict):
                 Z = [arrays[x] for x in indices[1]]
                 ZPrime = [labels[x] for x in indices[1]]
 
-                score,scoreB, sens, spec, sensB, specB = make_predictions(X,Y,Z,ZPrime)
+                score,scoreB,scoreD = make_predictions(X,Y,Z,ZPrime)
                 score_total += score
                 scoreB_total += scoreB
-                sens_total += sens
-                spec_total += spec
-                sensB_total += sensB
-                specB_total += specB
+                score_dual += scoreD
 
-            output = (score_total/num_splits, sens_total/num_splits,
-                    spec_total/num_splits, scoreB_total/num_splits,
-                    sensB_total/num_splits, specB_total/num_splits)
+            output = (score_total/num_splits, scoreB_total/num_splits,
+                    score_dual/num_splits)
 
         else:
             sss = ssSplit(n_splits=1, test_size = 0.5, random_state=13)
