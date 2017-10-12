@@ -1,8 +1,15 @@
 import subprocess
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout, RepeatVector
+from keras.layers import Flatten, Reshape, Input, concatenate, BatchNormalization
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.preprocessing import MinMaxScaler
+from keras.models import Model
+from keras.callbacks import LearningRateScheduler
+from keras.layers.convolutional import Conv1D, Conv2D
+from keras.layers.pooling import MaxPooling1D, AveragePooling1D
+from keras.layers.pooling import GlobalMaxPooling1D, GlobalAveragePooling1D
+from keras.utils import plot_model
 from sklearn.model_selection import StratifiedShuffleSplit as ssSplit
 import numpy as np
 import os
@@ -205,6 +212,39 @@ def sensitivity_specificity(predicted_values, true_values):
 
 
 
+def inception(input_stream):
+
+    parrallel1 = Conv1D(32, 3, activation='relu', padding='same')(input_stream)
+    parrallel1 = Dropout(0.5)(parrallel1)
+
+    parrallel2 = Conv1D(15, 3, activation='relu', padding='same')(input_stream)
+    parrallel2 = Conv1D(32, 3, activation='relu', padding='same')(parrallel2)
+    parrallel2 = Dropout(0.5)(parrallel2)
+
+    parrallel3 = Conv1D(15, 3, activation='relu', padding='same')(input_stream)
+    parrallel3 = Conv1D(32, 3, activation='relu', padding='same')(parrallel3)
+    parrallel3 = Dropout(0.5)(parrallel3)
+
+    parrallel4 = AveragePooling1D(pool_size=3, strides=1, padding='same')(input_stream)
+    parrallel4 = Conv1D(32, 3, activation='relu', padding='same')(parrallel4)
+    parrallel4 = Dropout(0.5)(parrallel4)
+
+    output_stream = concatenate([parrallel1,parrallel2,parrallel3,parrallel4],axis=-1)
+
+    return output_stream
+
+
+def bioinformatics(length):
+        model = Sequential()
+        model.add(Conv1D(32, 3, input_shape=(length, 1), activation='relu'))
+        model.add(MaxPooling1D(pool_size=3, strides=2))
+        model.add(Dropout(0.25))
+        model.add(Flatten())
+        model.add(Dense(32, activation='sigmoid'))
+        model.add(Dense(1, activation='sigmoid'))
+        return model
+
+
 def make_predictions(train_data, train_labels, test_data, test_labels):
     """
     Helper method for kmer_prediction.run(), should not be used on its own.
@@ -219,29 +259,87 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
 
     test_data = np.asarray(test_data, dtype='float64')
 
-    modelA = Sequential([
-            Dense(32, input_dim = train_data.shape[1]),
-            Activation('sigmoid'),
-            Dense(1),
-            Activation('sigmoid')
-            ])
-    # modelB = Sequential([
+    # modelA = Sequential([
     #         Dense(32, input_dim = train_data.shape[1]),
     #         Activation('sigmoid'),
     #         Dense(1),
     #         Activation('sigmoid')
     #         ])
+    modelB = Sequential([
+            Conv1D(15, 3, activation='relu', input_shape=(train_data.shape[1],1)),
+            Conv1D(32, 3, activation='relu'),
+            Dropout(0.25),
+            Flatten(),
+            Dense(1, activation='sigmoid')
+            ])
+
+    # inputA = Input(shape=(train_data.shape[1],1))
+    #
+    # input_streamA = Conv1D(5, 3, activation='relu')(inputA)
+    # input_streamA = MaxPooling1D(pool_size=1, strides=1)(input_streamA)
+    # input_streamA = Conv1D(10, 3, activation='relu')(input_streamA)
+    # input_streamA = Conv1D(15, 3, activation='relu')(input_streamA)
+    # input_streamA = MaxPooling1D(pool_size=1, strides=1)(input_streamA)
+    # input_streamA = Dropout(0.25)(input_streamA)
+    #
+    # parrallelA1 = Conv1D(32, 3, activation='relu', padding='same')(input_streamA)
+    # parrallelA1 = Dropout(0.5)(parrallelA1)
+    #
+    # parrallelA2 = Conv1D(15, 3, activation='relu', padding='same')(input_streamA)
+    # parrallelA2 = Conv1D(32, 3, activation='relu', padding='same')(parrallelA2)
+    # parrallelA2 = Dropout(0.5)(parrallelA2)
+    #
+    # parrallelA3 = Conv1D(15, 3, activation='relu', padding='same')(input_streamA)
+    # parrallelA3 = Conv1D(32, 3, activation='relu', padding='same')(parrallelA3)
+    # parrallelA3 = Dropout(0.5)(parrallelA3)
+    #
+    # parrallelA4 = MaxPooling1D(pool_size=1, strides=1, padding='same')(input_streamA)
+    # parrallelA4 = Dropout(0.5)(parrallelA4)
+    # parrallelA4 = Conv1D(32, 3, activation='relu', padding='same')(parrallelA4)
+    #
+    #output_streamA=concatenate([parrallelA1,parrallelA2,parrallelA3,parrallelA4],axis=-1)
+    # output_streamA = MaxPooling1D(pool_size=1, strides=1)(output_streamA)
+    # output_streamA = Dropout(0.25)(output_streamA)
+    # output_streamA = Flatten()(output_streamA)
+    # output_streamA = Dense(1, activation='sigmoid')(output_streamA)
+    #
+    # modelB = Model(inputA, output_streamA)
+
+    # input = Input(shape=(train_data.shape[1],1))
+    #
+    # input_stream = Conv1D(5, 3, activation='relu')(input)
+    # input_stream = BatchNormalization()(input_stream)
+    # input_stream = MaxPooling1D(pool_size=3, strides=1)(input_stream)
+    # input_stream = Conv1D(10, 3, activation='relu',)(input_stream)
+    # input_stream = Conv1D(15, 3, activation='relu')(input_stream)
+    # input_stream = BatchNormalization()(input_stream)
+    # input_stream = MaxPooling1D(pool_size=3, strides=1)(input_stream)
+    # input_stream = Dropout(0.5)(input_stream)
+    #
+    # output_stream = AveragePooling1D(pool_size=7,strides=1,padding='same')(input_stream)
+    # output_stream = Dropout(0.5)(output_stream)
+    # output_stream = Flatten()(output_stream)
+    # output_stream = Dense(1, activation='sigmoid')(output_stream)
+    # modelC = Model(input, output_stream)
+
+    modelC = bioinformatics(train_data.shape[1])
+
+
+
     # modelC = Sequential([
-    #         Dense(32, input_dim = train_data.shape[1]),
-    #         Activation('sigmoid'),
-    #         Dense(1),
-    #         Activation('sigmoid')
+    #         Conv1D(15, 3, activation='relu', input_shape=(train_data.shape[1],1)),
+    #         Conv1D(32, 3, activation='relu'),
+    #         MaxPooling1D(pool_size=1),
+    #         Dropout(0.25),
+    #         Flatten(),
+    #         Dense(1, activation='sigmoid')
     #         ])
     # modelD = Sequential([
-    #         Dense(32, input_dim = train_data.shape[1]),
-    #         Activation('sigmoid'),
-    #         Dense(1),
-    #         Activation('sigmoid')
+    #         Conv1D(15, 3, activation='relu', input_shape=(train_data.shape[1],1)),
+    #         Conv1D(32, 3, activation='relu'),
+    #         Dropout(0.25),
+    #         Flatten(),
+    #         Dense(1, activation='sigmoid')
     #         ])
     # modelE = Sequential([
     #         Dense(64, input_dim = train_data.shape[1]),
@@ -249,45 +347,51 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     #         Dense(1),
     #         Activation('sigmoid')
     #         ])
-    modelA.compile(optimizer = 'sgd',
+    # modelA.compile(optimizer = 'sgd',
+    #             loss = 'binary_crossentropy',
+    #             metrics = ['accuracy'])
+    modelB.compile(optimizer = 'adam',
                 loss = 'binary_crossentropy',
                 metrics = ['accuracy'])
-    # modelB.compile(optimizer = 'sgd',
-    #             loss = 'binary_crossentropy',
-    #             metrics = ['accuracy'])
-    # modelC.compile(optimizer = 'sgd',
-    #             loss = 'binary_crossentropy',
-    #             metrics = ['accuracy'])
-    # modelD.compile(optimizer = 'sgd',
+    modelC.compile(optimizer = 'adam',
+                loss = 'binary_crossentropy',
+                metrics = ['accuracy'])
+
+    # modelD.compile(optimizer = 'adam',
     #             loss = 'binary_crossentropy',
     #             metrics = ['accuracy'])
     # modelE.compile(optimizer = 'sgd',
     #             loss = 'binary_crossentropy',
     #             metrics = ['accuracy'])
 
-    scaler = MinMaxScaler()
+    scaler = MinMaxScaler(feature_range=(-1,1))
     X = scaler.fit_transform(train_data)
+    Xprime = X.reshape(X.shape + (1,))
     Z = scaler.transform(test_data)
+    Zprime = Z.reshape(Z.shape + (1,))
 
     try:
-        modelA.fit(X, train_labels, epochs=100, batch_size=10, verbose=0)
-        # modelB.fit(X, train_labels, epochs=10, batch_size=10, verbose=0)
-        # modelC.fit(X, train_labels, epochs=10, batch_size=10, verbose=0)
-        # modelD.fit(X, train_labels, epochs=10, batch_size=10, verbose=0)
+        # modelA.fit(X, train_labels, epochs=100, batch_size=10, verbose=1)
+        modelB.fit(Xprime, train_labels, epochs=10, batch_size=10, verbose=1)
+        modelC.fit(Xprime, train_labels, epochs=10, batch_size=10, verbose=1)
+        # modelD.fit(Xprime, train_labels, epochs=10, batch_size=10, verbose=1)
         # modelE.fit(X, train_labels, epochs=10, batch_size=10, verbose=0)
         if test_labels:
             test_labels = np.asarray(test_labels)
             test_labels = test_labels.reshape(test_labels.shape[0], 1)
-            scoreA = modelA.evaluate(Z, test_labels, batch_size=32, verbose=0)
-            # scoreB = modelB.evaluate(Z, test_labels, batch_size=32, verbose=0)
-            # scoreC = modelC.evaluate(Z, test_labels, batch_size=32, verbose=0)
-            # scoreD = modelD.evaluate(Z, test_labels, batch_size=32, verbose=0)
+            # scoreA = modelA.evaluate(Z, test_labels, batch_size=32, verbose=1)
+            scoreB = modelB.evaluate(Zprime, test_labels, batch_size=10, verbose=1)
+            scoreC = modelC.evaluate(Zprime, test_labels, batch_size=10, verbose=1)
+            # scoreD = modelD.evaluate(Zprime, test_labels, batch_size=10, verbose=1)
             # scoreE = modelD.evaluate(Z, test_labels, batch_size=32, verbose=0)
             # score,sensitivity,specificity=sensitivity_specificity(results,test_labels)
-            return (scoreA[1]) #scoreB[1], scoreC[1], scoreD[1], scoreE[1])
+            #return (scoreA[1], scoreB[1], scoreC[1])#, scoreD[1], scoreE[1])
+            return (scoreB[1], scoreC[1])#, scoreD[1])
         else:
-            print "Oops"
-            exit()
+            a = modelA.predict(Z)
+            # b = modelB.predict(Zprime)
+            # c = modelC.predict(Zprime)
+            return a
     except (ValueError, TypeError) as E:
         print E
         return -1
@@ -331,7 +435,6 @@ def run(k, limit, num_splits, pos, neg, predict):
         scoreE_total = 0.0
         # sensitivity_total = 0.0
         # specificity_total = 0.0
-        count = 0
         for indices in sss.split(arrays, labels):
             X = [arrays[x] for x in indices[0]]
             Y = [labels[x] for x in indices[0]]
@@ -339,18 +442,17 @@ def run(k, limit, num_splits, pos, neg, predict):
             ZPrime = [labels[x] for x in indices[1]]
 
             scores = make_predictions(X,Y,Z,ZPrime)
-            scoreA_total += scores
-            # scoreB_total += scores[1]
+            print scores
+            scoreA_total += scores[0]
+            scoreB_total += scores[1]
             # scoreC_total += scores[2]
             # scoreD_total += scores[3]
             # scoreE_total += scores[4]
-            count += 1
-            print "Done %d" % count
             # sensitivity_total += sensitivity
             # specificity_total += specificity
 
-        output = (scoreA_total/num_splits) #, scoreB_total/num_splits,
-                    # scoreC_total/num_splits, scoreD_total/num_splits,
+        output = (scoreA_total/num_splits, scoreB_total/num_splits)
+                    # scoreC_total/num_splits) #, scoreD_total/num_splits,
                     # scoreE_total/num_splits)
 
     else:
