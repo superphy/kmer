@@ -1,13 +1,9 @@
-import subprocess
-from kmer_counter import count_kmers, get_counts
-from sklearn import svm
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedShuffleSplit as ssSplit
+from kmer_counter import count_kmers, get_counts
+from sklearn.preprocessing import MinMaxScaler
+from sklearn import svm
 import os
-import lmdb
 import sys
-import numpy as np
-from sklearn.preprocessing import binarize
 
 
 
