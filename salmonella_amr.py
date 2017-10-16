@@ -15,7 +15,7 @@ def setup_files(antibiotic):
         for line in lines:
             if line:
                 line = line.split(',')
-                if line[1] == antibiotic:
+                if line[1] == antibiotic and not len(line[0]) == 7:
                     if line[2] == "Susceptible":
                         susceptible.append(line[0])
                     else:

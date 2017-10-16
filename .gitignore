@@ -1,6 +1,7 @@
 *.jf
 *.pyc
 *.fasta
+*.txt
 /database/*
 /kmer_counts/*
 /database2/*
