@@ -1,7 +1,5 @@
 import random
 import json
-import os
-import numpy as np
 
 
 
@@ -57,18 +55,17 @@ def get_fasta_from_json(positive_json, negative_json):
         data = json.load(f)
         fasta_names = [str(x['assembly_barcode']) for x in data]
         negative_fasta = [moria+x+'.fasta' for x in fasta_names
-                        if x not in bad_genomes
-                        and moria+'x'+'.fasta' not in invalid_genomes
-                        and check_fasta(moria+x+'.fasta')]
+                          if x not in bad_genomes
+                          and moria+'x'+'.fasta' not in invalid_genomes
+                          and check_fasta(moria+x+'.fasta')]
 
     with open(positive_json, 'r') as f:
         data = json.load(f)
         fasta_names = [str(x['assembly_barcode']) for x in data]
-        # fasta_names = list(np.random.choice(fasta_names, int(1.25*len(negative_fasta))))
         positive_fasta = [moria+x+'.fasta' for x in fasta_names
-                       if x not in bad_genomes
-                       and moria+'x'+'.fasta' not in invalid_genomes
-                       and check_fasta(moria+x+'.fasta')]
+                          if x not in bad_genomes
+                          and moria+'x'+'.fasta' not in invalid_genomes
+                          and check_fasta(moria+x+'.fasta')]
 
     return positive_fasta, negative_fasta
 
@@ -84,15 +81,17 @@ def train_test(positive_json, negative_json):
         x_test:     A list fo filepaths to genomes to be used to test a model.
         y_test:     A list of labels for each genome in x_test.
 
-    Shuffles the output of get_fasta_from_json together to create an 80/20
-    train/test split of the genomes and corresponding labels.
+    Shuffles the output lists of get_fasta_from_json together to create an 80/20
+    train/test split of the genomes as well lists of the corresponding labels. 1
+    for possesing the phenotype of interest and 0 for not possessing the
+    phenotype.
 
     See Superphy/MoreSerotype/module/DownloadMetadata.py on Github for a script
     that can generate the json files required to make this work.
     """
-    positive_fasta, negative_fasta = get_fasta_from_json(positive_json, negative_json)
-    labels = [1 for x in positive_fasta] + [0 for x in negative_fasta]
-    fasta_files = positive_fasta + negative_fasta
+    pos_fasta, neg_fasta = get_fasta_from_json(positive_json, negative_json)
+    labels = [1 for x in pos_fasta] + [0 for x in neg_fasta]
+    fasta_files = pos_fasta + neg_fasta
 
     temp = list(zip(fasta_files, labels))
     random.shuffle(temp)
@@ -125,8 +124,7 @@ def train_test_files(train_file, test_file, positive_json, negative_json):
 
     Writes the output of train_test to "train_file" and "test_file", formats the
     files like csv files where the first column contains the path to the fasta
-    file for a genome and the second column contains the label for the genome. 1
-    for possesing the phenotype and 0 for not possesing the phenotype.
+    file for a genome and the second column contains the label for the genome.
 
      See Superphy/MoreSerotype/module/DownloadMetadata.py on Github for a script
      that can generate the json files required to make this work.
