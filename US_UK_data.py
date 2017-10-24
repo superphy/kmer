@@ -19,30 +19,16 @@ def same_shuffle(a,b):
 
 
 
-def data(database, threeD, recount, k, l):
+def get_filepaths():
     """
-    Parameters:
-        database:   Path to an lmdb database where you want the kmer counts to
-                    be stored.
-        threeD:     Boolean value, if true the returned data has its dimensions
-                    increased by 1. This is necessary if the data will be
-                    passed to a neural network that uses convolutional1D layers.
-        recount:    Boolean value, if true the kmers are recounted and stored in
-                    the database, if false it is assumed that the database
-                    already has the correct kmer counts and they are simply read
-                    from the database.
-        k:          Size of kmer to be counted. Ignored if recount is false.
-        l:          Minimum number of times a kmer must appear in order to be
-                    counted. Ignored if recount is false.
+    Parameters: None.
     Returns:
-        x_train:    A shuffled list of paths to the fasta files for the UK
-                    dataset.
-        y_train:    The human(1) bovine(0) labels corresponding to x_train.
-        x_test:     A shuffled list of paths to the fasta files for the US
-                    dataset.
-        y_test:     The human(1) bovine(0) labels corresponding to x_test.
+        x_train:    Shuffled list of filepaths to genomes from the UK dataset.
+        y_train:    Labels corresponding to x_train.
+        x_test:     Shuffled list of filepaths to genomes from the US dataset.
+        y_test:     Labels corresponding to x_test.
 
-    This method prepares the train and test data/labels to recreate the results
+    This method returns the filepaths to the fasta files to recreate the results
     of the 2016 paper "Support vector machine applied to predict the zoonotic
     potential of E. coli O157 cattle isolates" by Lupolova et. al.
     """
@@ -74,6 +60,39 @@ def data(database, threeD, recount, k, l):
 
     x_train, y_train = same_shuffle(x_train, y_train)
     x_test, y_test = same_shuffle(x_test, y_test)
+
+    return x_train, y_train, x_test, y_test
+
+
+
+def get_preprocessed_data(database, threeD, recount, k, l):
+    """
+    Parameters:
+        database:   Path to an lmdb database where you want the kmer counts to
+                    be stored.
+        threeD:     Boolean value, if true the returned data has its dimensions
+                    increased by 1. This is necessary if the data will be
+                    passed to a neural network that uses convolutional layers.
+        recount:    Boolean value, if true the kmers are recounted and stored in
+                    the database, if false it is assumed that the database
+                    already has the correct kmer counts and they are simply read
+                    from the database.
+        k:          Size of kmer to be counted. Ignored if recount is false.
+        l:          Minimum number of times a kmer must appear in order to be
+                    counted. Ignored if recount is false.
+    Returns:
+        x_train:    UK data ready to be input directly into a machine learning
+                    model.
+        y_train:    The human(1) bovine(0) labels corresponding to x_train.
+        x_test:     US data ready to be input directly into a machine learning
+                    model.
+        y_test:     The human(1) bovine(0) labels corresponding to x_test.
+
+    This method prepares the train and test data/labels to recreate the results
+    of the 2016 paper "Support vector machine applied to predict the zoonotic
+    potential of E. coli O157 cattle isolates" by Lupolova et. al.
+    """
+    x_train, y_train, x_test, y_test = get_filepaths()
 
     if recount:
         allfiles = x_train + x_test
