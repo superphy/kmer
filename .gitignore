@@ -7,3 +7,8 @@
 /database2/*
 /Results/*
 /deprecated/*
+/database3/*
+*.h5
+*.png
+*metadata*
+/Models/*
