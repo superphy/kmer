@@ -7,7 +7,7 @@ file_path = '/home/rboothman/Data/salmonella_amr/'
 
 key = '/home/rboothman/Data/amr_sorted.csv'
 
-def setup_files(antibiotic, arrays):
+def setup_files(antibiotic):
     susceptible = []
     resistant = []
     with open(key, 'r') as f:
@@ -39,7 +39,7 @@ def main(k_range, l_range, reps):
         for k in k_range:
             count_kmers(k, l, all_files, "database")
             for antibiotic in antibiotics:
-                sus, res = setup_files(antibiotic, all_files)
+                sus, res = setup_files(antibiotic)
                 sus = get_counts(sus, "database")
                 res = get_counts(res, "database")
                 with open('/home/rboothman/Data/lower_limits/results_salmonella/%s/l%d.txt'%(antibiotic,l), 'a') as f:
