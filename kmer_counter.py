@@ -11,7 +11,7 @@ def __start(filename, k, limit, env, txn, data):
     removing any kmer that has a count less than limit. Resets the master
     database data and then writes each kmer as a key with value -1 to data.
     Creates a new database called filename, writes each kmer/count pair to the
-    new databse as a key value pair.
+    new database as a key value pair.
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
             '%s' % filename, '-o', 'test.jf', '-L', '%d' % limit]
@@ -111,7 +111,6 @@ def __print_status(counter, total):
 
 
 
-
 def __setup_data(files, k, limit, env, txn, data):
     """
     Takes a list of paths to fasta files, a kmer length, a lower limit on how
@@ -147,10 +146,11 @@ def __setup_data(files, k, limit, env, txn, data):
     print "\n"
 
 
+
 def __add(filename, k, env, txn):
     """
-    Counts kmers in filename and adds them to the database pointed to by env if
-    the kmer already exists in env.
+    Counts kmers in filename and adds them to the database pointed to by env.
+    Only counts kmers that already exists in env.
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
             '%s' % filename, '-o', 'test.jf']
@@ -182,7 +182,7 @@ def __add(filename, k, env, txn):
 def __add_to_database(files, k, env, txn):
     """
     Adds the kmer counts in files to an already created database, does not
-    remove any kmer counts from the data base, sets
+    remove any kmer counts from the data base.
     """
     counter = 0
     total = len(files)
