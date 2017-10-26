@@ -5,7 +5,7 @@ import random
 
 
 
-def same_shuffle(a,b):
+def same_shuffle_list(a,b):
     """
     Takes two lists and shuffles them so that the elements that appear in
     position x in both lists before the shuffling, both appear in position y
@@ -16,6 +16,14 @@ def same_shuffle(a,b):
     random.shuffle(temp)
     a,b = zip(*temp)
     return list(a), list(b)
+
+
+
+def same_shuffle_array(a,b):
+    temp = list(zip(a, b))
+    random.shuffle(temp)
+    a,b = zip(*temp)
+    return np.asarray(a), np.asarray(b)
 
 
 
@@ -36,32 +44,39 @@ def get_filepaths():
     bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
 
     with open('human_bovine.csv', 'r') as f:
-        x_train = []
-        y_train = []
-        x_test = []
-        y_test = []
+        human_train = []
+        bovine_train =[]
+        human_test = []
+        bovine_test = []
         line = f.readline()
         while line:
             line = line.rstrip('\n')
             line = line.split(',')
             if line[1] == 'Human' and line[2] == 'Train':
-                x_train.append(human_path+line[0]+'.fasta')
-                y_train.append(1)
+                human_train.append(human_path+line[0]+'.fasta')
             elif line[1] == 'Bovine' and line[2] == 'Train':
-                x_train.append(bovine_path+line[0]+'.fasta')
-                y_train.append(0)
+                bovine_train.append(bovine_path+line[0]+'.fasta')
             elif line[1] == 'Human' and line[2] == 'Test':
-                x_test.append(human_path+line[0]+'.fasta')
-                y_test.append(1)
+                human_test.append(human_path+line[0].replace(' ', '_').replace('-', '_')+'.fasta')
             elif line[1] == 'Bovine' and line[2] == 'Test':
-                x_test.append(bovine_path+line[0]+'.fasta')
-                y_test.append(0)
+                bovine_test.append(bovine_path+line[0].replace(' ', '_').replace('-', '_')+'.fasta')
             line = f.readline()
 
-    x_train, y_train = same_shuffle(x_train, y_train)
-    x_test, y_test = same_shuffle(x_test, y_test)
+    return human_train, bovine_train, human_test, bovine_test
 
-    return x_train, y_train, x_test, y_test
+
+
+def shuffle(A, B, labelA, labelB):
+    if type(A) == list:
+        data = A + B
+        labels = [labelA for x in A] +  [labelB for x in B]
+        return same_shuffle_list(data, labels)
+    elif type(A) == np.ndarray:
+        data = np.concatenate((A,B), axis=0)
+        labelsA = np.full(A.shape[0], labelA)
+        labelsB = np.full(B.shape[0], labelB)
+        labels = np.concatenate((labelsA, labelsB), axis=0)
+        return same_shuffle_array(data, labels)
 
 
 
@@ -92,7 +107,9 @@ def get_preprocessed_data(database, threeD, recount, k, l):
     of the 2016 paper "Support vector machine applied to predict the zoonotic
     potential of E. coli O157 cattle isolates" by Lupolova et. al.
     """
-    x_train, y_train, x_test, y_test = get_filepaths()
+    human_train, bovine_train, human_test, bovine_test = get_filepaths()
+    x_train, y_train = shuffle(human_train, bovine_train, 1, 0)
+    x_test, y_test = shuffle(human_test, bovine_test, 1, 0)
 
     if recount:
         allfiles = x_train + x_test

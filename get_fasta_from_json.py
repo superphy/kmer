@@ -27,11 +27,10 @@ def get_fasta_from_json(positive_json, negative_json):
                         for enterobase genomes, where each genome does not
                         possess the phenotype of interest.
     Returns:
-        Two lists (of approximately equal length) of complete file paths to
-        valid fasta files from enterobase that are stored on moria. The first
-        list contains only genomes positive for the phenotype of interest and
-        the the second list contains only genomes that are negative for the
-        phenotype of interest.
+        Two lists of complete file paths to valid fasta files from enterobase
+        that are stored on moria. The first list contains only genomes positive
+        for the phenotype of interest and the the second list contains only
+        genomes that are negative for the phenotype of interest.
 
     See Superphy/MoreSerotype/module/DownloadMetadata.py on Github for a script
     that can generate the json files required to make this work.
