@@ -107,7 +107,7 @@ from data_augmentation import augment_data_adasyn, augment_data_smote, augment_d
 #     scores = model100a.evaluate(X_test, Y_test, batch_size=10, verbose=1)
 #
 #     print "\n", scores
-
+#
 # def get_files():
 #     sus, res = setup_files('kanamycin')
 #     labels = [1 for x in sus] + [0 for x in res]
@@ -135,18 +135,18 @@ from data_augmentation import augment_data_adasyn, augment_data_smote, augment_d
 #     x_train, y_train, x_test, y_test = train_test('human_metadata', 'bovine_metadata')
 #
 #     return x_train+x_test, y_train+y_test
-
-
+#
+#
 # uk_data, uk_labels, us_data, us_labels = data("database", True, False, 1, 1)
 #
 # x_train, y_train = get_vals()
 # x_train, y_train, x_test, y_test = get_augmented_data("database", True, False, 1, 1, 10)
 x_train, y_train, x_test, y_test = get_preprocessed_data("database", True, False, 7, 13)
 # x_train, y_train, x_test, y_test = get_data_and_labels('binary_table.txt', '/home/rboothman/Data/human_bovine/human/', True)
-x_train, y_train, x_test, y_test = variance_threshold(x_train, y_train, x_test, y_test, 0.1)
-x_train, y_train = augment_data_adasyn(x_train, y_train, 500)
+# x_train, y_train, x_test, y_test = variance_threshold(x_train, y_train, x_test, y_test, 0.1)
+# x_train, y_train = augment_data_adasyn(x_train, y_train, 500)
 # x = int(0.8*x_test.shape[0])
-
+#
 # x_test = x_train[x:]
 # y_test = y_train[x:]
 #
@@ -161,10 +161,10 @@ x_train, y_train = augment_data_adasyn(x_train, y_train, 500)
 # x_train, y_train = zip(*temp)
 # x_train = list(x_train)
 # y_train = list(y_train)
-
+#
 # all_files = x_train + x_test
 # count_kmers(7, 13, all_files, "database2")
-
+#
 # x_train = get_counts(x_train, "database")
 # x_train = np.asarray(x_train, dtype='float64')
 #
