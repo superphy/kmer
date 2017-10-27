@@ -1,6 +1,7 @@
 from kmer_counter import count_kmers, get_counts
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
+import pandas as pd
 import random
 
 
@@ -24,6 +25,17 @@ def same_shuffle_array(a,b):
     random.shuffle(temp)
     a,b = zip(*temp)
     return np.asarray(a), np.asarray(b)
+
+
+def determine_dataset(name):
+    data = pd.read_csv('/home/rboothman/PHAC/kmer/human_bovine_underscores.csv', header=0)
+    dictionary = data.set_index('filename').T.to_dict('list')
+    if name in dictionary:
+        temp = dictionary[name]
+        return temp[0] + temp[1]
+    else:
+        return False
+
 
 
 

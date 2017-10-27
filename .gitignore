@@ -1,8 +1,13 @@
 *.jf
 *.pyc
 *.fasta
+*.csv
+*.txt
+.~*
 /database/*
 /kmer_counts/*
 /database2/*
 /Results/*
 /deprecated/*
+*metadata*
+/Models/*
