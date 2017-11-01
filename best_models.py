@@ -9,10 +9,9 @@ from keras.layers.pooling import MaxPooling1D, AveragePooling1D
 from keras.layers.convolutional import Conv1D
 import random
 import os
-from get_fasta_from_json import train_test
 from salmonella_amr import setup_files
-from get_data import get_genome_region_mixed, get_genome_region_us_uk_split
-from get_data import get_kmer_mixed, get_kmer_us_uk_split
+from data import get_genome_region_us_uk_mixed, get_genome_region_us_uk_split
+from data import get_kmer_us_uk_mixed, get_kmer_us_uk_split
 from feature_selection import variance_threshold, select_percentile, select_k_best
 from sklearn import svm
 import time

@@ -137,10 +137,10 @@ def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
         file_suffix: Suffix to appened to genome names in "metadata".
 
     Returns:
-        pos_train:    All postive training fasta files.
-        neg_train:    All negative training fasta files.
-        pos_test:     All positive test fasta files.
-        neg_test:     All negative test fasta files.
+        pos_train:   All postive training fasta files.
+        neg_train:   All negative training fasta files.
+        pos_test:    All positive test fasta files.
+        neg_test:    All negative test fasta files.
     """
     with open(metadata, 'r') as f:
         pos_train = []
@@ -183,7 +183,8 @@ def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
     return x_train, y_train, x_test, y_test
 
 
-def parse_json(path, suffix, key, *json_files):
+def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
+               key='assembly_barcode', *json_files):
     """
     Parameters:
         path:       File path to be appended to the beginning of each fasta file
@@ -209,5 +210,5 @@ def parse_json(path, suffix, key, *json_files):
             fasta_names = [path+x+suffix for x in fasta_names]
             fasta_names = [x for x in fasta_names if check_fasta(x)]
         output.append(fasta_names)
-        
+
     return output
