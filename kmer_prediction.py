@@ -76,14 +76,14 @@ def make_predictions(train_data, train_labels, test_data, test_labels):
     try:
         model.fit(Xprime,
                   train_labels,
-                  epochs=1,
+                  epochs=50,
                   batch_size=10,
-                  verbose=1,)
+                  verbose=0,)
         if test_labels:
             test_labels = np.asarray(test_labels)
             test_labels = test_labels.reshape(test_labels.shape[0], 1)
 
-            score = model.evaluate(Zprime, test_labels, batch_size=10, verbose=1)
+            score = model.evaluate(Zprime, test_labels, batch_size=10, verbose=0)
             return score[1]
         else:
             return model.predict(Zprime)
@@ -98,7 +98,7 @@ def run(k, limit, num_splits, pos, neg, predict):
     else:
         files = pos + neg + predict
 
-    # count_kmers( k, limit, files, "database2")
+    # count_kmers( k, limit, files, "database")
 
     arrays = get_counts(files, "database")
 
@@ -116,7 +116,7 @@ def run(k, limit, num_splits, pos, neg, predict):
 
             scores = make_predictions(X,Y,Z,ZPrime)
             print scores
-            score_total += scores[1]
+            score_total += scores
 
         output = score_total/num_splits
 
