@@ -28,7 +28,7 @@ def get_kmer_us_uk_split(database="database", threeD=True, scale=True, recount=F
         kmer data ready to be input into a ml model and recreate the Lupolova
         et. al paper.
     """
-    params = ['human_bovine.csv', 'Human', 'Bovine', human_path, bovine_path,
+    params = ['Data/human_bovine.csv', 'Human', 'Bovine', human_path, bovine_path,
               'Train', 'Test', '.fasta']
     x_train, y_train, x_test, y_test = parse_metadata(*params)
 
@@ -68,7 +68,7 @@ def get_kmer_us_uk_mixed(database="database", threeD=True, scale=True, recount=F
         kmer data ready to be input into a ml model, with us/uk data shuffled
         together.
     """
-    params = ['human_bovine.csv', 'Human', 'Bovine', human_path, bovine_path,
+    params = ['Data/human_bovine.csv', 'Human', 'Bovine', human_path, bovine_path,
               '', '', '.fasta']
     x_train, y_train, x_test, y_test = parse_metadata(*params)
 
@@ -90,7 +90,7 @@ def get_kmer_us_uk_mixed(database="database", threeD=True, scale=True, recount=F
     return x_train, y_train, x_test, y_test
 
 
-def get_genome_region_us_uk_mixed(table='binary_table.txt', threeD=True):
+def get_genome_region_us_uk_mixed(table='Data/binary_table.txt', threeD=True):
     """
     Parameters:
         table:   binary_table.txt output from panseq.
@@ -101,7 +101,7 @@ def get_genome_region_us_uk_mixed(table='binary_table.txt', threeD=True):
         binary genome region presence absence data ready to be input into a ml
         model, with us/uk data shuffled together.
     """
-    params = ('human_bovine.csv', 'Human', 'Bovine')
+    params = ('Data/human_bovine.csv', 'Human', 'Bovine')
     x_train, y_train, x_test, y_test = parse_genome_region_table(table, params)
 
     x_train = np.asarray(x_train)
@@ -114,7 +114,7 @@ def get_genome_region_us_uk_mixed(table='binary_table.txt', threeD=True):
     return x_train, y_train, x_test, y_test
 
 
-def get_genome_region_us_uk_split(table='binary_table.txt', threeD=True, sep='\s+'):
+def get_genome_region_us_uk_split(table='Data/binary_table.txt', threeD=True, sep='\s+'):
     """
     Parameters:
         table:   binary_table.txt output from panseq.
@@ -125,7 +125,7 @@ def get_genome_region_us_uk_split(table='binary_table.txt', threeD=True, sep='\s
         binary genome region presence absence data ready to be input into a ml
         model to recreate the Lupoloval et. al paper.
     """
-    params = ('human_bovine.csv', 'Human', 'Bovine', '', '', 'Train', 'Test')
+    params = ('Data/human_bovine.csv', 'Human', 'Bovine', '', '', 'Train', 'Test')
     x_train, y_train, x_test, y_test = parse_genome_region_table(table, params)
 
     x_train = np.asarray(x_train)
