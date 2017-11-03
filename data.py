@@ -14,7 +14,7 @@ human_path = get_human_path()
 bovine_path = get_bovine_path()
 
 
-def get_kmer_us_uk_split(database="database", threeD=True, recount=False, k=7, l=13):
+def get_kmer_us_uk_split(database="database", threeD=True, scale=True, recount=False, k=7, l=13):
     """
     Parameters:
         database:   lmdb database to store kmer counts.
@@ -42,9 +42,10 @@ def get_kmer_us_uk_split(database="database", threeD=True, recount=False, k=7, l
     x_test = get_counts(x_test, database)
     x_test = np.asarray(list(x_test), dtype='float64')
 
-    scaler = MinMaxScaler(feature_range=(-1,1))
-    x_train = scaler.fit_transform(x_train)
-    x_test = scaler.transform(x_test)
+    if scale:
+        scaler = MinMaxScaler(feature_range=(-1,1))
+        x_train = scaler.fit_transform(x_train)
+        x_test = scaler.transform(x_test)
 
     if threeD:
         x_train = x_train.reshape(x_train.shape + (1,))
@@ -53,7 +54,7 @@ def get_kmer_us_uk_split(database="database", threeD=True, recount=False, k=7, l
     return x_train, y_train, x_test, y_test
 
 
-def get_kmer_us_uk_mixed(database="database", threeD=True, recount=False, k=7, l=13):
+def get_kmer_us_uk_mixed(database="database", threeD=True, scale=True, recount=False, k=7, l=13):
     """
     Parameters:
         database:   lmdb database to store kmer counts.
@@ -69,7 +70,7 @@ def get_kmer_us_uk_mixed(database="database", threeD=True, recount=False, k=7, l
     """
     params = ['human_bovine.csv', 'Human', 'Bovine', human_path, bovine_path,
               '', '', '.fasta']
-    y_train, y_train, x_test, y_test = parse_metadata(*params)
+    x_train, y_train, x_test, y_test = parse_metadata(*params)
 
     if recount:
         count_kmers(k, l, genomes, database)
@@ -77,9 +78,10 @@ def get_kmer_us_uk_mixed(database="database", threeD=True, recount=False, k=7, l
     x_train = get_counts(x_train, database)
     x_test = get_counts(x_test, database)
 
-    scaler = MinMaxScaler(feature_range=(-1,1))
-    x_train = scaler.fit_transform(x_train)
-    x_test = scaler.transform(x_test)
+    if scale:
+        scaler = MinMaxScaler(feature_range=(-1,1))
+        x_train = scaler.fit_transform(x_train)
+        x_test = scaler.transform(x_test)
 
     if threeD:
         x_train = x_train.reshape(x_train.shape + (1,))
@@ -99,8 +101,8 @@ def get_genome_region_us_uk_mixed(table='binary_table.txt', threeD=True):
         binary genome region presence absence data ready to be input into a ml
         model, with us/uk data shuffled together.
     """
-    params = ['human_bovine.csv', 'Human', 'Bovine']
-    x_train, y_train, x_test, y_test = parse_genome_region_table(table, *params)
+    params = ('human_bovine.csv', 'Human', 'Bovine')
+    x_train, y_train, x_test, y_test = parse_genome_region_table(table, params)
 
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
@@ -112,7 +114,7 @@ def get_genome_region_us_uk_mixed(table='binary_table.txt', threeD=True):
     return x_train, y_train, x_test, y_test
 
 
-def get_genome_region_us_uk_split(table='binary_table.txt', threeD=True):
+def get_genome_region_us_uk_split(table='binary_table.txt', threeD=True, sep='\s+'):
     """
     Parameters:
         table:   binary_table.txt output from panseq.
@@ -123,8 +125,8 @@ def get_genome_region_us_uk_split(table='binary_table.txt', threeD=True):
         binary genome region presence absence data ready to be input into a ml
         model to recreate the Lupoloval et. al paper.
     """
-    params = ['human_bovine.csv', 'Human', 'Bovine', '', '', 'Train', 'Test']
-    x_train, y_train, x_test, y_test = parse_genome_region_table(table, *params)
+    params = ('human_bovine.csv', 'Human', 'Bovine', '', '', 'Train', 'Test')
+    x_train, y_train, x_test, y_test = parse_genome_region_table(table, params)
 
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
