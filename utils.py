@@ -171,7 +171,7 @@ def parse_and_filter_genome_region_table(input_table,validation_table,params,
 
 
 def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
-                   train_label='', test_label='', file_suffix=''):
+                   train_label='', test_label='', file_suffix='', sep='\t'):
     """
     Parameters:
         metadata:    A csv metadata sheet with 2 or 3 columns. The first row
@@ -189,6 +189,7 @@ def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
         train_label: Label identifying train genomes in "metadata".
         test_label:  Label identifying test genomes in "metadata".
         file_suffix: Suffix to appened to genome names in "metadata".
+        sep:         The delimiter used in "metadata"
 
     Returns:
         pos_train:   All postive training fasta files.
@@ -205,7 +206,7 @@ def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
         line = f.readline()
         while line:
             line = line.rstrip('\n')
-            line = line.split(',')
+            line = line.split(sep)
             if train_label:
                 if line[1] == pos_label and line[2] == train_label:
                     pos_train.append(pos_path+line[0]+file_suffix)

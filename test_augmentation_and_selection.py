@@ -33,7 +33,7 @@ score_functions = {'f': f_classif,
 
 def test_variance():
     sel = variance_threshold
-    variances = list(np.arange(0.026,1.0,0.002))
+    variances = list(np.arange(0.028,1.0,0.002))
     for v in variances:
         nn_mixed_kmer = []
         nn_split_kmer = []
