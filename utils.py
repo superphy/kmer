@@ -2,7 +2,7 @@ import csv
 import os
 import random
 import json
-
+import pandas as pd
 
 def get_human_path():
     """
@@ -76,17 +76,15 @@ def shuffle(A, B, labelA, labelB):
         return np.asarray(data), np.asarray(labels)
 
 
-def parse_genome_region_table(table, *params):
+def parse_genome_region_table(table, params, sep=None):
     """
     Parameters:
-        table:      A binary_table.txt output by panseq.
-        *params:    Parameters necessary to run parse_metadata.
+        table:      A binary table output by panseq.
+        params:     A tuple of the parameters necessary to run parse_metadata.
+        sep:        The delimiter used to seperate entries in "table".
 
     Returns:
-        pos_train_data: The binary data for all the positive training genomes.
-        neg_train_data: The binary data for all the negative training genomes.
-        pos_test_data:  THe binary data for all the positive test genomes.
-        neg_test_data:  The binary data for all the negative test genomes.
+        x_train, y_train, x_test, y_test ready to be input into a ml model.
     """
     labels = parse_metadata(*params)
     x_train_labels = labels[0]
@@ -96,22 +94,78 @@ def parse_genome_region_table(table, *params):
 
     x_train = []
     x_test = []
+    if sep == None:
+        data = pd.read_csv(table, sep=sep, engine='python', index_col=0)
+    else:
+        data = pd.read_csv(table, sep=sep, index_col=0)
 
     for header in x_train_labels:
-        output = []
-        with open(table, 'r') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                output.append(row[header])
-        x_train.append(output)
+        x_train.append(data[header].tolist())
 
     for header in x_test_labels:
-        output = []
-        with open(table, 'r') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                output.append(row[header])
-        x_test.append(output)
+        x_test.append(data[header].tolist())
+
+
+    return x_train, y_train, x_test, y_test
+
+
+def parse_and_filter_genome_region_table(input_table,validation_table,params,
+                                         col='Ratio', cutoff=0.045,
+                                         absolute=True, greater=True, sep=None):
+    """
+    Parameters:
+        input_table:        A binary_table output by panseq
+        validation_table:   A table containing all the same rows as input_table,
+                            but different columns.
+        params:             A tuple fo the paramaeters necessary to run
+                            parse_metadata.
+        col:                The name of the column in validation_table that has
+                            the values used to determine if a row will be kept.
+        cutoff:             What the values in "col" are compared to to decide
+                            if a row is kept or not.
+        abs:                If true the absolute value of the values in "col" is
+                            used, if false the value is used as is
+        greater:            If true the value in "col" must be greater than the
+                            "cutoff" for a row to be kept, if false the value
+                            must be less than "cutoff"
+        sep:                The delimiter used in input_table and
+                            validation_table
+    Returns:
+        x_train, y_train, x_test, y_test ready to be input into a ml model, with
+        all the rows that do not satisfy the constraints removed in
+        validation_table removed.
+    """
+    labels = parse_metadata(*params)
+    x_train_labels = labels[0]
+    y_train = labels[1]
+    x_test_labels = labels[2]
+    y_test = labels[3]
+
+    if sep == None:
+        input_data=pd.read_csv(input_table,sep=sep,engine='python',index_col=0)
+        validation_data=pd.read_csv(validation_table,sep=sep,engine='python',
+                                    index_col=0)
+    else:
+        input_data = pd.read_csv(input_table, sep=sep, index_col=0)
+        validation_data = pd.read_csv(validation_data, sep=sep, index_col=0)
+
+    if absolute and greater:
+        data = input_data[abs(validation_data[col]) > cutoff]
+    elif absolute and not greater:
+        data = input_data[abs(validation_data[col]) < cutoff]
+    elif not absolute and greater:
+        data = input_data[validation_data[col] > cutoff]
+    elif not absolute and not greater:
+        data = input_data[validation_data[col] < cutoff]
+
+    x_train = []
+    x_test = []
+
+    for header in x_train_labels:
+        x_train.append(data[header].tolist())
+
+    for header in x_test_labels:
+        x_test.append(data[header].tolist())
 
     return x_train, y_train, x_test, y_test
 
@@ -159,7 +213,7 @@ def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
                     neg_train.append(neg_path+line[0]+file_suffix)
                 elif line[1] == pos_label and line[2] == test_label:
                     pos_test.append(pos_path+line[0]+file_suffix)
-                elif line[1] == neg_path and line[2] == test_label:
+                elif line[1] == neg_label and line[2] == test_label:
                     neg_test.append(neg_path+line[0]+file_suffix)
             else:
                 if line[1] == pos_label:
