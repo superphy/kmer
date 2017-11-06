@@ -3,7 +3,7 @@ from sklearn.model_selection import StratifiedShuffleSplit as SSS
 from kmer_counter import count_kmers, get_counts
 from utils import check_fasta, same_shuffle, shuffle
 from utils import parse_genome_region_table, parse_metadata
-from utils import get_human_path, get_bovine_path, parse_json
+from utils import get_human_path, get_bovine_path, parse_json, setup_files
 import numpy as np
 import pandas as pd
 import csv
@@ -177,7 +177,7 @@ def get_kmer_data_from_json(database='database',threeD=True,recount=False,k=7,
     x_train = np.asarray(x_train, dtype='float64')
 
     x_test = get_counts(x_test, database)
-    x_test = np.asarray(list(x_test), dtype='float64')
+    x_test = np.asarray(x_test, dtype='float64')
 
     scaler = MinMaxScaler(feature_range=(-1,1))
     x_train = scaler.fit_transform(x_train)
@@ -188,3 +188,51 @@ def get_kmer_data_from_json(database='database',threeD=True,recount=False,k=7,
         x_test = x_test.reshape(x_test.shape + (1,))
 
     return x_train, y_train, x_test, y_test
+
+
+def get_kmer_from_directory(database='database', threeD=True, recount=False, k=7,
+                            l=13, scale=True, *directories):
+    """
+    Parameters:
+        database,threeD,recount,k,l: See get_kmer_us_uk_split
+        Scale:                       If true the data is scaled to range (-1,1)
+                                     if false the data is not scaled.
+        *directories:                One or more directories containing fasta
+                                     files.
+    Returns:
+        A list of arrays of kmer count data. The list has the same number of
+        elements as directories passed to the method. The first element of the
+        list contains the kmer counts for the first directory passed into the
+        method, the second element corresponds to the second directory etc. The
+        scaling of the data will be done based on the first directory passed to
+        the method. The files contained in  the directories will not be shuffled
+    """
+    all_files = []
+    for directory in directories:
+        all_files.append(setup_files(directory))
+
+    if recount:
+        count_kmers(k, l, all_files, database)
+
+    output = []
+    for directory in directories:
+        temp = get_counts(setup_files(directory), database)
+        temp = np.asarray(temp, dtype='float64')
+        output.append(a)
+
+    if scale:
+        scaler = MinMaxScaler(feature_range(-1,1))
+        temp = output
+        output = []
+        output.append(scaler.fit_transform(temp[0]))
+        for array in temp[1:]:
+            output.append(scaler.transform(array))
+
+    if threeD:
+        temp = output
+        output = []
+        for array in temp:
+            array = make3D(array)
+            output.append(array)
+
+    return output

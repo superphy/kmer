@@ -17,6 +17,15 @@ def get_bovine_path():
     """
     return '/home/rboothman/Data/human_bovine/bovine/'
 
+def setup_files(filepath):
+    """
+    Takes a path to a directory, returns a list of the complete paths to each
+    file in the directory
+    """
+    if not filepath[-1] == '/':
+        filepath += '/'
+    return [filepath + x for x in os.listdir(filepath)]
+
 
 def check_fasta(file):
     """
@@ -74,6 +83,32 @@ def shuffle(A, B, labelA, labelB):
         labels = np.concatenate((labelsA, labelsB), axis=0)
         data, labels = same_shuffle(data, labels)
         return np.asarray(data), np.asarray(labels)
+
+
+def sensitivity_specificity(predicted_values, true_values):
+    """
+    Takes two arrays, one is the predicted_values from running a prediction, the
+    other is the true values. Returns the sensitivity and the specificity of the
+    machin learning model.
+    """
+    true_pos = len([x for x in true_values if x == 1])
+    true_neg = len([x for x in true_values if x == 0])
+    false_pos = 0
+    false_neg = 0
+    err_rate = 0
+    for i in range(len(predicted_values)):
+        if true_values[i] == 0 and predicted_values[i] == 1:
+            false_pos += 1
+            err_rate += 1
+        if true_values[i] == 1 and predicted_values[i] == 0:
+            false_neg += 1
+            err_rate += 1
+
+    sensitivity = (1.0*true_pos)/(true_pos + false_neg)
+    specificity = (1.0*true_neg)/(true_neg + false_pos)
+    score = len(predicted_values - 1.0*err_rate)/len(predicted_values)
+
+    return score, sensitivity, specificity
 
 
 def parse_genome_region_table(table, params, sep=None):
