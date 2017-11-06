@@ -2,7 +2,7 @@ import subprocess
 import os
 import lmdb
 import sys
-import numpy as np
+
 
 
 def __start(filename, k, limit, env, txn, data):
