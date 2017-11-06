@@ -4,16 +4,16 @@ Wrapper to gather data, pass it to a machine learning model and then return eith
 
 ### To use in another script
 
-```
+```python
 from run import run
-output = run(model, data, reps, validata, params)
+output = run(model, data, reps, validate, params)
 ```
 
 - model: The machine learning model to be used, see best_models.py
 - data: The method used to prepare the data for the model, see data.py
 - reps: How many times to run the model, if doing validation
 - params: A list or tuple of all parameters to be passed to "data"
-- validate: If true "data" should return x_train, y_train, x_testand y_test and "model" should accept the output of dataand return an accuracy. If false "data" should returnx_train, y_train, and x_test and "model" should acceptthe output of "data" and return predictions for x_test.
+- validate: If true "data" should return: x_train, y_train, x_test and y_test, "model" should accept the output of data and return an accuracy. If false "data" should return x_train, y_train, and x_test, "model" should accept the output of "data" and return predictions for x_test.
 
 
 - Returns: The output of "model" when given "data". If validating the model, the output is the average over all repetitions.
@@ -21,7 +21,9 @@ output = run(model, data, reps, validata, params)
 
 ### To use from the command line
 
-`python run.py --model <name of ml model> --data <name of data method> --reps <# of repetitions to run> --validate <True or False> --params <the parameters to pass to data>`
+```sh
+python run.py --model <name of ml model> --data <name of data method> --reps <num of repetitions to run> --validate <True or False> --params <the parameters to pass to data>
+```
 
 All of the command line options are optional, any that are ommitted will be replaced by their default values. All of the options have short forms based on their first letter, for example --model and -m are equivalent.
 
@@ -41,7 +43,7 @@ add_counts: Adds new files to the database, does not affect kmer counts already 
 
 ### To use in another script
 
-```
+```python
 from kmer_counter import count_kmers, add_kmers, get_counts
 count_kmers(k, limit, files, database)
 add_counts(new_files, database)
@@ -102,7 +104,7 @@ If you receive an import error stating that python can't find the module lmdb, r
 
 If, when running a script that involves hyperas, you receive an error like:
 
-```
+```sh
 File "/home/user/miniconda3/envs/kmer/lib/python2.7/site-packages/hyperopt/pyll/base.py", line 715, in toposort
    assert order[-1] == expr
 TypeError: 'generator' object has no attribute '__getitem__'
