@@ -1,47 +1,52 @@
-## Needs to be updated
+## run.py
 
-### kmer prediction
+Wrapper to gather data, pass it to a machine learning model and then return either an accuracy score or prediction values.
 
-Using kmer counts as inputs to machine learning models to predict if a genome is positive or negative for a phenotype.
+### To use in another script
 
-Counts kmers using kmer_counter.py
+```
+from run import run
+output = run(model, data, reps, validata, params)
+```
 
-
-### To use kmer_prediction.py
-
-`from kmer_prediction import run`
-
-`output = run(k, l, repetitions, positive_path, negative_path, prediction_path)`
-
-- k: Length of kmer to use
-- l: Minimum count required for a kmer to be output
-- repetitions: Number of times to train and test the model. Ignored if prediction_path is not none.
-- positive_path: Path to a directory containing fasta files for genomes positive for the phenotype.
-- negative_path: Path to a directory containing fast files for genomes negative for the phenotype.
-- prediction_path: None or Path to a directory contiaining fasta files for genomes that you would like to predict if they are positive or negative for a phenotype. If None the file in positive_path and negative_path are shuffled and split into training and testing groups and the percentage that the model guesses correct is output. If prediction_path is not None a binary list is output, where a 1 means that the genome belongs to the positive_path group and 0 means that the genome belongs to the negative_path group.
+- model: The machine learning model to be used, see best_models.py
+- data: The method used to prepare the data for the model, see data.py
+- reps: How many times to run the model, if doing validation
+- params: A list or tuple of all parameters to be passed to "data"
+- validate: If true "data" should return x_train, y_train, x_testand y_test and "model" should accept the output of dataand return an accuracy. If false "data" should returnx_train, y_train, and x_test and "model" should acceptthe output of "data" and return predictions for x_test.
 
 
-### kmer counter
+- Returns: The output of "model" when given "data". If validating the model, the output is the average over all repetitions.
 
-Since jellyfish (the kmer counter used in this program) does not output kmers that have a count of zero and machine learning models require that every input be of the same length the output from jellyfish cannot be directly input into a ml model. To overcome this problem only kmers that have a non-zero count in every genome are stored in the database.
 
-count kmers: Counts all kmers of length k that appear at least l times in each file in a list
-of fasta files. Stores the output in a database
+### To use from the command line
+
+`python run.py --model <name of ml model> --data <name of data method> --reps <# of repetitions to run> --validate <True or False> --params <the parameters to pass to data>`
+
+All of the command line options are optional, any that are ommitted will be replaced by their default values. All of the options have short forms based on their first letter, for example --model and -m are equivalent.
+
+
+## kmer_counter.py
+
+Methods to count kmers, store the counts in a database, and then retrieve the counts later. The jellyfish program, https://github.com/gmarcais/Jellyfish, is used to count the kmers.
+
+In order to be meaningful the inputs to machine learning models must all be of the same length and the features of each input must match up, therefore the output of jellyfish can not be directly input into a machine learning model, instead only kmers that appear at least "limit" times in each input genome will be kept.
+
+count kmers: Counts all kmers of length k that appear at least limit times in each given fasta file. Stores the output in a database
 
 get_counts: Returns a list of the kmer counts stored in the database for each input fasta file.
 
-add_counts: Adds new files to the database, does not affect kmer counts already in the database. Useful for when you train a model on a dataset and then later get more data. Since the kmer counts of the new data will have to have the same length as the kmer counts of the old data.
+add_counts: Adds new files to the database, does not affect kmer counts already in the database. Useful for when you train a model on a dataset and then later get more data. Since the kmer counts of the new data must match up with the kmer counts of the old data.
 
 
-### To use kmer_counter.py
+### To use in another script
 
-`from kmer_counter import count_kmers, add_kmers, get_counts`
-
-`count_kmers(k, limit, files, database)`
-
-`add_counts(new_files, database)`
-
-`data = get_counts(files+new_files, database)`
+```
+from kmer_counter import count_kmers, add_kmers, get_counts
+count_kmers(k, limit, files, database)
+add_counts(new_files, database)
+data = get_counts(files+new_files, database)
+```
 
 - k: Length of kmer to use.
 - limit: Minimum count required for a kmer to be output.
@@ -51,33 +56,56 @@ add_counts: Adds new files to the database, does not affect kmer counts already 
 - data: A list of lists of kmer counts, can be used as the input to a machine learning model.
 
 
-### get_fasta_from_json.py
+### To use from the command line
 
-If you have pulled metadata from enterobase using Superphy/MoreSerotype/module/DownloadMetadata.py or something similar, this allows you to search the created json files and then use the corresponding fasta/fastq files on moria as input to a machine learning module. bad_genomes.csv and invalid_files.csv are used to determine that the files from enterobase are usable.
-
-- get_fasta_from_json: Takes two json files returns lists of filepaths to the fasta files corresponding to the genomes whose metadata is in the json files
-- train_test: Uses get_fasta_from_json, takes two json files returns the x_train, y_train, x_test, y_test corresponding to the genomes contained in the json files
-- train_test_files: Writes the output of train_test to two files so that you can save the files you trained and tested on to see if your results are reproducible.
+Not supported
 
 
-### US_UK_data.py
+## data.py
 
-Sets up the files/data to attempt to replicate the results of the paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5056084/. human_bovine.csv is the metadata sheet for this data.
+A collection of methods that prepare data to be input into machine learning models. Most return x_train, y_train, x_test, and y_test. Where x_train is the trianing data, y_train is the corresponding labels, x_test is the testing data, and y_test is the corresponding labels.
 
-- get_filepaths: Returns x_train, y_train, x_test, y_test where x_train and x_test are paths to the fasta files and y_train and y_test are the human/bovine labels.
+To recreate the results of the the Lupolova et. al paper (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5056084/) with kmer counts as inputs use the method: get_kmer_us_uk_split. To recreate the results of the paper using genome region presence absence data use the method get_genome_region_us_uk_split.
 
-- get_preprocessed_data: Returns x_trian, y_train, x_test, y_test where x_train adn x_test are already preprocessed data ready to be immediately input into a machine learning model.
-
-
-### salmonella_amr.py
-
-Sets up files to to train a ml model on salmonella antimicrobial resistance.
+See the individual methods for their necessary parameters and usage.
 
 
-### Dependencies
+## best_models.py
+
+A collection of ready to use machine learning models. Some take x_train, y_train, x_test, y_test as input and return an accuracy score after training and testing on those inputs. Some take x_train, y_train, and x_test and return predictions on x_test.
+
+See the individual methods for their necessary parameters and usage.
+
+
+## data_augmentaion.py
+
+A collection of methods to augment data. All of them take x, y the training data and corresponding labels as well as some method specific parameters, all of them return x, y with additonal, (artificially generated) samples added to x and their labels added to y.
+
+See the individual methods for their necessary parameters and usage.
+
+
+## feature_selection.py
+
+A collection of methods that perform feature selection on the training data. All of them take x_train, y_train, x_test, y_test, the (training data and labels, and the test data and labels) as well as some method specific parameters. If you do not have labels for the test data simply pass None in place of y_test.
+All of the methods return x_train, y_train, x_test, and y_test with some features removed from x_trian and x_test.
+
+See the individual methods for their necessary parameters and usage.
+
+
+## Dependencies
 
 To install the dependecies run `conda create --name <env> --file conda-specs.txt`
 
 You will need to install jellyfish separately. See https://github.com/gmarcais/Jellyfish for installation instructions. *You do not need to install the python binding for jellyfish, just the command line tool*
 
 If you receive an import error stating that python can't find the module lmdb, run `pip install lmdb` with the conda environment activated.
+
+If, when running a script that involves hyperas, you receive an error like:
+
+```
+File "/home/user/miniconda3/envs/kmer/lib/python2.7/site-packages/hyperopt/pyll/base.py", line 715, in toposort
+   assert order[-1] == expr
+TypeError: 'generator' object has no attribute '__getitem__'
+```
+
+Try downgrading networkx from version 2.0 to version 1.1 and rerunning the script.
