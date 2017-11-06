@@ -19,8 +19,6 @@ def run(model=best_models.support_vector_machine, data=data.get_kmer_us_uk_split
         The output of "model" when given "data". If validating the model the
         output is the average over all repetitions.
     """
-    print model, data, reps, params, validate
-    exit()
     if validate:
         total = 0.0
         for i in range(reps):
@@ -106,7 +104,7 @@ if __name__ == "__main__":
                         type=clean_args)
     args = parser.parse_args()
     args_dict = vars(args)
+    # Remove unentered and invalid arguments
     filtered = {k: v for k,v in args_dict.items() if v is not None}
-    print filtered
     output = run(**filtered)
     print output
