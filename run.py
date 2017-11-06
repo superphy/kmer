@@ -3,8 +3,25 @@ import data
 import argparse
 
 def run(model=best_models.support_vector_machine, data=data.get_kmer_us_uk_split,
-        reps=10, params=None, validate_model=True):
-    if validate_model:
+        reps=10, params=None, validate=True):
+    """
+    Parameters:
+        model:  The machine learning model to be used, see best_models.py
+        data:   The method used to prepare the data for the model, see data.py
+        reps:   How many times to run the model, if doing validation
+        params: A list or tuple of all parameters to be passed to "data"
+        validate_model: If true "data" should return x_train, y_train, x_test
+                        and y_test and "model" should accept the output of data
+                        and return an accuracy. If false "data" should return
+                        x_train, y_train, and x_test and "model" should accept
+                        the output of "data" and return predictions for x_test.
+    Returns:
+        The output of "model" when given "data". If validating the model the
+        output is the average over all repetitions.
+    """
+    print model, data, reps, params, validate
+    exit()
+    if validate:
         total = 0.0
         for i in range(reps):
             if not params:
@@ -33,8 +50,8 @@ def model_functions(input):
     try:
         output = model_map[input]
     except KeyError as E:
-        print E, "Using default model"
-        return None
+        print "%s is not a valid model name, using default model" % E
+        output = None
     return output
 
 def data_functions(input):
@@ -50,43 +67,46 @@ def data_functions(input):
     try:
         output = data_map[input]
     except KeyError as E:
-        print E, "Using default data method"
-        return None
+        print "%s is not a valid data method, using default data method" % E
+        output = None
     return output
 
-def clean_params(input):
+def clean_args(value):
     """
-    Convert strings to theif proper type.
+    Convert strings to their proper type.
     """
-    if input.isdigit():
-        return int(input)
-    elif input == 'True':
-        return True
-    elif input == 'False':
-        return False
+    if value.isdigit():
+        output = int(value)
+    elif value == 'True':
+        output = True
+    elif value == 'False':
+        output = False
     else:
-        return input
+        output = value
+    return output
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-model',
+    parser.add_argument('--model', '-m',
                         help='Machine learning model to use, see best_models.py',
                         type=model_functions)
-    parser.add_argument('-data',
+    parser.add_argument('--data', '-d',
                         help='The method to get the input data, see data.py',
                         type=data_functions)
-    parser.add_argument('-reps',
-                        help='How many times to run the model, ignored if validate_model is False',
+    parser.add_argument('--reps', '-r',
+                        help='How many times to run the model, ignored if validate is False',
                         type=int)
-    parser.add_argument('-validate_model',
+    parser.add_argument('--validate', '-v',
                         help='If True the model should return a score if False the model should return predictions',
-                        type=bool)
-    parser.add_argument('-params',
-                        help='The parameters to be passed to the data_method',
+                        type=clean_args,
+                        choices=[True, False])
+    parser.add_argument('--params', '-p',
+                        help='The parameters to be passed to the data method',
                         nargs=argparse.REMAINDER,
-                        type=clean_params)
+                        type=clean_args)
     args = parser.parse_args()
     args_dict = vars(args)
     filtered = {k: v for k,v in args_dict.items() if v is not None}
+    print filtered
     output = run(**filtered)
     print output
