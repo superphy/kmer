@@ -1,11 +1,11 @@
 from kmer_prediction import run
+from utils import get_human_path, get_bovine_path
 import os
 import sys
 
-human_path = '/home/rboothman/Data/human_bovine/human/'
-bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
-
 def setup_files():
+    human_path = get_human_path()
+    bovine_path = get_bovine_path()
     h_files = os.listdir(human_path)
     h_files = [human_path + x for x in h_files]
 
