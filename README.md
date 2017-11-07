@@ -1,31 +1,143 @@
 ## run.py
 
-Wrapper to gather data, pass it to a machine learning model and then return either an accuracy score or prediction values.
+Wrapper to gather data, preprocess the data, perform feature selection, build the model, train the model, and test/use the model.
+
+### Command Line Usage
+
+To use with default options:
+
+```
+python run.py
+```
+
+To use with custom options:
+
+```
+usage: run.py [-h] [--model MODEL]
+              [--model_arguments [MODEL_ARGUMENTS [MODEL_ARGUMENTS ...]]]
+              [--data DATA] [--data_args [DATA_ARGS [DATA_ARGS ...]]]
+              [--scaler SCALER]
+              [--scaler_args [SCALER_ARGS [SCALER_ARGS ...]]]
+              [--selection SELECTION]
+              [--selection_args [SELECTION_ARGS [SELECTION_ARGS ...]]]
+              [--augment AUGMENT]
+              [--augment_args [AUGMENT_ARGS [AUGMENT_ARGS ...]]] [--reps REPS]
+              [--validate {True,False}]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --model MODEL, -m MODEL
+                        Machine learning model to use, see best_models.py
+  --model_arguments [MODEL_ARGUMENTS [MODEL_ARGUMENTS ...]], -ma [MODEL_ARGUMENTS [MODEL_ARGUMENTS ...]]
+                        The arguments to be passed to the model method.
+  --data DATA, -d DATA  The method to get the input data, see data.py
+  --data_args [DATA_ARGS [DATA_ARGS ...]], -da [DATA_ARGS [DATA_ARGS ...]]
+                        The arguments to be passed to the data method
+  --scaler SCALER, -S SCALER
+                        The scaling method to apply to the data.
+  --scaler_args [SCALER_ARGS [SCALER_ARGS ...]], -Sa [SCALER_ARGS [SCALER_ARGS ...]]
+                        The arguments to be passed to the scaling method.
+  --selection SELECTION, -s SELECTION
+                        The method used to perform feature selection on the
+                        data
+  --selection_args [SELECTION_ARGS [SELECTION_ARGS ...]], -sa [SELECTION_ARGS [SELECTION_ARGS ...]]
+                        The arguments to be passed to the feature selection
+                        method
+  --augment AUGMENT, -a AUGMENT
+                        The method used to augment the trianing data
+  --augment_args [AUGMENT_ARGS [AUGMENT_ARGS ...]], -aa [AUGMENT_ARGS [AUGMENT_ARGS ...]]
+                        The arguments to be passed to the augment method.
+  --reps REPS, -r REPS  How many times to run the model, ignored if validate
+                        is False
+  --validate {True,False}, -v {True,False}
+                        If True the model should return a score if False the
+                        model should return predictions
+```
 
 ### To use in another script
 
+To run with the default parameters:
+
 ```python
 from run import run
-output = run(model, data, reps, validate, params)
+output = run()
 ```
 
-- model: The machine learning model to be used, see best_models.py
-- data: The method used to prepare the data for the model, see data.py
-- reps: How many times to run the model, if doing validation
-- params: A list or tuple of all parameters to be passed to "data"
-- validate: If true "data" should return: x_train, y_train, x_test and y_test, "model" should accept the output of data and return an accuracy. If false "data" should return x_train, y_train, and x_test, "model" should accept the output of "data" and return predictions for x_test.
+Example with custom parameters:
 
+```python
+from models import neural_network as nn
+from data import get_genome_region_us_uk_mixed as data
+from feature_selction import variance_threshold as sel
+from run import run
 
-- Returns: The output of "model" when given "data". If validating the model, the output is the average over all repetitions.
-
-
-### To use from the command line
-
-```sh
-python run.py --model <name of ml model> --data <name of data method> --reps <num of repetitions to run> --validate <True or False> --params <the parameters to pass to data>
+output = run(model=nn, data=data, selction=sel, scaler=None, reps=1, validate=True)
 ```
 
-All of the command line options are optional, any that are ommitted will be replaced by their default values. All of the options have short forms based on their first letter, for example --model and -m are equivalent.
+It is also possible to forget about run.py and do something like this:
+
+```python
+from models import neural_network_validation
+from data import get_genome_region_us_uk_mixed as data
+from feature_selction import variance_threshold as sel
+
+d = data()
+d = sel(*d)
+score = neural_network_validation(*d)
+```
+
+The above is necessary if you want to change the order in which things occurr, for instance performing data augmentation before performing feature scaling.
+
+
+## data.py
+
+A collection of methods that prepare data to be input into machine learning models. Most return x_train, y_train, x_test, and y_test. Where x_train is the training data, y_train is the corresponding labels, x_test is the testing data, and y_test is the corresponding labels.
+
+To recreate the results of the the Lupolova et. al paper (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5056084/) with kmer counts as inputs use the method: get_kmer_us_uk_split. To recreate the results of the paper using genome region presence absence data use the method get_genome_region_us_uk_split.
+
+See the individual methods for their necessary parameters and usage.
+
+You will need to update the global human_path and bovine_path variables at the top of the file.
+
+
+## models.py
+
+A collection of ready to use machine learning models. Some take x_train, y_train, x_test, y_test as input and return an accuracy score after training and testing on those inputs. Some take x_train, y_train, and x_test and return predictions on x_test.
+
+See the individual methods for their necessary parameters and usage.
+
+
+## data_augmentaion.py
+
+A collection of methods to augment data. All of them take x_train, y_train, x_test, and y_test and return x_train, y_train, x_test, y_test with additonal, (artificially generated) samples added to x_train and y_train.
+
+See the individual methods for their necessary parameters and usage.
+
+
+## feature_selection.py
+
+A collection of methods that perform feature selection on the training data. All of them take x_train, y_train, x_test, y_test, the (training data and labels, and the test data and labels) as well as some method specific parameters. If you do not have labels for the test data simply pass None in place of y_test.
+All of the methods return x_train, y_train, x_test, and y_test with some features removed from x_trian and x_test.
+
+See the individual methods for their necessary parameters and usage.
+
+
+## feature_scaling.py
+
+A collection of methods that perform feature scaling on input data. All of them take x_train, y_train, x_test, y_test and return x_train, y_train, x_test, y_test with the data in x_train and x_test scaled according to the method.
+
+See the individual methods for their necessary parameters and usage.
+
+
+## Extending the above files
+
+If you wish to add methods to any of the above files and would like the methods to work with run.py the methods should follow these guidelines:
+
+- A Data method should return x_train, y_train, x_test, y_test
+- Any method that will manipulate the output of a data method should have as parameters x_train, y_train, x_test, y_test and then args, where args is a list of method specific positional arguments.
+- Any method whose output could be passed to a model should return x_train, y_train, x_test, y_test
+- The methods that contain the models should perform all of the building, compiling, and training necessary for the model.
+- Once a method is added to a file, the dictionary inside the get_methods() function for that file should be updated to contain the new method.
 
 
 ## kmer_counter.py
@@ -61,37 +173,6 @@ data = get_counts(files+new_files, database)
 ### To use from the command line
 
 Not supported
-
-
-## data.py
-
-A collection of methods that prepare data to be input into machine learning models. Most return x_train, y_train, x_test, and y_test. Where x_train is the trianing data, y_train is the corresponding labels, x_test is the testing data, and y_test is the corresponding labels.
-
-To recreate the results of the the Lupolova et. al paper (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5056084/) with kmer counts as inputs use the method: get_kmer_us_uk_split. To recreate the results of the paper using genome region presence absence data use the method get_genome_region_us_uk_split.
-
-See the individual methods for their necessary parameters and usage.
-
-
-## best_models.py
-
-A collection of ready to use machine learning models. Some take x_train, y_train, x_test, y_test as input and return an accuracy score after training and testing on those inputs. Some take x_train, y_train, and x_test and return predictions on x_test.
-
-See the individual methods for their necessary parameters and usage.
-
-
-## data_augmentaion.py
-
-A collection of methods to augment data. All of them take x, y the training data and corresponding labels as well as some method specific parameters, all of them return x, y with additonal, (artificially generated) samples added to x and their labels added to y.
-
-See the individual methods for their necessary parameters and usage.
-
-
-## feature_selection.py
-
-A collection of methods that perform feature selection on the training data. All of them take x_train, y_train, x_test, y_test, the (training data and labels, and the test data and labels) as well as some method specific parameters. If you do not have labels for the test data simply pass None in place of y_test.
-All of the methods return x_train, y_train, x_test, and y_test with some features removed from x_trian and x_test.
-
-See the individual methods for their necessary parameters and usage.
 
 
 ## Dependencies

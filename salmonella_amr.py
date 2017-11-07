@@ -1,3 +1,7 @@
+"""
+This is outdated, but is currently running on panther and so will be left ehre for the moment
+"""
+
 import os
 import sys
 from kmer_prediction import run

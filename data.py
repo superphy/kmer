@@ -1,20 +1,94 @@
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedShuffleSplit as SSS
 from kmer_counter import count_kmers, get_counts
-from utils import check_fasta, same_shuffle, shuffle
-from utils import parse_genome_region_table, parse_metadata
-from utils import get_human_path, get_bovine_path, parse_json, setup_files
+from utils import check_fasta, same_shuffle, shuffle, flatten, make3D, setup_files
+from utils import parse_metadata, parse_json
 import numpy as np
 import pandas as pd
 import csv
 import os
 import random
 
-human_path = get_human_path()
-bovine_path = get_bovine_path()
+
+human_path = '/home/rboothman/Data/human_bovine/human/'
+bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
 
 
-def get_kmer_us_uk_split(database="database", threeD=True, scale=True, recount=False, k=7, l=13):
+def get_methods():
+    output = {'kmer_split': get_kmer_us_uk_split,
+              'kmer_mixed': get_kmer_us_uk_mixed,
+              'genome_mixed': get_genome_region_us_uk_mixed,
+              'genome_split': get_genome_region_us_uk_split,
+              'kmer_json': get_kmer_from_json,
+              'kmer_directory': get_kmer_from_directory,
+              'genome_filtered': get_genome_region_filtered,
+              'genome_custom': get_genome_regions,
+              'kmer_custom': get_kmer}
+    return output
+
+
+def get_kmer(args, database="database", recount=False, k=7, l=13):
+    """
+    Parameters:
+        args:       The arguments to pass to parse_metadata.
+        database:   lmdb database to store kmer counts.
+        threeD:     If True the data is made three dimensional.
+        recount:    If True the kmers are recounted.
+        k:          Size of kmer to be counted. Ignored if recount is false.
+        l:          kmer cutoff value. Ignored if recount is false.
+    Returns:
+        x_train, y_train, x_test, y_test
+    """
+    x_train, y_train, x_test, y_test = parse_metadata(*params)
+
+    if recount:
+        allfiles = x_train + x_test
+        count_kmers(k, l, allfiles, database)
+
+    x_train = get_counts(x_train, database)
+    x_train = np.asarray(x_train, dtype='float64')
+
+    x_test = get_counts(x_test, database)
+    x_test = np.asarray(list(x_test), dtype='float64')
+
+    return x_train, y_train, x_test, y_test
+
+
+def get_genome(args, table='Data/binary_table.txt', sep=None):
+    """
+    Parameters:
+        args:    The arguments to pass to parse_metadata.
+        table:   binary_table.txt output from panseq.
+        threeD:  If True the data is made three dimensional.
+    Returns:
+        x_train, y_train, x_test, y_test
+    """
+    labels = parse_metadata(*params)
+    x_train_labels = labels[0]
+    y_train = labels[1]
+    x_test_labels = labels[2]
+    y_test = labels[3]
+
+    x_train = []
+    x_test = []
+    if sep == None:
+        data = pd.read_csv(table, sep=sep, engine='python', index_col=0)
+    else:
+        data = pd.read_csv(table, sep=sep, index_col=0)
+
+    for header in x_train_labels:
+        x_train.append(data[header].tolist())
+
+    for header in x_test_labels:
+        x_test.append(data[header].tolist())
+
+    x_train = np.asarray(x_train)
+    x_test = np.asarray(x_test)
+
+    return x_train, y_train, x_test, y_test
+
+
+def get_kmer_us_uk_split(database="database", recount=False, k=7, l=13):
     """
     Parameters:
         database:   lmdb database to store kmer counts.
@@ -42,19 +116,10 @@ def get_kmer_us_uk_split(database="database", threeD=True, scale=True, recount=F
     x_test = get_counts(x_test, database)
     x_test = np.asarray(list(x_test), dtype='float64')
 
-    if scale:
-        scaler = MinMaxScaler(feature_range=(-1,1))
-        x_train = scaler.fit_transform(x_train)
-        x_test = scaler.transform(x_test)
-
-    if threeD:
-        x_train = x_train.reshape(x_train.shape + (1,))
-        x_test = x_test.reshape(x_test.shape + (1,))
-
     return x_train, y_train, x_test, y_test
 
 
-def get_kmer_us_uk_mixed(database="database", threeD=True, scale=True, recount=False, k=7, l=13):
+def get_kmer_us_uk_mixed(database="database", recount=False, k=7, l=13):
     """
     Parameters:
         database:   lmdb database to store kmer counts.
@@ -68,8 +133,8 @@ def get_kmer_us_uk_mixed(database="database", threeD=True, scale=True, recount=F
         kmer data ready to be input into a ml model, with us/uk data shuffled
         together.
     """
-    params = ['Data/human_bovine.csv', 'Human', 'Bovine', human_path, bovine_path,
-              '', '', '.fasta']
+    params = ['Data/human_bovine.csv','Human','Bovine',human_path,bovine_path,
+              '','','.fasta']
     x_train, y_train, x_test, y_test = parse_metadata(*params)
 
     if recount:
@@ -78,19 +143,10 @@ def get_kmer_us_uk_mixed(database="database", threeD=True, scale=True, recount=F
     x_train = get_counts(x_train, database)
     x_test = get_counts(x_test, database)
 
-    if scale:
-        scaler = MinMaxScaler(feature_range=(-1,1))
-        x_train = scaler.fit_transform(x_train)
-        x_test = scaler.transform(x_test)
-
-    if threeD:
-        x_train = x_train.reshape(x_train.shape + (1,))
-        x_test = x_test.reshape(x_test.shape + (1,))
-
     return x_train, y_train, x_test, y_test
 
 
-def get_genome_region_us_uk_mixed(table='Data/binary_table.txt', threeD=True):
+def get_genome_region_us_uk_mixed(table='Data/binary_table.txt', sep=None):
     """
     Parameters:
         table:   binary_table.txt output from panseq.
@@ -102,19 +158,32 @@ def get_genome_region_us_uk_mixed(table='Data/binary_table.txt', threeD=True):
         model, with us/uk data shuffled together.
     """
     params = ('Data/human_bovine.csv', 'Human', 'Bovine')
-    x_train, y_train, x_test, y_test = parse_genome_region_table(table, params)
+    labels = parse_metadata(*params)
+    x_train_labels = labels[0]
+    y_train = labels[1]
+    x_test_labels = labels[2]
+    y_test = labels[3]
+
+    x_train = []
+    x_test = []
+    if sep == None:
+        data = pd.read_csv(table, sep=sep, engine='python', index_col=0)
+    else:
+        data = pd.read_csv(table, sep=sep, index_col=0)
+
+    for header in x_train_labels:
+        x_train.append(data[header].tolist())
+
+    for header in x_test_labels:
+        x_test.append(data[header].tolist())
 
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    if threeD:
-        x_train = x_train.reshape(x_train.shape + (1,))
-        x_test = x_test.reshape(x_test.shape + (1,))
-
     return x_train, y_train, x_test, y_test
 
 
-def get_genome_region_us_uk_split(table='Data/binary_table.txt', threeD=True, sep='\s+'):
+def get_genome_region_us_uk_split(table='Data/binary_table.txt', sep=None):
     """
     Parameters:
         table:   binary_table.txt output from panseq.
@@ -125,21 +194,96 @@ def get_genome_region_us_uk_split(table='Data/binary_table.txt', threeD=True, se
         binary genome region presence absence data ready to be input into a ml
         model to recreate the Lupoloval et. al paper.
     """
-    params = ('Data/human_bovine.csv', 'Human', 'Bovine', '', '', 'Train', 'Test')
-    x_train, y_train, x_test, y_test = parse_genome_region_table(table, params)
+    params = ('Data/human_bovine.csv','Human','Bovine','','','Train','Test')
+    labels = parse_metadata(*params)
+    x_train_labels = labels[0]
+    y_train = labels[1]
+    x_test_labels = labels[2]
+    y_test = labels[3]
+
+    x_train = []
+    x_test = []
+    if sep == None:
+        data = pd.read_csv(table, sep=sep, engine='python', index_col=0)
+    else:
+        data = pd.read_csv(table, sep=sep, index_col=0)
+
+    for header in x_train_labels:
+        x_train.append(data[header].tolist())
+
+    for header in x_test_labels:
+        x_test.append(data[header].tolist())
 
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    if threeD:
-        x_train = x_train.reshape(x_train.shape + (1,))
-        x_test = x_test.reshape(x_test.shape + (1,))
+    return x_train, y_train, x_test, y_test
+
+
+def get_genome_region_filtered(input_table='Data/binary_table.txt',
+                               validation_table='Data/human_bovine_train_predictive.results',
+                               sep=None,col='Ratio',cutoff=0.045,absolute=True,
+                               greater=True,
+                               args=['Data/human_bovine.csv','Human','Bovine']):
+    """
+    Parameters:
+        input_table:        A binary_table output by panseq
+        validation_table:   A table containing all the same rows as input_table,
+                            but different columns.
+        sep:                The delimiter used in input_table and
+                            validation_table
+        col:                The name of the column in validation_table that has
+                            the values used to determine if a row will be kept.
+        cutoff:             What the values in "col" are compared to to decide
+                            if a row is kept or not.
+        absolute:           If true the absolute value of the values in "col" is
+                            used, if false the value is used as is
+        greater:            If true the value in "col" must be greater than the
+                            "cutoff" for a row to be kept, if false the value
+                            must be less than "cutoff"
+        args:               A list of arguments to be passed to parse_metadata.
+    Returns:
+        x_train, y_train, x_test, y_test ready to be input into a ml model, with
+        all the rows that do not satisfy the constraints removed in
+        validation_table removed.
+    """
+    labels = parse_metadata(*args)
+    x_train_labels = labels[0]
+    y_train = labels[1]
+    x_test_labels = labels[2]
+    y_test = labels[3]
+
+    if sep == None:
+        input_data=pd.read_csv(input_table,sep=sep,engine='python',index_col=0)
+        validation_data=pd.read_csv(validation_table,sep=sep,engine='python',
+                                    index_col=0)
+    else:
+        input_data = pd.read_csv(input_table, sep=sep, index_col=0)
+        validation_data = pd.read_csv(validation_data, sep=sep, index_col=0)
+
+    if absolute and greater:
+        data = input_data[abs(validation_data[col]) > cutoff]
+    elif absolute and not greater:
+        data = input_data[abs(validation_data[col]) < cutoff]
+    elif not absolute and greater:
+        data = input_data[validation_data[col] > cutoff]
+    elif not absolute and not greater:
+        data = input_data[validation_data[col] < cutoff]
+
+    x_train = []
+    x_test = []
+
+    for header in x_train_labels:
+        x_train.append(data[header].tolist())
+
+    for header in x_test_labels:
+        x_test.append(data[header].tolist())
 
     return x_train, y_train, x_test, y_test
 
 
-def get_kmer_data_from_json(database='database',threeD=True,recount=False,k=7,
-                            l=13,path='/home/rboothman/moria/entero_db/',
+def get_kmer_from_json(database='database',recount=False,k=7,l=13,
+                            path='/home/rboothman/moria/entero_db/',
                             suffix='.fasta',key='assembly_barcode',*json):
     """
     Parameters:
@@ -183,15 +327,11 @@ def get_kmer_data_from_json(database='database',threeD=True,recount=False,k=7,
     x_train = scaler.fit_transform(x_train)
     x_test = scaler.transform(x_test)
 
-    if threeD:
-        x_train = x_train.reshape(x_train.shape + (1,))
-        x_test = x_test.reshape(x_test.shape + (1,))
-
     return x_train, y_train, x_test, y_test
 
 
-def get_kmer_from_directory(database='database', threeD=True, recount=False, k=7,
-                            l=13, scale=True, *directories):
+def get_kmer_from_directory(database='database', recount=False, k=7, l=13,
+                            threeD=True, scale=True, *directories):
     """
     Parameters:
         database,threeD,recount,k,l: See get_kmer_us_uk_split

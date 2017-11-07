@@ -3,19 +3,7 @@ import os
 import random
 import json
 import pandas as pd
-
-def get_human_path():
-    """
-    Returns the file path to the directory containing all the human fasta files.
-    """
-    return '/home/rboothman/Data/human_bovine/human/'
-
-
-def get_bovine_path():
-    """
-    Returns the file path to the directory containing all the bovine fasta files
-    """
-    return '/home/rboothman/Data/human_bovine/bovine/'
+import numpy as np
 
 def setup_files(filepath):
     """
@@ -84,6 +72,20 @@ def shuffle(A, B, labelA, labelB):
         data, labels = same_shuffle(data, labels)
         return np.asarray(data), np.asarray(labels)
 
+def flatten(data):
+    """
+    Takes a 3D numpy ndarray and makes it 2D
+    """
+    data = data.reshape(data.shape[0], data.shape[1])
+    return data
+
+def make3D(data):
+    """
+    Takes a 2D numpy ndarray and makes it 3D
+    """
+    data = data.reshape(data.shape + (1,))
+    return data
+
 
 def sensitivity_specificity(predicted_values, true_values):
     """
@@ -111,100 +113,6 @@ def sensitivity_specificity(predicted_values, true_values):
     return score, sensitivity, specificity
 
 
-def parse_genome_region_table(table, params, sep=None):
-    """
-    Parameters:
-        table:      A binary table output by panseq.
-        params:     A tuple of the parameters necessary to run parse_metadata.
-        sep:        The delimiter used to seperate entries in "table".
-
-    Returns:
-        x_train, y_train, x_test, y_test ready to be input into a ml model.
-    """
-    labels = parse_metadata(*params)
-    x_train_labels = labels[0]
-    y_train = labels[1]
-    x_test_labels = labels[2]
-    y_test = labels[3]
-
-    x_train = []
-    x_test = []
-    if sep == None:
-        data = pd.read_csv(table, sep=sep, engine='python', index_col=0)
-    else:
-        data = pd.read_csv(table, sep=sep, index_col=0)
-
-    for header in x_train_labels:
-        x_train.append(data[header].tolist())
-
-    for header in x_test_labels:
-        x_test.append(data[header].tolist())
-
-
-    return x_train, y_train, x_test, y_test
-
-
-def parse_and_filter_genome_region_table(input_table,validation_table,params,
-                                         col='Ratio', cutoff=0.045,
-                                         absolute=True, greater=True, sep=None):
-    """
-    Parameters:
-        input_table:        A binary_table output by panseq
-        validation_table:   A table containing all the same rows as input_table,
-                            but different columns.
-        params:             A tuple fo the paramaeters necessary to run
-                            parse_metadata.
-        col:                The name of the column in validation_table that has
-                            the values used to determine if a row will be kept.
-        cutoff:             What the values in "col" are compared to to decide
-                            if a row is kept or not.
-        abs:                If true the absolute value of the values in "col" is
-                            used, if false the value is used as is
-        greater:            If true the value in "col" must be greater than the
-                            "cutoff" for a row to be kept, if false the value
-                            must be less than "cutoff"
-        sep:                The delimiter used in input_table and
-                            validation_table
-    Returns:
-        x_train, y_train, x_test, y_test ready to be input into a ml model, with
-        all the rows that do not satisfy the constraints removed in
-        validation_table removed.
-    """
-    labels = parse_metadata(*params)
-    x_train_labels = labels[0]
-    y_train = labels[1]
-    x_test_labels = labels[2]
-    y_test = labels[3]
-
-    if sep == None:
-        input_data=pd.read_csv(input_table,sep=sep,engine='python',index_col=0)
-        validation_data=pd.read_csv(validation_table,sep=sep,engine='python',
-                                    index_col=0)
-    else:
-        input_data = pd.read_csv(input_table, sep=sep, index_col=0)
-        validation_data = pd.read_csv(validation_data, sep=sep, index_col=0)
-
-    if absolute and greater:
-        data = input_data[abs(validation_data[col]) > cutoff]
-    elif absolute and not greater:
-        data = input_data[abs(validation_data[col]) < cutoff]
-    elif not absolute and greater:
-        data = input_data[validation_data[col] > cutoff]
-    elif not absolute and not greater:
-        data = input_data[validation_data[col] < cutoff]
-
-    x_train = []
-    x_test = []
-
-    for header in x_train_labels:
-        x_train.append(data[header].tolist())
-
-    for header in x_test_labels:
-        x_test.append(data[header].tolist())
-
-    return x_train, y_train, x_test, y_test
-
-
 def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
                    train_label='', test_label='', file_suffix='', sep='\t'):
     """
@@ -227,10 +135,10 @@ def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
         sep:         The delimiter used in "metadata"
 
     Returns:
-        pos_train:   All postive training fasta files.
-        neg_train:   All negative training fasta files.
-        pos_test:    All positive test fasta files.
-        neg_test:    All negative test fasta files.
+        x_train:   All the training fasta files
+        y_train:   The labels for x_train
+        x_test:    All the test fasta files.
+        y_test:    The labels for x_test
     """
     with open(metadata, 'r') as f:
         pos_train = []
@@ -297,7 +205,7 @@ def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
             data = json.load(f)
             fasta_names = [str(x[key]) for x in data]
             fasta_names = [x for x in fasta_names if valid_file(x)]
-            fasta_names = [path+x+suffix for x in fasta_names]
+            fasta_names = [path + x + suffix for x in fasta_names]
             fasta_names = [x for x in fasta_names if check_fasta(x)]
         output.append(fasta_names)
 

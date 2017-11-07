@@ -2,6 +2,7 @@ import numpy as np
 from data import get_genome_region_us_uk_mixed, get_genome_region_us_uk_split
 from data import get_kmer_us_uk_mixed, get_kmer_us_uk_split
 import time
+from models import support_vector_machine_validation, neural_network_validation
 
 def svm_kmer_mixed(reps):
     scores = []
@@ -10,7 +11,7 @@ def svm_kmer_mixed(reps):
     for i in range(reps):
         start_time = time.time()
         x_train, y_train, x_test, y_test = get_kmer_us_uk_mixed("database",False,False,7,13)
-        scores.append(support_vector_machine(x_train, y_train, x_test, y_test))
+        scores.append(support_vector_machine_validation(x_train, y_train, x_test, y_test))
         times.append(time.time()-start_time)
     scores = np.asarray(scores, dtype='float64')
     times = np.asarray(times, dtype='float64')
@@ -33,7 +34,7 @@ def svm_kmer_split(reps):
     for i in range(reps):
         start_time = time.time()
         x_train, y_train, x_test, y_test = get_kmer_us_uk_split("database",False,False,7,13)
-        scores.append(support_vector_machine(x_train, y_train, x_test, y_test))
+        scores.append(support_vector_machine_validation(x_train, y_train, x_test, y_test))
         times.append(time.time()-start_time)
     scores = np.asarray(scores, dtype='float64')
     times = np.asarray(times, dtype='float64')
@@ -55,7 +56,7 @@ def svm_genome_mixed(reps):
     for i in range(reps):
         start_time = time.time()
         x_train, y_train, x_test, y_test = get_genome_region_mixed("binary_table.txt",False)
-        scores.append(support_vector_machine(x_train, y_train, x_test, y_test))
+        scores.append(support_vector_machine_validation(x_train, y_train, x_test, y_test))
         times.append(time.time()-start_time)
     scores = np.asarray(scores, dtype='float64')
     times = np.asarray(times, dtype='float64')
@@ -77,7 +78,7 @@ def svm_genome_split(reps):
     for i in range(reps):
         start_time = time.time()
         x_train, y_train, x_test, y_test = get_genome_region_us_uk_split("binary_table.txt",False)
-        scores.append(support_vector_machine(x_train, y_train, x_test, y_test))
+        scores.append(support_vector_machine_validation(x_train, y_train, x_test, y_test))
         times.append(time.time()-start_time)
     scores = np.asarray(scores, dtype='float64')
     times = np.asarray(times, dtype='float64')
@@ -100,7 +101,7 @@ def keras_kmer_split(reps):
     for i in range(reps):
         start_time = time.time()
         x_train, y_train, x_test, y_test = get_kmer_us_uk_split("database",True,False,7,13)
-        scores.append(neural_network(x_train, y_train, x_test, y_test))
+        scores.append(neural_network_validation(x_train, y_train, x_test, y_test))
         times.append(time.time()-start_time)
     scores = np.asarray(scores, dtype='float64')
     times = np.asarray(times, dtype='float64')
@@ -123,7 +124,7 @@ def keras_kmer_mixed(reps):
     for i in range(reps):
         start_time = time.time()
         x_train, y_train, x_test, y_test = get_kmer_us_uk_mixed("database",True,False,7,13)
-        scores.append(neural_network(x_train, y_train, x_test, y_test))
+        scores.append(neural_network_validation(x_train, y_train, x_test, y_test))
         times.append(time.time()-start_time)
     scores = np.asarray(scores, dtype='float64')
     times = np.asarray(times, dtype='float64')
@@ -145,7 +146,7 @@ def keras_genome_split(reps):
     for i in range(reps):
         start_time = time.time()
         x_train, y_train, x_test, y_test = get_genome_region_us_uk_split("binary_table.txt",True)
-        scores.append(neural_network(x_train, y_train, x_test, y_test))
+        scores.append(neural_network_validation(x_train, y_train, x_test, y_test))
         times.append(time.time()-start_time)
     scores = np.asarray(scores, dtype='float64')
     times = np.asarray(times, dtype='float64')
@@ -167,7 +168,7 @@ def keras_genome_mixed(reps):
     for i in range(reps):
         start_time = time.time()
         x_train, y_train, x_test, y_test = get_genome_region_mixed("binary_table.txt",True)
-        scores.append(neural_network(x_train, y_train, x_test, y_test))
+        scores.append(neural_network_validation(x_train, y_train, x_test, y_test))
         times.append(time.time()-start_time)
     scores = np.asarray(scores, dtype='float64')
     times = np.asarray(times, dtype='float64')

@@ -1,3 +1,7 @@
+"""
+This is a mess, but it shows a few examples of how to use hyperas to tune keras parameters.
+"""
+
 from keras.layers.pooling import MaxPooling1D, AveragePooling1D
 from keras.layers.pooling import GlobalMaxPooling1D, GlobalAveragePooling1D
 
