@@ -44,12 +44,17 @@ def run(model=models.support_vector_machine, model_args=None,
                 d = data()
             else:
                 d = data(*data_args)
+            if selection:
+                if selection_args:
+                    d = selection(*d, args=selection_args)
+                else:
+                    d = selection(*d)
             if d[0].max() > 1:
                 if scaler_args:
                     d = scaler(*d, args=scaler_args)
                 else:
                     d = scaler(*d)
-            if augment is not None:
+            if augment:
                 if augment_args:
                     d = augment(*d, args=augment_args)
                 else:
@@ -87,7 +92,7 @@ def data_methods(input_string):
     try:
         output = methods[input_string]
     except KeyError as E:
-        print "%s is not a valid data method, using default data method" % E
+        print "%s is not a valid data method, using the default" % E
         output = None
     return output
 
@@ -101,7 +106,7 @@ def scale_methods(input_string):
     try:
         output = methods[input_string]
     except KeyError as E:
-        print "%s is not a valid scaling method, using the default method" % E
+        print "%s is not a valid scaling method, using the default" % E
         output = None
     return output
 
@@ -115,7 +120,7 @@ def selection_methods(input_string):
     try:
         output = methods[input_string]
     except KeyError as E:
-        print "%s is not a valid selection method, using the default method" % E
+        print "%s is not a valid selection method, using the default" % E
         output = None
     return output
 
