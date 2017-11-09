@@ -14,11 +14,11 @@ def __start(filename, k, limit, env, txn, data):
     new database as a key value pair.
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
-            '%s' % filename, '-o', 'test.jf', '-L', '%d' % limit]
+            '%s' % filename, '-o', 'counts.jf', '-L', '%d' % limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
     # Get results from kmer count
-    args = ['jellyfish', 'dump', '-c', 'test.jf']
+    args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
     out, err = p.communicate()
     # Transform results into usable format
@@ -44,12 +44,12 @@ def __firstpass(filename, k, limit, env, txn):
     is not present in filename.
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
-            '%s' % filename, '-o', 'test.jf', '-L', '%d' % limit]
+            '%s' % filename, '-o', 'counts.jf', '-L', '%d' % limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
 
     # Get results from kmer count
-    args = ['jellyfish', 'dump', '-c', 'test.jf']
+    args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
     out, err = p.communicate()
     # Transform results into usable format
@@ -153,12 +153,12 @@ def __add(filename, k, env, txn):
     Only counts kmers that already exists in env.
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
-            '%s' % filename, '-o', 'test.jf']
+            '%s' % filename, '-o', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
 
     # Get results from kmer count
-    args = ['jellyfish', 'dump', '-c', 'test.jf']
+    args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
     out, err = p.communicate()
     # Transform results into usable format

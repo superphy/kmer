@@ -6,7 +6,7 @@ def get_methods():
     return output
 
 
-def scale_to_range(x_train, y_train, x_test, y_test, args=[-1, 1]):
+def scale_to_range(x_train, y_train, x_test, y_test, args=(-1, 1)):
     """
     Scales the features in x_train and x_test to lie within the range args[0],
     args[1]

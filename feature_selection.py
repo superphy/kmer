@@ -2,6 +2,8 @@ from sklearn.feature_selection import VarianceThreshold, SelectKBest
 from sklearn.feature_selection import SelectPercentile, f_classif, RFE, RFECV
 from sklearn.svm import SVC
 from utils import flatten, make3D
+import pandas as pd
+import numpy as np
 
 def get_methods():
     output = {"variance": variance_threshold,
@@ -11,7 +13,7 @@ def get_methods():
               "rfecv": recursive_feature_elimination_cv}
     return output
 
-def variance_threshold(x_train, y_train, x_test, y_test, args=[0.16]):
+def variance_threshold(x_train, y_train, x_test, y_test, args=(0.16)):
     """
     Removes all features from x_train and x_test whose variances is less than
     args[0] in x_train.
@@ -31,7 +33,15 @@ def variance_threshold(x_train, y_train, x_test, y_test, args=[0.16]):
     return x_train, y_train, x_test, y_test
 
 
-def select_k_best(x_train, y_train, x_test, y_test, args=[f_classif, 500]):
+def remove_constant_features(x_train, x_test):
+    A = pd.DataFrame(x_train)
+    A = A.loc[:, A.var() != 0.0]
+    B = pd.DataFrame(x_test)
+    B = B[list(A)]
+
+    return np.asarray(A), np.asarray(B)
+
+def select_k_best(x_train, y_train, x_test, y_test, args=(f_classif, 500)):
     """
     Selects the args[1] best features in x_train, removes all others from
     x_train and x_test. Selects the best features by using the score function
@@ -39,6 +49,10 @@ def select_k_best(x_train, y_train, x_test, y_test, args=[f_classif, 500]):
     """
     score_func = args[0]
     k = args[1]
+
+    if score_func == f_classif:
+        x_train, x_test = remove_constant_features(x_train, x_test)
+
     dims = len(x_train.shape)
     if dims == 3:
         x_train = flatten(x_train)
@@ -53,7 +67,7 @@ def select_k_best(x_train, y_train, x_test, y_test, args=[f_classif, 500]):
     return x_train, y_train, x_test, y_test
 
 
-def select_percentile(x_train, y_train, x_test, y_test, args=[f_classif, 0.5]):
+def select_percentile(x_train, y_train, x_test, y_test, args=(f_classif, 0.5)):
     """
     Selects the best args[1] percentile of features in x_train, removes the rest
     of the features from x_train and x_test. Selects the best features by using
@@ -61,6 +75,10 @@ def select_percentile(x_train, y_train, x_test, y_test, args=[f_classif, 0.5]):
     """
     score_func = args[0]
     percentile = args[1]
+
+    if score_func == f_classif:
+        x_train, x_test = remove_constant_features(x_train, x_test)
+
     dims = len(x_train.shape)
     if dims == 3:
         x_train = flatten(x_train)
@@ -77,7 +95,7 @@ def select_percentile(x_train, y_train, x_test, y_test, args=[f_classif, 0.5]):
 
 
 def recursive_feature_elimination(x_train, y_train, x_test, y_test,
-                                  args=[SVC(kernel='linear', C=1), None, 1]):
+                                  args=(SVC(kernel='linear', C=1), None, 1)):
     """
     Recursively eliminates features from x_train and x_test, see documentaion:
     http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html
@@ -102,7 +120,7 @@ def recursive_feature_elimination(x_train, y_train, x_test, y_test,
     return x_train, y_train, x_test, y_test
 
 def recursive_feature_elimination_cv(x_train, y_train, x_test, y_test,
-                                     args=[SVC(kernel='linear', C=1), 1, 3]):
+                                     args=(SVC(kernel='linear', C=1), 1, 3)):
     """
     Recursively elinates features from x_traina nd x_test using cross validation
     see documentation:

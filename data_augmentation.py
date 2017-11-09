@@ -25,7 +25,7 @@ def __augment_data_naive_helper(data, desired_samples, x):
     return data
 
 
-def augment_data_naive(x_train, y_train, x_test, y_test, args=[50, 2]):
+def augment_data_naive(x_train, y_train, x_test, y_test, args=(50, 2)):
     """
     Augments data by grabbing args[1] random samples from the same class and
     averaging their values to create another sample of the same class. Adds
@@ -41,7 +41,7 @@ def augment_data_naive(x_train, y_train, x_test, y_test, args=[50, 2]):
     return x_train, y_train, x_test, y_test
 
 
-def augment_data_smote(x_train, y_train, x_test, y_test, args=[100]):
+def augment_data_smote(x_train, y_train, x_test, y_test, args=(100)):
     """
     Augments data using the SMOTE algorithm, adds args[0] more samples
     to each classs in the data. For more information see the documentaion:
@@ -59,7 +59,7 @@ def augment_data_smote(x_train, y_train, x_test, y_test, args=[100]):
     return x_train, y_train, x_test, y_test
 
 
-def augment_data_adasyn(x_train, y_train, x_test, y_test, args=[200]):
+def augment_data_adasyn(x_train, y_train, x_test, y_test, args=(200)):
     """
     Augments data using the ADASYN algorithm, adds args[0] more
     samples to each class in the data. For more info see the documentation:

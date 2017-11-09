@@ -39,7 +39,7 @@ def get_kmer(args, database="database", recount=False, k=7, l=13):
     Returns:
         x_train, y_train, x_test, y_test
     """
-    x_train, y_train, x_test, y_test = parse_metadata(*params)
+    x_train, y_train, x_test, y_test = parse_metadata(*args)
 
     if recount:
         allfiles = x_train + x_test
@@ -63,7 +63,7 @@ def get_genome(args, table='Data/binary_table.txt', sep=None):
     Returns:
         x_train, y_train, x_test, y_test
     """
-    labels = parse_metadata(*params)
+    labels = parse_metadata(*args)
     x_train_labels = labels[0]
     y_train = labels[1]
     x_test_labels = labels[2]
@@ -114,7 +114,7 @@ def get_kmer_us_uk_split(database="database", recount=False, k=7, l=13):
     x_train = np.asarray(x_train, dtype='float64')
 
     x_test = get_counts(x_test, database)
-    x_test = np.asarray(list(x_test), dtype='float64')
+    x_test = np.asarray(x_test, dtype='float64')
 
     return x_train, y_train, x_test, y_test
 
@@ -141,7 +141,10 @@ def get_kmer_us_uk_mixed(database="database", recount=False, k=7, l=13):
         count_kmers(k, l, genomes, database)
 
     x_train = get_counts(x_train, database)
+    x_train = np.asarray(x_train, dtype='float64')
+
     x_test = get_counts(x_test, database)
+    x_test = np.asarray(x_test, dtype='float64')
 
     return x_train, y_train, x_test, y_test
 
@@ -220,11 +223,11 @@ def get_genome_region_us_uk_split(table='Data/binary_table.txt', sep=None):
     return x_train, y_train, x_test, y_test
 
 
-def get_genome_region_filtered(input_table='Data/binary_table.txt',
+def get_genome_region_filteredA(input_table='Data/binary_table.txt',
                                validation_table='Data/human_bovine_train_predictive.results',
-                               sep=None,col='Ratio',cutoff=0.045,absolute=True,
+                               sep=None,col='Ratio',cutoff=0.25,absolute=True,
                                greater=True,
-                               args=['Data/human_bovine.csv','Human','Bovine']):
+                               args=('Data/human_bovine.csv','Human','Bovine')):
     """
     Parameters:
         input_table:        A binary_table output by panseq
@@ -278,6 +281,58 @@ def get_genome_region_filtered(input_table='Data/binary_table.txt',
 
     for header in x_test_labels:
         x_test.append(data[header].tolist())
+
+    x_train = np.asarray(x_train)
+    x_test = np.asarray(x_test)
+
+    return x_train, y_train, x_test, y_test
+
+def get_genome_region_filteredB(input_table='Data/binary_table.txt',
+                               validation_table='Data/human_bovine_train_predictive.results',
+                               sep=None, count = 50,
+                               args=('Data/human_bovine.csv','Human','Bovine')):
+    """
+    Parameters:
+        input_table:        A binary_table output by panseq
+        validation_table:   A table containing all the same rows as input_table,
+                            but different columns.
+        sep:                The delimiter used in input_table and
+                            validation_table
+        count:              How many of the top rows to keep.
+        args:               A list of arguments to be passed to parse_metadata.
+    Returns:
+        x_train, y_train, x_test, y_test ready to be input into a ml model, with
+        all the rows that do not satisfy the constraints removed in
+        validation_table removed.
+    """
+    labels = parse_metadata(*args)
+    x_train_labels = labels[0]
+    y_train = labels[1]
+    x_test_labels = labels[2]
+    y_test = labels[3]
+
+    if sep == None:
+        input_data=pd.read_csv(input_table,sep=sep,engine='python',index_col=0)
+        validation_data=pd.read_csv(validation_table,sep=sep,engine='python',
+                                    index_col=0)
+    else:
+        input_data = pd.read_csv(input_table, sep=sep, index_col=0)
+        validation_data = pd.read_csv(validation_data, sep=sep, index_col=0)
+
+    validation_data = validation_data.head(count)
+    input_data = input_data.loc[validation_data.index]
+
+    x_train = []
+    x_test = []
+
+    for header in x_train_labels:
+        x_train.append(input_data[header].tolist())
+
+    for header in x_test_labels:
+        x_test.append(input_data[header].tolist())
+
+    x_train = np.asarray(x_train)
+    x_test = np.asarray(x_test)
 
     return x_train, y_train, x_test, y_test
 
