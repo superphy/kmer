@@ -1,14 +1,11 @@
 *.jf
 *.pyc
 *.fasta
-*.txt
 /database/*
-/kmer_counts/*
-/database2/*
 /Results/*
 /deprecated/*
-/database3/*
 *.h5
 *.png
-*metadata*
 /Models/*
+*metadata*
+*binary_table*
