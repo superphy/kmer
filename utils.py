@@ -97,20 +97,16 @@ def sensitivity_specificity(predicted_values, true_values):
     true_neg = len([x for x in true_values if x == 0])
     false_pos = 0
     false_neg = 0
-    err_rate = 0
     for i in range(len(predicted_values)):
         if true_values[i] == 0 and predicted_values[i] == 1:
             false_pos += 1
-            err_rate += 1
         if true_values[i] == 1 and predicted_values[i] == 0:
             false_neg += 1
-            err_rate += 1
 
     sensitivity = (1.0*true_pos)/(true_pos + false_neg)
     specificity = (1.0*true_neg)/(true_neg + false_pos)
-    score = len(predicted_values - 1.0*err_rate)/len(predicted_values)
 
-    return score, sensitivity, specificity
+    return sensitivity, specificity
 
 
 def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
