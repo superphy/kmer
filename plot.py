@@ -17,7 +17,7 @@ def get_data(filename):
         print data
     return x,y
 
-def main(filepath, title, xlabel, ylabel, x_range, y_range):
+def main(filepath, title, xlabel, ylabel, x_range, y_range, keep):
     plt.figure()
     if title:
         plt.title(' '.join(title))
@@ -30,7 +30,11 @@ def main(filepath, title, xlabel, ylabel, x_range, y_range):
         plt.xlabel(' '.join(xlabel))
     if ylabel:
         plt.ylabel(' '.join(ylabel))
-    files = [filepath + x for x in os.listdir(filepath) if '.py' not in x]
+    if keep:
+        valid = [x for x in os.listdir(filepath) if keep in x]
+        files = [filepath + x for x in valid]
+    else:
+        files = [filepath + x for x in os.listdir(filepath) if '.py' not in x]
     for f in files:
         data = get_data(f)
         plt.plot(data[0], data[1], label=f.replace('.txt', '').replace(filepath, ''))
@@ -59,6 +63,8 @@ if __name__ == "__main__":
                         help='start,stop,step for the location of y tick marks',
                         nargs=3,
                         type=float)
+    parser.add_argument('--keep', '-k',
+                        help='A substring that must be included in the filenames for them to be plotted')
 
     args = parser.parse_args()
     args_dict = vars(args)
