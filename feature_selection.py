@@ -13,12 +13,16 @@ def get_methods():
               "rfecv": recursive_feature_elimination_cv}
     return output
 
-def variance_threshold(x_train, y_train, x_test, y_test, args=(0.16)):
+def variance_threshold(input_data, threshold=0.16):
     """
-    Removes all features from x_train and x_test whose variances is less than
-    args[0] in x_train.
+    Removes all features from x_train and x_test whose variances is less
+    than args[0] in x_train.
     """
-    threshold = args[0]
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
     dims = len(x_train.shape)
     if dims == 3:
         x_train = flatten(x_train)
@@ -30,7 +34,7 @@ def variance_threshold(x_train, y_train, x_test, y_test, args=(0.16)):
         x_train = make3D(x_train)
         x_test = make3D(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def remove_constant_features(x_train, x_test):
@@ -41,14 +45,16 @@ def remove_constant_features(x_train, x_test):
 
     return np.asarray(A), np.asarray(B)
 
-def select_k_best(x_train, y_train, x_test, y_test, args=(f_classif, 500)):
+def select_k_best(input_data, score_func=f_classif, k=500):
     """
     Selects the args[1] best features in x_train, removes all others from
-    x_train and x_test. Selects the best features by using the score function
-    args[0].
+    x_train and x_test. Selects the best features by using the score
+    function args[0].
     """
-    score_func = args[0]
-    k = args[1]
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
 
     if score_func == f_classif:
         x_train, x_test = remove_constant_features(x_train, x_test)
@@ -64,17 +70,19 @@ def select_k_best(x_train, y_train, x_test, y_test, args=(f_classif, 500)):
         x_train = make3D(x_train)
         x_test = make3D(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
-def select_percentile(x_train, y_train, x_test, y_test, args=(f_classif, 0.5)):
+def select_percentile(input_data, score_func=f_classif, percentile=0.5):
     """
-    Selects the best args[1] percentile of features in x_train, removes the rest
-    of the features from x_train and x_test. Selects the best features by using
-    the score function args[0].
+    Selects the best args[1] percentile of features in x_train, removes
+    the rest of the features from x_train and x_test. Selects the best
+    features by using the score function args[0].
     """
-    score_func = args[0]
-    percentile = args[1]
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
 
     if score_func == f_classif:
         x_train, x_test = remove_constant_features(x_train, x_test)
@@ -91,21 +99,22 @@ def select_percentile(x_train, y_train, x_test, y_test, args=(f_classif, 0.5)):
         x_train = make3D(x_train)
         x_test = make3D(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
-def recursive_feature_elimination(x_train, y_train, x_test, y_test,
-                                  args=(SVC(kernel='linear', C=1), None, 1)):
+def recursive_feature_elimination(input_data, estimator=SVC(kernel='linear'),
+                                  n_features_to_select=None, step=0.1):
     """
-    Recursively eliminates features from x_train and x_test, see documentaion:
-    http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html
-    for more details.
+    Recursively eliminates features from x_train and x_test, see
+    documentaion: http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html
     If providing args, it should be of the form:
     [estimator, n_features_to_select, step]
     """
-    estimator = args[0]
-    n_features_to_select = args[1]
-    step = args[2]
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
     dims = len(x_train.shape)
     if dims == 3:
         x_train = flatten(x_train)
@@ -117,20 +126,20 @@ def recursive_feature_elimination(x_train, y_train, x_test, y_test,
         x_train = make3D(x_train)
         x_test = make3D(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
-def recursive_feature_elimination_cv(x_train, y_train, x_test, y_test,
-                                     args=(SVC(kernel='linear', C=1), 1, 3)):
+def recursive_feature_elimination_cv(input_data, estimator=SVC(kernel='linear'),
+                                     step=0.1, cv=3):
     """
-    Recursively elinates features from x_traina nd x_test using cross validation
-    see documentation:
-    http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFECV.html
-    for more details.
+    Recursively elinates features from x_train and x_test using cross
+    validation, see documentation: http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFECV.html
     If providing args, it should be of the form: [estimator, step, cv]
     """
-    estimator = args[0]
-    step = args[1]
-    cv = args[2]
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
     dims = len(x_train.shape)
     if dims == 3:
         x_train = flatten(x_train)
@@ -142,4 +151,4 @@ def recursive_feature_elimination_cv(x_train, y_train, x_test, y_test,
         x_train = make3D(x_train)
         x_test = make3D(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)

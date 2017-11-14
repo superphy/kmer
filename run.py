@@ -4,13 +4,16 @@ import argparse
 import feature_scaling
 import feature_selection
 import data_augmentation
+import numpy as np
+import time
 
 
 def run(model=models.support_vector_machine, model_args=None,
         data=data.get_kmer_us_uk_split, data_args=None,
         scaler=feature_scaling.scale_to_range, scaler_args=None,
         selection=feature_selection.variance_threshold, selection_args=None,
-        augment=None, augment_args=None, validate=True, reps=10):
+        augment=None, augment_args=None, validate=True, record_time=False,
+        record_std_dev=False, record_data_size=False, reps=10):
     """
     Parameters:
         model:          The machine learning model to be used, see
@@ -27,49 +30,81 @@ def run(model=models.support_vector_machine, model_args=None,
         augment:        The method used to augment the training data, see
                         data_augmentation.py
         augment_args:   The arguments to be passed to the augment method.
-        validate:       If true "data" should return x_train, y_train, x_test
-                        and y_test and "model" should accept the output of data
-                        and return an accuracy. If false "data" should return
-                        x_train, y_train, and x_test and "model" should accept
-                        the output of "data" and return predictions for x_test.
+        validate:       If true "data" should return x_train, y_train,
+                        x_test, and y_test and "model" should accept the
+                        output of data and return an accuracy. If false
+                        "data" should return x_train, y_train, and x_test
+                        and "model" should accept the output of "data" and
+                        return predictions for x_test.
         reps:           How many times to run the model, if doing validation
     Returns:
-        The output of "model" when given "data". If validating the model the
-        output is the average over all repetitions.
+        The output of "model" when given "data". If validating the model
+        the output is the average over all repetitions.
     """
     if validate:
-        total = 0.0
+        results = np.zeros(reps)
+        times = np.zeros(reps)
         for i in range(reps):
-            if not data_args:
-                d = data()
-            else:
+            if record_time:
+                start = time.time()
+            if data_args:
                 d = data(*data_args)
+            else:
+                d = data()
             if selection:
                 if selection_args:
-                    d = selection(*d, args=selection_args)
+                    d = selection(d, *selection_args)
                 else:
-                    d = selection(*d)
+                    d = selection(d)
             if d[0].max() > 1:
                 if scaler_args:
-                    d = scaler(*d, args=scaler_args)
+                    d = scaler(d, *scaler_args)
                 else:
-                    d = scaler(*d)
+                    d = scaler(d)
             if augment:
                 if augment_args:
-                    d = augment(*d, args=augment_args)
+                    d = augment(d, *augment_args)
                 else:
-                    d = augment(*d)
-            score = model(*d)
-            total += score
-        return total/reps
+                    d = augment(d)
+            if model_args:
+                score = model(d, *model_args)
+            else:
+                score = model(d)
+            results[i] = score
+            if record_time:
+                times[i] = time.time() - start
+        if record_time:
+            if record_std_dev:
+                output = [results.mean(), results.std(), times.mean(), times.std()]
+            else:
+                output = [results.mean(), times.mean()]
+        else:
+            if record_std_dev:
+                output = [results.mean(), results.std()]
+            else:
+                output = results.mean()
     else:
+        if record_time:
+            start = time.time()
         if not data_args:
             d = data()
         else:
             d = data(*data_args)
-        predictions = model(*d)
-        return predictions
-
+        if model_args:
+            predictions = model(d, *model_args)
+        else:
+            predictions = model(d)
+        if record_time:
+            total_time = time.time() - start
+            output = [prediction, total_time]
+        else:
+            output = predictions
+    if record_data_size:
+        if type(output) == list:
+            output.append(d[0].shape[0]+d[2].shape[0])
+        else:
+            output = list(output).append(d[0].shape[0+d[2].shape[0]])
+    return output
 
 def model_methods(input_string):
     """
@@ -113,8 +148,8 @@ def scale_methods(input_string):
 
 def selection_methods(input_string):
     """
-    Given a string that is the name of a feature selection method, return the
-    feature selection method.
+    Given a string that is the name of a feature selection method, return
+    the feature selection method.
     """
     methods = feature_selection.get_methods()
     try:
@@ -127,8 +162,8 @@ def selection_methods(input_string):
 
 def augment_methods(input_string):
     """
-    Given a string that is the name of a data augmentation method, return the
-    data augmentation method.
+    Given a string that is the name of a data augmentation method, return
+    the data augmentation method.
     """
     methods = data_augmentation.get_methods()
     try:
@@ -198,6 +233,18 @@ if __name__ == "__main__":
                         help='If True the model should return a score if False the model should return predictions',
                         type=clean_args,
                         choices=[True, False])
+    parser.add_argument('--record_time', '-rt',
+                        help='If true keep track of time, if flase do not',
+                        type=clean_args,
+                        choice=[True, False])
+    parser.add_argument('--record_std_dev', '-rsd',
+                        help='If true record the standard deviation or all results',
+                        type=clean_args,
+                        choice=[True, False])
+    parser.add_argument('--record_data_size', 'rds',
+                        help='If True output how many training and test samples there are',
+                        type=clean_args,
+                        choice=[True,False])
     args = parser.parse_args()
     args_dict = vars(args)
     # Remove unentered and invalid arguments

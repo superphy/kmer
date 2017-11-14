@@ -16,11 +16,16 @@ def get_methods():
     return output
 
 
-def neural_network_validation(x_train, y_train, x_test, y_test, *args):
+def neural_network_validation(input_data):
     """
     Constructs, compiles, trains, and tests a neural network.
     Returns the accuracy of the model.
     """
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_Test = input_data[3]
+
     if len(x_train.shape) == 2:
         x_train = make3D(x_train)
         x_test = make3D(x_test)
@@ -40,7 +45,7 @@ def neural_network_validation(x_train, y_train, x_test, y_test, *args):
     return evaluation[1]
 
 
-def neural_network(x_train, y_train, predict, *args):
+def neural_network(input_data):
     """
     Constructs, compiles, trains and makes predictions with a neural network.
     Returns the predicted values for "predict". If args[0] is true the
@@ -49,6 +54,10 @@ def neural_network(x_train, y_train, predict, *args):
     probability of the prediction being correct.
     If args is not provided, default values will be used.
     """
+    x_train = input_data[0]
+    y_train = input_data[1]
+    predict = input_data[2]
+
     binarize = True
     if args:
         binarize = args[0]
@@ -72,28 +81,36 @@ def neural_network(x_train, y_train, predict, *args):
     return prediction
 
 
-def support_vector_machine_validation(x_train, y_train, x_test, y_test, *args):
+def support_vector_machine_validation(input_data, kernel='linear', C=1):
     """
     Fits, trains, and test a support vector machine.
     Returns the accuracy of the model.
     """
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
     if len(x_train.shape) == 3:
         x_train = flatten(x_train)
         x_test = flatten(x_test)
-
-    model = svm.SVC(kernel='linear')
+    model = svm.SVC(kernel=kernel, C=C)
     model.fit(x_train, y_train)
     return model.score(x_test, y_test)
 
 
-def support_vector_machine(x_train, y_train, predict, *args):
+def support_vector_machine(input_data, kernel='linear', C=1):
     """
     Fits, trains, and makes predictions with a support vector machine.
     Returns the predicted values for "predict"
     """
+    x_train = input_data[0]
+    y_train = input_data[1]
+    predict = input_data[2]
+
     if len(x_train.shape) == 3:
         x_train = flatten(x_train)
         x_test = flatten(x_test)
-    model = svm.SVC(kernel='linear')
+    model = svm.SVC(kernel=kernel, C=C)
     model.fit(x_train, y_train)
     return model.predict(predict)

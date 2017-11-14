@@ -51,7 +51,7 @@ def get_kmer(args, database="database", recount=False, k=7, l=13):
     x_test = get_counts(x_test, database)
     x_test = np.asarray(list(x_test), dtype='float64')
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def get_genome(args, table='Data/binary_table.txt', sep=None):
@@ -85,7 +85,7 @@ def get_genome(args, table='Data/binary_table.txt', sep=None):
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def get_kmer_us_uk_split(database="database", recount=False, k=7, l=13):
@@ -116,7 +116,7 @@ def get_kmer_us_uk_split(database="database", recount=False, k=7, l=13):
     x_test = get_counts(x_test, database)
     x_test = np.asarray(x_test, dtype='float64')
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def get_kmer_us_uk_mixed(database="database", recount=False, k=7, l=13):
@@ -146,7 +146,7 @@ def get_kmer_us_uk_mixed(database="database", recount=False, k=7, l=13):
     x_test = get_counts(x_test, database)
     x_test = np.asarray(x_test, dtype='float64')
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def get_genome_region_us_uk_mixed(table='Data/binary_table.txt', sep=None):
@@ -183,7 +183,7 @@ def get_genome_region_us_uk_mixed(table='Data/binary_table.txt', sep=None):
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def get_genome_region_us_uk_split(table='Data/binary_table.txt', sep=None):
@@ -220,7 +220,7 @@ def get_genome_region_us_uk_split(table='Data/binary_table.txt', sep=None):
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def get_genome_region_filteredA(input_table='Data/binary_table.txt',
@@ -285,7 +285,7 @@ def get_genome_region_filteredA(input_table='Data/binary_table.txt',
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 def get_genome_region_filteredB(input_table='Data/binary_table.txt',
                                validation_table='Data/human_bovine_train_predictive.results',
@@ -334,7 +334,7 @@ def get_genome_region_filteredB(input_table='Data/binary_table.txt',
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def get_kmer_from_json(database='database',recount=False,k=7,l=13,
@@ -382,7 +382,7 @@ def get_kmer_from_json(database='database',recount=False,k=7,l=13,
     x_train = scaler.fit_transform(x_train)
     x_test = scaler.transform(x_test)
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def get_kmer_from_directory(database='database', recount=False, k=7, l=13,

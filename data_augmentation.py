@@ -25,53 +25,131 @@ def __augment_data_naive_helper(data, desired_samples, x):
     return data
 
 
-def augment_data_naive(x_train, y_train, x_test, y_test, args=(50, 2)):
+def augment_data_naive(input_data, desired_samples=50, choice=2):
     """
-    Augments data by grabbing args[1] random samples from the same class and
-    averaging their values to create another sample of the same class. Adds
-    args[0] more samples to each class in the data.
+    Augments data by grabbing x random samples from a class and
+    averaging their values to create another sample of the same class.
+
+    args:   A tuple where the first value is the number of new samples to
+            add to each class, and the second value is the number of
+            original samples to use when creating a new sample.
     """
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
     desired_samples = args[0]
-    x = args[1]
     temp = np.asarray(y_train, dtype='bool')
-    x_pos = __augment_data_naive_helper(x_train[temp], desired_samples, x)
+    x_pos = __augment_data_naive_helper(x_train[temp], desired_samples, choice)
     temp = np.invert(temp)
-    x_neg = __augment_data_naive_helper(x_train[temp], desired_samples, x)
+    x_neg = __augment_data_naive_helper(x_train[temp], desired_samples, choice)
     x_train, y_train = shuffle(x_pos, x_neg, 1, 0)
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
-def augment_data_smote(x_train, y_train, x_test, y_test, args=(100)):
+def augment_data_smote(input_data, desired_samples=50):
     """
-    Augments data using the SMOTE algorithm, adds args[0] more samples
-    to each classs in the data. For more information see the documentaion:
-    http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.SMOTE.html
-    Will probably give a user warning stating: "The number of smaple in class x
-    will be larger than the number of samples in the majority class", but we can
-    ignore this since we are using SMOTE to augment data, not to correct for
-    imbalanced data.
+    Augments data using the SMOTE algorithm. For more information see the
+    documentation:  http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.SMOTE.html
+
+    Will probably give a user warning stating: "The number of smaples in
+    class x will be larger than the number of samples in the majority class"
+    but we can ignore this since we are using SMOTE to augment data, not to
+    correct for imbalanced data.
+
+    args:   A tuple where the first value is the number of smaples to be
+            added to each class, the second value is the label for the
+            lexicographically smaller of the classes, and the third value
+            is the label for the remaining class.
     """
-    desired_samples = args[0]
-    ratio = {1:desired_samples, 0:desired_samples}
-    new_x, new_y = SMOTE(ratio=ratio).fit_sample(x_train, y_train)
-    x_train = np.vstack((x_train, new_x))
-    y_train = np.concatenate((y_train, new_y))
-    return x_train, y_train, x_test, y_test
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
+    counts = np.bincount(y_train)
+    classes = np.unique(y_train)
+    a = counts[0]+desired_samples
+    b = counts[1]+desired_samples
+    ratio = {classes[0]:a, classes[1]:b}
+    x_train, y_train = SMOTE(ratio=ratio).fit_sample(x_train, y_train)
+    return (x_train, y_train, x_test, y_test)
 
 
-def augment_data_adasyn(x_train, y_train, x_test, y_test, args=(200)):
+def augment_data_adasyn(input_data, desired_samples=50):
     """
-    Augments data using the ADASYN algorithm, adds args[0] more
-    samples to each class in the data. For more info see the documentation:
-    http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.ADASYN.html
-    Will probably give a user warning stating: "The number of smaple in class x
-    will be larger than the number of samples in the majority class", but we can
-    ignore this since we are using ADASYN to augment data, not to correct for
-    imbalanced data.
+    Augments data using the ADASYN algorithm. For more information see the
+    documentation:  http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.ADASYN.html
+
+    Will probably give a user warning stating: "The number of smaples in
+    class x will be larger than the number of samples in the majority class"
+    but we can ignore this since we are using ADASYN to augment data, not to
+    correct for imbalanced data.
+
+    args:   A tuple where the first value is the number of smaples to be
+            added to each class, the second value is the label for the
+            lexicographically smaller of the classes, and the third value
+            is the label for the remaining class.
     """
-    desired_samples = args[0]
-    ratio = {1:desired_samples, 0:desired_samples}
-    new_x, new_y = ADASYN(ratio=ratio).fit_sample(x_train, y_train)
-    x_train = np.vstack((x_train, new_x))
-    y_train = np.concatenate((y_train, new_y))
-    return x_train, y_train, x_test, y_test
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
+    counts = np.bincount(y_train)
+    vals = np.unique(y_train)
+    ratio = {vals[0]:counts[0]+desired_samples, vals[1]:counts[1]+desired_samples}
+    x_train, y_train = ADASYN(ratio=ratio).fit_sample(x_train, y_train)
+    return (x_train, y_train, x_test, y_test)
+
+
+def augment_data_noise(input_data, desired_samples=50):
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
+    x_pos = x_train[np.asarray(y_train, dtype='bool')]
+    x_neg = x_train[np.invert(np.asarray(y_train, dtype='bool'))]
+    new_x_pos = x_pos[np.random.choice(x_pos.shape[0], desired_samples)]
+    new_x_neg = x_neg[np.random.choice(x_neg.shape[0], desired_samples)]
+    new_x_pos = np.random.randn(x_pos.shape[1]) + new_x_pos
+    new_x_neg = np.random.randn(x_neg.shape[1]) + new_x_neg
+    x_pos = np.vstack((x_pos, new_x_pos))
+    x_neg = np.vstack((x_neg, new_x_neg))
+    x_train, y_train = shuffle(x_pos, x_neg, 1, 0)
+    return (x_train, y_train, x_test, y_test)
+
+
+def balance_data_smote(input_data):
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
+    counts = np.bincount(y_train)
+    classes = np.unique(y_train)
+    ratio = {classes[0]:max(counts), classes[1]:max(counts)}
+    x_train, y_train = SMOTE(ratio=ratio).fit_sample(x_train, y_train)
+    return (x_train, y_train, x_test, y_test)
+
+def balance_data_adasyn(input_data):
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
+    counts = np.bincount(y_train)
+    classes = np.unique(y_train)
+    ratio = {classes[0]:max(counts), classes[1]:max(counts)}
+    x_train, y_train = ADASYN(ratio=ratio).fit_sample(x_train, y_train)
+    return (x_train, y_train, x_test, y_test)
+
+def balance_data_naive(x_train, y_train, x_test, y_test):
+
+    return (x_train, y_train, x_test, y_test)
+
+def balance_data_noise(x_trian, y_train, x_test, y_test):
+
+    return (x_train, y_train, x_test, y_test)
