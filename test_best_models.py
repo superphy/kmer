@@ -2,7 +2,12 @@ import numpy as np
 from data import get_genome_region_us_uk_mixed, get_genome_region_us_uk_split
 from data import get_kmer_us_uk_mixed, get_kmer_us_uk_split
 import time
-from models import support_vector_machine_validation, neural_network_validation
+from models import support_vector_machine_validation as svm
+from models import neural_network_validation as nn
+from multiprocessing import Process
+from run import run
+
+path = '/home/rboothman/Data/genome_regions/binary_tables/'
 
 def svm_kmer_mixed(reps):
     scores = []
@@ -24,6 +29,19 @@ def svm_kmer_mixed(reps):
             times.std(),
             x_train.shape[0]+x_test.shape[0],
             reps]
+    print output
+    return ','.join([str(x) for x in output])
+
+def run_svm_kmer_mixed(reps):
+    acc_mean,acc_std_dev,time_mean,time_std_dev,data_size = run(model=svm,
+                                                                data=get_kmer_us_uk_mixed,
+                                                                record_time=True,
+                                                                record_std_dev=True,
+                                                                record_data_size=True,
+                                                                selection_args=(0.056),
+                                                                reps=reps)
+    output = ["svm", "kmer count", "mixed", acc_mean, acc_std_dev, time_mean,
+              time_std_dev, data_size, reps]
     print output
     return ','.join([str(x) for x in output])
 
@@ -50,6 +68,19 @@ def svm_kmer_split(reps):
     print output
     return ','.join([str(x) for x in output])
 
+def run_svm_kmer_split(reps):
+    acc_mean,acc_std_dev,time_mean,time_std_dev,data_size = run(model=svm,
+                                                                data=get_kmer_us_uk_split,
+                                                                record_time=True,
+                                                                record_std_dev=True,
+                                                                record_data_size=True,
+                                                                selection_args=(0.164),
+                                                                reps=reps)
+    output = ["svm", "kmer count", "split", acc_mean, acc_std_dev, time_mean,
+              time_std_dev, data_size, reps]
+    print output
+    return ','.join([str(x) for x in output])
+
 def svm_genome_mixed(reps):
     scores = []
     times = []
@@ -72,6 +103,20 @@ def svm_genome_mixed(reps):
     print output
     return ','.join([str(x) for x in output])
 
+def run_svm_genome_mixed(reps):
+    acc_mean,acc_std_dev,time_mean,time_std_dev,data_size = run(model=svm,
+                                                                data=get_genome_region_us_uk_mixed,
+                                                                data_args={'table':path+'binary_table_450.txt'},
+                                                                record_time=True,
+                                                                record_std_dev=True,
+                                                                record_data_size=True,
+                                                                selection_args=(0.008),
+                                                                reps=reps)
+    output = ["svm", "genome regions", "mixed", acc_mean, acc_std_dev, time_mean,
+              time_std_dev, data_size, reps]
+    print output
+    return ','.join([str(x) for x in output])
+
 def svm_genome_split(reps):
     scores = []
     times = []
@@ -91,6 +136,20 @@ def svm_genome_split(reps):
             times.std(),
             x_train.shape[0]+x_test.shape[0],
             reps]
+    print output
+    return ','.join([str(x) for x in output])
+
+def run_svm_genome_split(reps):
+    acc_mean,acc_std_dev,time_mean,time_std_dev,data_size = run(model=svm,
+                                                                data=get_genome_region_us_uk_split,
+                                                                data_args={'table':path+'binary_table_1450.txt'},
+                                                                record_time=True,
+                                                                record_std_dev=True,
+                                                                record_data_size=True,
+                                                                selection_args=(0.244),
+                                                                reps=reps)
+    output = ["svm", "genome regions", "split", acc_mean, acc_std_dev, time_mean,
+              time_std_dev, data_size, reps]
     print output
     return ','.join([str(x) for x in output])
 
@@ -117,6 +176,19 @@ def keras_kmer_split(reps):
     print output
     return ','.join([str(x) for x in output])
 
+def run_nn_kmer_split(reps):
+    acc_mean,acc_std_dev,time_mean,time_std_dev,data_size = run(model=nn,
+                                                                data=get_kmer_us_uk_split,
+                                                                record_time=True,
+                                                                record_std_dev=True,
+                                                                record_data_size=True,
+                                                                selection_args=(0.152),
+                                                                reps=reps)
+    output = ["nn", "kmer count", "split", acc_mean, acc_std_dev, time_mean,
+              time_std_dev, data_size, reps]
+    print output
+    return ','.join([str(x) for x in output])
+
 def keras_kmer_mixed(reps):
     scores = []
     times = []
@@ -137,6 +209,19 @@ def keras_kmer_mixed(reps):
             times.std(),
             x_train.shape[0]+x_test.shape[0],
             reps]
+    print output
+    return ','.join([str(x) for x in output])
+
+def run_nn_kmer_mixed(reps):
+    acc_mean,acc_std_dev,time_mean,time_std_dev,data_size = run(model=nn,
+                                                                data=get_kmer_us_uk_mixed,
+                                                                record_time=True,
+                                                                record_std_dev=True,
+                                                                record_data_size=True,
+                                                                selection_args=(0.088),
+                                                                reps=reps)
+    output = ["nn", "kmer count", "mixed", acc_mean, acc_std_dev, time_mean,
+              time_std_dev, data_size, reps]
     print output
     return ','.join([str(x) for x in output])
 
@@ -162,6 +247,20 @@ def keras_genome_split(reps):
     print output
     return ','.join([str(x) for x in output])
 
+def run_nn_genome_split(reps):
+    acc_mean,acc_std_dev,time_mean,time_std_dev,data_size = run(model=nn,
+                                                                data=get_genome_region_us_uk_split,
+                                                                data_args={'table':path+'binary_table_1500.txt'},
+                                                                record_time=True,
+                                                                record_std_dev=True,
+                                                                record_data_size=True,
+                                                                selection_args=(0.248),
+                                                                reps=reps)
+    output = ["nn", 'genome regions', "split", acc_mean, acc_std_dev, time_mean,
+              time_std_dev, data_size, reps]
+    print output
+    return ','.join([str(x) for x in output])
+
 def keras_genome_mixed(reps):
     scores = []
     times = []
@@ -184,18 +283,32 @@ def keras_genome_mixed(reps):
     print output
     return ','.join([str(x) for x in output])
 
-if __name__ == "__main__":
-    reps = 20
-    skm = svm_kmer_mixed(reps)
-    sks = svm_kmer_split(reps)
-    sgm = svm_genome_mixed(reps)
-    sgs = svm_genome_split(reps)
-    kkm = keras_kmer_mixed(reps)
-    kks = keras_kmer_split(reps)
-    kgm = keras_genome_mixed(reps)
-    kgs = keras_genome_split(reps)
+def run_nn_genome_mixed(reps):
+    acc_mean,acc_std_dev,time_mean,time_std_dev,data_size = run(model=nn,
+                                                                data=get_genome_region_us_uk_mixed,
+                                                                data_args={'table':path+'binary_table_1500.txt'},
+                                                                record_time=True,
+                                                                record_std_dev=True,
+                                                                record_data_size=True,
+                                                                selection_args=(0.008),
+                                                                reps=reps)
+    output = ["nn", 'genome regions', "mixed", acc_mean, acc_std_dev, time_mean,
+              time_std_dev, data_size, reps]
+    print output
+    return ','.join([str(x) for x in output])
 
-    headers = "Model Type,Input,Train/Test,Avg. Acc.,StdDev Acc.,Avg. Time,StdDev Time,#Genomes,#Repititions"
+if __name__ == "__main__":
+    reps = 10
+    skm = run_svm_kmer_mixed(reps)
+    sks = run_svm_kmer_split(reps)
+    sgm = run_svm_genome_mixed(reps)
+    sgs = run_svm_genome_split(reps)
+    kkm = run_nn_kmer_mixed(reps)
+    kks = run_nn_kmer_split(reps)
+    kgm = run_nn_genome_mixed(reps)
+    kgs = run_nn_genome_split(reps)
+
+    headers = "Model Type,Input, Train/Test, Acc.Avg., Acc.StdDev, Time Avg., Time StdDev, #Genomes, #Repititions"
     output = [headers, skm, sks, sgm, sgs, kkm, kks, kgm, kgs]
     output = '\n'.join(output)
     with open('/home/rboothman/Documents/best_model_results.csv', 'a') as f:
