@@ -2,7 +2,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedShuffleSplit as SSS
 from kmer_counter import count_kmers, get_counts
 from utils import check_fasta, same_shuffle, shuffle, flatten, make3D, setup_files
-from utils import parse_metadata, parse_json
+from utils import parse_metadata, parse_json, parse_salmonella_metadata
 import numpy as np
 import pandas as pd
 import csv
@@ -21,8 +21,9 @@ def get_methods():
               'genome_split': get_genome_region_us_uk_split,
               'kmer_json': get_kmer_from_json,
               'kmer_directory': get_kmer_from_directory,
-              'genome_filtered': get_genome_region_filtered,
+              'genome_filtered': get_genome_region_filteredA,
               'genome_custom': get_genome_regions,
+              'salmonella': get_salmonella_kmer,
               'kmer_custom': get_kmer}
     return output
 
@@ -431,3 +432,34 @@ def get_kmer_from_directory(database='database', recount=False, k=7, l=13,
             output.append(array)
 
     return output
+
+def get_salmonella_kmer(database='database2', recount=False, k=7, l=13,
+                        args=None):
+    """
+    Parmeters:
+        database:   Name of the database to use.
+        recount:    Boolean, if true the kmers are recounted.
+        k:          The length of kmer to count.
+        l:          The minimum number of times a kmer must appear to be output
+        args:       Dictionary, the arguments to be passed to
+                    parse_salmonella_metadata.
+    Returns:
+        (x_train,y_train,x_test,y_test): Kmer data ready to be passed to a
+        machine learning model.
+    """
+    if args:
+        x_train, y_train, x_test, y_test = parse_salmonella_metadata(**args)
+    else:
+        x_train, y_train, x_test, y_test = parse_salmonella_metadata()
+
+    if recount:
+        all_files = x_train + x_test
+        count_kmers(k,l, all_files, database)
+
+    x_train = get_counts(x_train, database)
+    x_train = np.asarray(x_train, dtype='float64')
+
+    x_test = get_counts(x_test, database)
+    x_test = np.asarray(x_test, dtype='float64')
+
+    return (x_train, y_train, x_test, y_test)

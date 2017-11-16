@@ -11,7 +11,7 @@ import time
 def run(model=models.support_vector_machine, model_args=None,
         data=data.get_kmer_us_uk_split, data_args=None,
         scaler=feature_scaling.scale_to_range, scaler_args=None,
-        selection=feature_selection.variance_threshold, selection_args=None,
+        selection=None, selection_args=None,
         augment=None, augment_args=None, validate=True, record_time=False,
         record_std_dev=False, record_data_size=False, reps=10):
     """

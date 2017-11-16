@@ -206,3 +206,26 @@ def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
         output.append(fasta_names)
 
     return output
+
+def parse_salmonella_metadata(metadata='/home/rboothman/PHAC/kmer/Data/amr_sorted.csv',
+                              antibiotic='ampicillin',
+                              path='/home/rboothman/Data/salmonella_amr/',
+                              suffix='.fna', pos_label='Susceptible',
+                              neg_label='Resistant'):
+    data = pd.read_csv(metadata)
+    filtered = data[data.Antibiotic == antibiotic]
+    susceptible = filtered[filtered.AMR == pos_label]
+    resistant = filtered[filtered.AMR == neg_label]
+    all_files = os.listdir(path)
+    susceptible = [path+str(x)+suffix for x in list(susceptible.Fasta) if str(x)+suffix in all_files]
+    resistant = [path+str(x)+suffix for x in list(resistant.Fasta) if str(x)+suffix in all_files]
+    x_train, y_train = shuffle(susceptible, resistant, 1, 0)
+
+    cutoff = int(0.8*len(x_train))
+    x_test = x_train[cutoff:]
+    y_test = y_train[cutoff:]
+
+    x_train = x_train[:cutoff]
+    y_train = y_train[:cutoff]
+
+    return (x_train, y_train, x_test, y_test)
