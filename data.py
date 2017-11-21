@@ -2,7 +2,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedShuffleSplit as SSS
 from kmer_counter import count_kmers, get_counts
 from utils import check_fasta, same_shuffle, shuffle, flatten, make3D, setup_files
-from utils import parse_metadata, parse_json, parse_salmonella_metadata
+from utils import parse_metadata, parse_json
 import numpy as np
 import pandas as pd
 import csv
@@ -10,8 +10,7 @@ import os
 import random
 
 
-human_path = '/home/rboothman/Data/human_bovine/human/'
-bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
+filepath = '/home/rboothman/Data/ecoli/'
 
 
 def get_methods():
@@ -21,7 +20,8 @@ def get_methods():
               'genome_split': get_genome_region_us_uk_split,
               'kmer_json': get_kmer_from_json,
               'kmer_directory': get_kmer_from_directory,
-              'genome_filtered': get_genome_region_filteredA,
+              'genome_filtered': get_genome_pre_filtered,
+              'genome_custom_filtered': get_genome_custom_filtered,
               'genome_custom': get_genome_regions,
               'salmonella': get_salmonella_kmer,
               'kmer_custom': get_kmer}
@@ -60,7 +60,6 @@ def get_genome(args, table='Data/binary_table.txt', sep=None):
     Parameters:
         args:    The arguments to pass to parse_metadata.
         table:   binary_table.txt output from panseq.
-        threeD:  If True the data is made three dimensional.
     Returns:
         x_train, y_train, x_test, y_test
     """
@@ -103,9 +102,8 @@ def get_kmer_us_uk_split(database="database", recount=False, k=7, l=13):
         kmer data ready to be input into a ml model and recreate the Lupolova
         et. al paper.
     """
-    params = ['Data/human_bovine.csv', 'Human', 'Bovine', human_path, bovine_path,
-              'Train', 'Test', '.fasta']
-    x_train, y_train, x_test, y_test = parse_metadata(*params)
+    kwargs = {'prefix': filepath, 'suffix': '.fasta'}
+    x_train, y_train, x_test, y_test = parse_metadata_2_(**kwargs)
 
     if recount:
         allfiles = x_train + x_test
@@ -134,9 +132,9 @@ def get_kmer_us_uk_mixed(database="database", recount=False, k=7, l=13):
         kmer data ready to be input into a ml model, with us/uk data shuffled
         together.
     """
-    params = ['Data/human_bovine.csv','Human','Bovine',human_path,bovine_path,
-              '','','.fasta']
-    x_train, y_train, x_test, y_test = parse_metadata(*params)
+    kwargs = {'prefix': filepath, 'suffix': '.fasta', 'train_header': None}
+
+    x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
 
     if recount:
         count_kmers(k, l, genomes, database)
@@ -161,8 +159,8 @@ def get_genome_region_us_uk_mixed(table='Data/binary_table.txt', sep=None):
         binary genome region presence absence data ready to be input into a ml
         model, with us/uk data shuffled together.
     """
-    params = ('Data/human_bovine.csv', 'Human', 'Bovine')
-    labels = parse_metadata(*params)
+    kwargs = {'prefix': filepath, 'suffix': '.fasta', 'train_header': None}
+    labels = parse_metadata(**kwargs)
     x_train_labels = labels[0]
     y_train = labels[1]
     x_test_labels = labels[2]
@@ -198,8 +196,8 @@ def get_genome_region_us_uk_split(table='Data/binary_table.txt', sep=None):
         binary genome region presence absence data ready to be input into a ml
         model to recreate the Lupoloval et. al paper.
     """
-    params = ('Data/human_bovine.csv','Human','Bovine','','','Train','Test')
-    labels = parse_metadata(*params)
+    kwargs = {'prefix': filepath, 'suffix': '.fasta'}
+    labels = parse_metadata(**kwargs)
     x_train_labels = labels[0]
     y_train = labels[1]
     x_test_labels = labels[2]
@@ -224,11 +222,11 @@ def get_genome_region_us_uk_split(table='Data/binary_table.txt', sep=None):
     return (x_train, y_train, x_test, y_test)
 
 
-def get_genome_region_filteredA(input_table='Data/binary_table.txt',
+def get_genome_custom_filtered(input_table='Data/binary_table.txt',
                                validation_table='Data/human_bovine_train_predictive.results',
                                sep=None,col='Ratio',cutoff=0.25,absolute=True,
                                greater=True,
-                               args=('Data/human_bovine.csv','Human','Bovine')):
+                               args=None):
     """
     Parameters:
         input_table:        A binary_table output by panseq
@@ -251,7 +249,10 @@ def get_genome_region_filteredA(input_table='Data/binary_table.txt',
         all the rows that do not satisfy the constraints removed in
         validation_table removed.
     """
-    labels = parse_metadata(*args)
+    if args:
+        labels = parse_metadata(*args)
+    else:
+        labels = parse_metadata()
     x_train_labels = labels[0]
     y_train = labels[1]
     x_test_labels = labels[2]
@@ -288,10 +289,10 @@ def get_genome_region_filteredA(input_table='Data/binary_table.txt',
 
     return (x_train, y_train, x_test, y_test)
 
-def get_genome_region_filteredB(input_table='Data/binary_table.txt',
+def get_genome_pre_filtered(input_table='Data/binary_table.txt',
                                validation_table='Data/human_bovine_train_predictive.results',
                                sep=None, count = 50,
-                               args=('Data/human_bovine.csv','Human','Bovine')):
+                               args=None):
     """
     Parameters:
         input_table:        A binary_table output by panseq
@@ -306,7 +307,10 @@ def get_genome_region_filteredB(input_table='Data/binary_table.txt',
         all the rows that do not satisfy the constraints removed in
         validation_table removed.
     """
-    labels = parse_metadata(*args)
+    if args:
+        labels = parse_metadata(*args)
+    else:
+        labels = parse_metadata()
     x_train_labels = labels[0]
     y_train = labels[1]
     x_test_labels = labels[2]
@@ -434,7 +438,7 @@ def get_kmer_from_directory(database='database', recount=False, k=7, l=13,
     return output
 
 def get_salmonella_kmer(database='database2', recount=False, k=7, l=13,
-                        args=None):
+                        antibiotic='ampicillin'):
     """
     Parmeters:
         database:   Name of the database to use.
@@ -447,10 +451,12 @@ def get_salmonella_kmer(database='database2', recount=False, k=7, l=13,
         (x_train,y_train,x_test,y_test): Kmer data ready to be passed to a
         machine learning model.
     """
-    if args:
-        x_train, y_train, x_test, y_test = parse_salmonella_metadata(**args)
-    else:
-        x_train, y_train, x_test, y_test = parse_salmonella_metadata()
+    args = {'metadata': '/home/rboothman/PHAC/kmer/Data/amr_sorted.csv',
+            'fasta_header': 'Fasta', 'label_header': 'AMR',
+            'train_header': None, 'extra_header': 'Antibiotic',
+            'extra_label': antibiotic,
+            'prefix': '/home/rboothman/Data/salmonella_amr/', 'suffix': '.fna'}
+    x_train, y_train, x_test, y_test = parse_metadata(**args)
 
     if recount:
         all_files = x_train + x_test

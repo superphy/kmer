@@ -23,8 +23,7 @@ def get_data(model, data, data_args, selection, selection_args, name, path):
 def test_selection_method(sel_method, score_func, path, antibiotic):
     k_vals = np.arange(10,1000,10)
 
-    metadata_args = {'antibiotic': antibiotic}
-    data_args = ('database2', False, 7, 13, metadata_args)
+    data_args = ('database2', True, 7, 13, antibiotic)
 
     for k in k_vals:
         sel_args = (score_func, k)
@@ -103,7 +102,7 @@ def test_selection_method(sel_method, score_func, path, antibiotic):
         # p.join()
 
 if __name__ == "__main__":
-    antibiotics = ['ampicillin', 'chloramphenicol', 'gentamicin',
+    antibiotics = ['chloramphenicol', 'gentamicin',
                    'kanamycin', 'nalidixic acid', 'spectinomycin',
                    'streptomycin', 'sulphonamides', 'tetracycline',
                    'trimethoprim']
