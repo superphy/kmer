@@ -229,3 +229,13 @@ def parse_salmonella_metadata(metadata='/home/rboothman/PHAC/kmer/Data/amr_sorte
     y_train = y_train[:cutoff]
 
     return (x_train, y_train, x_test, y_test)
+
+def parse_omnilog(headers='/home/rboothman/Data/ecomnilog/wide_format_header.txt'):
+    data = pd.read_csv(headers, sep=',', header=0, index_col=0)
+    # with open(headers, 'r') as f:
+    #     first = f.readline().split(',')
+    #     max_col = len(first)
+    # data = np.genfromtxt(headers, dtype='float64', delimiter=',', skip_header=1,
+    #                      missing_values=['NA'], filling_values=[np.nan],
+    #                      usecols = np.arange(1,max_col), autostrip=True)
+    return data
