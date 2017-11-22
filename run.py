@@ -6,6 +6,11 @@ import feature_selection
 import data_augmentation
 import numpy as np
 import time
+import inspect
+from sklearn.feature_selection import chi2, f_classif
+
+other_functions = {'f_classif': f_classif,
+                   'chi2': chi2}
 
 
 def run(model=models.support_vector_machine, model_args=None,
@@ -110,7 +115,8 @@ def model_methods(input_string):
     """
     Given a string that is the name of a model, return the model.
     """
-    methods = models.get_methods()
+    methods = dict(inspect.getmembers(models))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -123,7 +129,8 @@ def data_methods(input_string):
     """
     Given a string that is the name of data method, return the data method.
     """
-    methods = data.get_methods()
+    methods = dict(inspect.getmembers(data))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -137,7 +144,8 @@ def scale_methods(input_string):
     Given a string that is the name of a scaling method, return the scaling
     method.
     """
-    methods = feature_scaling.get_methods()
+    methods = dict(inspect.getmembers(feature_scaling))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -151,7 +159,8 @@ def selection_methods(input_string):
     Given a string that is the name of a feature selection method, return
     the feature selection method.
     """
-    methods = feature_selection.get_methods()
+    methods = dict(inspect.getmembers(feature_selection))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -165,7 +174,8 @@ def augment_methods(input_string):
     Given a string that is the name of a data augmentation method, return
     the data augmentation method.
     """
-    methods = data_augmentation.get_methods()
+    methods = dict(inspect.getmembers(data_augmentation))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -178,76 +188,83 @@ def clean_args(value):
     """
     Convert strings to their proper type.
     """
-    if value.isdigit():
-        output = int(value)
-    elif value == 'True':
+    if value == 'True':
         output = True
     elif value == 'False':
         output = False
+    elif value in other_functions.keys():
+        output = other_functions[value]
     else:
-        output = value
+        try:
+            output = int(value)
+        except ValueError:
+            output = value
     return output
 
 
+def create_args_dict():
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--model', '-m',
+                            help='Machine learning model, see best_models.py',
+                            type=model_methods)
+        parser.add_argument('--model_arguments', '-ma',
+                            help='The arguments to be passed to the model method.',
+                            nargs='*',
+                            type=clean_args)
+        parser.add_argument('--data', '-d',
+                            help='The method to get the input data, see data.py',
+                            type=data_methods)
+        parser.add_argument('--data_args', '-da',
+                            help='The arguments to be passed to the data method',
+                            nargs='*',
+                            type=clean_args)
+        parser.add_argument('--scaler', '-S',
+                            help='The scaling method to apply to the data.',
+                            type=scale_methods)
+        parser.add_argument('--scaler_args', '-Sa',
+                            help='The arguments for the scaling method.',
+                            nargs='*',
+                            type=clean_args)
+        parser.add_argument('--selection', '-s',
+                            help='The method used to perform feature selection',
+                            type=selection_methods)
+        parser.add_argument('--selection_args', '-sa',
+                            help='The arguments for the feature selection method',
+                            nargs='*',
+                            type=clean_args)
+        parser.add_argument('--augment', '-a',
+                            help='The method used to augment the trianing data',
+                            type=augment_methods)
+        parser.add_argument('--augment_args', '-aa',
+                            help='The arguments for the augment method.',
+                            nargs='*',
+                            type=clean_args)
+        parser.add_argument('--reps', '-r',
+                            help='How many times to run the model, ignored if validate is False',
+                            type=int)
+        parser.add_argument('--validate', '-v',
+                            help='If True the model should return a score if False the model should return predictions',
+                            type=clean_args,
+                            choices=[True, False])
+        parser.add_argument('--record_time', '-rt',
+                            help='If true keep track of time, if flase do not',
+                            type=clean_args,
+                            choices=[True, False])
+        parser.add_argument('--record_std_dev', '-rsd',
+                            help='If true record the standard deviation or all results',
+                            type=clean_args,
+                            choices=[True, False])
+        parser.add_argument('--record_data_size', '-rds',
+                            help='If True output how many training and test samples there are',
+                            type=clean_args,
+                            choices=[True,False])
+        args = parser.parse_args()
+        args_dict = vars(args)
+        # Remove unentered and invalid arguments
+        args_dict = {k: v for k,v in args_dict.items() if v is not None}
+        return args_dict
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model', '-m',
-                        help='Machine learning model, see best_models.py',
-                        type=model_methods)
-    parser.add_argument('--model_arguments', '-ma',
-                        help='The arguments to be passed to the model method.',
-                        nargs='*',
-                        type=clean_args)
-    parser.add_argument('--data', '-d',
-                        help='The method to get the input data, see data.py',
-                        type=data_methods)
-    parser.add_argument('--data_args', '-da',
-                        help='The arguments to be passed to the data method',
-                        nargs='*',
-                        type=clean_args)
-    parser.add_argument('--scaler', '-S',
-                        help='The scaling method to apply to the data.',
-                        type=scale_methods)
-    parser.add_argument('--scaler_args', '-Sa',
-                        help='The arguments for the scaling method.',
-                        nargs='*',
-                        type=clean_args)
-    parser.add_argument('--selection', '-s',
-                        help='The method used to perform feature selection',
-                        type=selection_methods)
-    parser.add_argument('--selection_args', '-sa',
-                        help='The arguments for the feature selection method',
-                        nargs='*',
-                        type=clean_args)
-    parser.add_argument('--augment', '-a',
-                        help='The method used to augment the trianing data',
-                        type=augment_methods)
-    parser.add_argument('--augment_args', '-aa',
-                        help='The arguments for the augment method.',
-                        nargs='*',
-                        type=clean_args)
-    parser.add_argument('--reps', '-r',
-                        help='How many times to run the model, ignored if validate is False',
-                        type=int)
-    parser.add_argument('--validate', '-v',
-                        help='If True the model should return a score if False the model should return predictions',
-                        type=clean_args,
-                        choices=[True, False])
-    parser.add_argument('--record_time', '-rt',
-                        help='If true keep track of time, if flase do not',
-                        type=clean_args,
-                        choice=[True, False])
-    parser.add_argument('--record_std_dev', '-rsd',
-                        help='If true record the standard deviation or all results',
-                        type=clean_args,
-                        choice=[True, False])
-    parser.add_argument('--record_data_size', 'rds',
-                        help='If True output how many training and test samples there are',
-                        type=clean_args,
-                        choice=[True,False])
-    args = parser.parse_args()
-    args_dict = vars(args)
-    # Remove unentered and invalid arguments
-    filtered = {k: v for k,v in args_dict.items() if v is not None}
-    output = run(**filtered)
+    args = create_args_dict()
+    output = run(**args)
     print output

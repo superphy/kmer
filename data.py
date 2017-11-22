@@ -14,20 +14,6 @@ human_path = '/home/rboothman/Data/human_bovine/human/'
 bovine_path = '/home/rboothman/Data/human_bovine/bovine/'
 
 
-def get_methods():
-    output = {'kmer_split': get_kmer_us_uk_split,
-              'kmer_mixed': get_kmer_us_uk_mixed,
-              'genome_mixed': get_genome_region_us_uk_mixed,
-              'genome_split': get_genome_region_us_uk_split,
-              'kmer_json': get_kmer_from_json,
-              'kmer_directory': get_kmer_from_directory,
-              'genome_filtered': get_genome_region_filteredA,
-              'genome_custom': get_genome_regions,
-              'salmonella': get_salmonella_kmer,
-              'kmer_custom': get_kmer}
-    return output
-
-
 def get_kmer(args, database="database", recount=False, k=7, l=13):
     """
     Parameters:

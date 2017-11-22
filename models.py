@@ -8,14 +8,6 @@ from sklearn import svm
 from utils import flatten, make3D
 
 
-def get_methods():
-    output = {'nn_validation': neural_network_validation,
-              'svm_validation': support_vector_machine_validation,
-              'nn': neural_network,
-              'svm': support_vector_machine}
-    return output
-
-
 def neural_network_validation(input_data):
     """
     Constructs, compiles, trains, and tests a neural network.

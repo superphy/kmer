@@ -5,18 +5,6 @@ import random
 from utils import shuffle
 
 
-def get_methods():
-    output = {'naive': augment_data_naive,
-              'smote': augment_data_smote,
-              'adasyn': augment_data_adasyn,
-              'noise': augment_data_noise,
-              'balance_naive': balance_data_naive,
-              'balance_smote': balance_data_smote,
-              'balance_adasyn': balance_data_adasyn,
-              'balance_noise': balance_data_noise}
-    return output
-
-
 def __augment_data_naive_helper(data, desired_samples, x):
     """
     Helper method for augment_data_naive
