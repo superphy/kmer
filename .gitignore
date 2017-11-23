@@ -11,4 +11,8 @@
 *binary_table*
 temp.py
 /database2/*
-test*
+test_augmentation.py
+test_best_models.py
+test_fragment_size.py
+test_genome_regions_filtered.py
+test_selection.py

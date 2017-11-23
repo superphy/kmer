@@ -47,9 +47,9 @@ def remove_constant_features(x_train, x_test):
 
 def select_k_best(input_data, score_func=f_classif, k=500):
     """
-    Selects the args[1] best features in x_train, removes all others from
+    Selects the k best features in x_train, removes all others from
     x_train and x_test. Selects the best features by using the score
-    function args[0].
+    function score_func.
     """
     x_train = input_data[0]
     y_train = input_data[1]

@@ -103,7 +103,7 @@ def get_kmer_us_uk_split(database="database", recount=False, k=7, l=13):
         et. al paper.
     """
     kwargs = {'prefix': filepath, 'suffix': '.fasta'}
-    x_train, y_train, x_test, y_test = parse_metadata_2_(**kwargs)
+    x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
 
     if recount:
         allfiles = x_train + x_test
@@ -137,6 +137,7 @@ def get_kmer_us_uk_mixed(database="database", recount=False, k=7, l=13):
     x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
 
     if recount:
+        genomes = x_train + x_test
         count_kmers(k, l, genomes, database)
 
     x_train = get_counts(x_train, database)
