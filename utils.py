@@ -157,10 +157,10 @@ def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
         sep:          The delimiter used in "metadata", if None the
                       delimiter is guessed.
     Returns:
-        x_train:    All the training fasta files
-        y_train:    The labels for x_train
-        x_test:     All the test fasta files.
-        y_test:     The labels for x_test
+        x_train:   All the training fasta files
+        y_train:   The labels for x_train
+        x_test:    All the test fasta files.
+        y_test:    The labels for x_test
     """
     if sep is None:
         data = pd.read_csv(metadata, sep=sep, engine='python')
@@ -177,8 +177,8 @@ def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
         for label in all_labels:
             all_train_data.append(train_data[train_data[label_header]==label])
             all_test_data.append(test_data[test_data[label_header]==label])
-        all_train_data = [x.as_matrix(columns=[fasta_header]) for x in all_train_data]
-        all_test_data = [x.as_matrix(columns=[fasta_header]) for x in all_test_data]
+        all_train_data = [x[fasta_header].values for x in all_train_data]
+        all_test_data = [x[fasta_header].values for x in all_test_data]
     else:
         all_train_data = []
         all_test_data = []
