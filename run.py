@@ -4,6 +4,7 @@ import argparse
 import feature_scaling
 import feature_selection
 import data_augmentation
+import inspection
 import numpy as np
 import time
 
@@ -110,7 +111,8 @@ def model_methods(input_string):
     """
     Given a string that is the name of a model, return the model.
     """
-    methods = models.get_methods()
+    methods = dict(inspect.getmembers(models))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -123,7 +125,8 @@ def data_methods(input_string):
     """
     Given a string that is the name of data method, return the data method.
     """
-    methods = data.get_methods()
+    methods = dict(inspect.getmembers(models))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -137,7 +140,8 @@ def scale_methods(input_string):
     Given a string that is the name of a scaling method, return the scaling
     method.
     """
-    methods = feature_scaling.get_methods()
+    methods = dict(inspect.getmembers(models))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -151,7 +155,8 @@ def selection_methods(input_string):
     Given a string that is the name of a feature selection method, return
     the feature selection method.
     """
-    methods = feature_selection.get_methods()
+    methods = dict(inspect.getmembers(models))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -165,7 +170,8 @@ def augment_methods(input_string):
     Given a string that is the name of a data augmentation method, return
     the data augmentation method.
     """
-    methods = data_augmentation.get_methods()
+    methods = dict(inspect.getmembers(models))
+    methods = {k:v for k,v in methods.items() if inspect.isfunction(v)}
     try:
         output = methods[input_string]
     except KeyError as E:
@@ -188,8 +194,7 @@ def clean_args(value):
         output = value
     return output
 
-
-if __name__ == "__main__":
+def create_args_dict():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', '-m',
                         help='Machine learning model, see best_models.py',
@@ -248,6 +253,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args_dict = vars(args)
     # Remove unentered and invalid arguments
-    filtered = {k: v for k,v in args_dict.items() if v is not None}
-    output = run(**filtered)
+    args_dict = {k: v for k,v in args_dict.items() if v is not None}
+    return args_dict
+
+if __name__ == "__main__":
+    args_dict = create_args_dict()
+    output = run(**args_dict)
     print output

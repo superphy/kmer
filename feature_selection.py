@@ -5,14 +5,6 @@ from utils import flatten, make3D
 import pandas as pd
 import numpy as np
 
-def get_methods():
-    output = {"variance": variance_threshold,
-              "k_best": select_k_best,
-              "percentile": select_percentile,
-              "rfe": recursive_feature_elimination,
-              "rfecv": recursive_feature_elimination_cv}
-    return output
-
 def variance_threshold(input_data, threshold=0.16):
     """
     Removes all features from x_train and x_test whose variances is less
