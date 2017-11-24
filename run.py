@@ -4,6 +4,7 @@ import argparse
 import feature_scaling
 import feature_selection
 import data_augmentation
+import inspection
 import numpy as np
 import time
 import inspect

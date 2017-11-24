@@ -3,13 +3,14 @@ from feature_selection import flatten, make3D
 import numpy as np
 import random
 from utils import shuffle
+import inspect
 
 
-def __augment_data_naive_helper(data, desired_samples, x):
+def __augment_data_naive_helper(data, desired_samples):
     """
     Helper method for augment_data_naive
     """
-    indices = np.random.randint(data.shape[0], size=x*desired_samples)
+    indices = np.random.randint(data.shape[0], size=2*desired_samples)
     temp = np.split(data[indices,:], desired_samples)
     new_data = []
     for elem in temp: new_data.append(elem.mean(axis=0))
@@ -18,7 +19,7 @@ def __augment_data_naive_helper(data, desired_samples, x):
     return data
 
 
-def augment_data_naive(input_data, desired_samples=50, choice=2):
+def augment_data_naive(input_data, desired_samples=50):
     """
     Augments data by grabbing x random samples from a class and
     averaging their values to create another sample of the same class.
@@ -32,11 +33,17 @@ def augment_data_naive(input_data, desired_samples=50, choice=2):
     x_test = input_data[2]
     y_test = input_data[3]
 
-    temp = np.asarray(y_train, dtype='bool')
-    x_pos = __augment_data_naive_helper(x_train[temp], desired_samples, choice)
-    temp = np.invert(temp)
-    x_neg = __augment_data_naive_helper(x_train[temp], desired_samples, choice)
-    x_train, y_train = shuffle(x_pos, x_neg, 1, 0)
+    classes = np.unique(y_train)
+    output = []
+    labels = []
+    for c in classes:
+        indices = np.where(y_train==c, True, False)
+        samples = x_train[indices]
+        new_samples = __augment_data_naive_helper(samples, desired_samples)
+        output.append(new_samples)
+        labels.append(c)
+
+    x_train, y_train = shuffle(output, labels)
     return (x_train, y_train, x_test, y_test)
 
 
@@ -62,10 +69,11 @@ def augment_data_smote(input_data, desired_samples=50):
 
     counts = np.bincount(y_train)
     classes = np.unique(y_train)
-    a = counts[0]+desired_samples
-    b = counts[1]+desired_samples
-    ratio = {classes[0]:a, classes[1]:b}
-    x_train, y_train = SMOTE(ratio=ratio).fit_sample(x_train, y_train)
+    ratio = {}
+    for c in range(len(classes)):
+        ratio[classes[c]] = counts[c]+desired_samples
+    smote = SMOTE(ratio=ratio)
+    x_train, y_train = smote.fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
 
@@ -90,8 +98,10 @@ def augment_data_adasyn(input_data, desired_samples=50):
     y_test = input_data[3]
 
     counts = np.bincount(y_train)
-    vals = np.unique(y_train)
-    ratio = {vals[0]:counts[0]+desired_samples, vals[1]:counts[1]+desired_samples}
+    classes = np.unique(y_train)
+    ratio = {}
+    for c in range(len(classes)):
+        ratio[classes[c]] = counts[c]+desired_samples
     x_train, y_train = ADASYN(ratio=ratio).fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
@@ -102,18 +112,19 @@ def augment_data_noise(input_data, desired_samples=50):
     x_test = input_data[2]
     y_test = input_data[3]
 
-    clasess = np.unique(y_train)
-    class1 = np.where(y_train==classes[0], True, False)
-    class2 = np.invert(class1)
-    x_pos = x_train[class1]
-    x_neg = x_train[class2]
-    new_x_pos = x_pos[np.random.choice(x_pos.shape[0], desired_samples)]
-    new_x_neg = x_neg[np.random.choice(x_neg.shape[0], desired_samples)]
-    new_x_pos = np.random.randn(x_pos.shape[1]) + new_x_pos
-    new_x_neg = np.random.randn(x_neg.shape[1]) + new_x_neg
-    x_pos = np.vstack((x_pos, new_x_pos))
-    x_neg = np.vstack((x_neg, new_x_neg))
-    x_train, y_train = shuffle(x_pos, x_neg, 1, 0)
+    classes = np.unique(y_train)
+    output = []
+    labels = []
+    for c in classes:
+        indices = np.where(y_train==c, True, False)
+        samples = x_train[indices]
+        new_samples = samples[np.random.choice(samples.shape[0], desired_samples)]
+        new_samples = np.random.randn(new_samples.shape[1]) + new_samples
+        samples = np.vstack((samples, new_samples))
+        output.append(samples)
+        labels.append(c)
+
+    x_train, y_train = shuffle(output, labels)
     return (x_train, y_train, x_test, y_test)
 
 
@@ -123,9 +134,11 @@ def balance_data_smote(input_data):
     x_test = input_data[2]
     y_test = input_data[3]
 
-    counts = np.bincount(y_train)
+    samples = max(np.bincount(y_train))
     classes = np.unique(y_train)
-    ratio = {classes[0]:max(counts), classes[1]:max(counts)}
+    ratio = {}
+    for c in classes:
+        ratioi[c] = samples
     x_train, y_train = SMOTE(ratio=ratio).fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
@@ -135,9 +148,11 @@ def balance_data_adasyn(input_data):
     x_test = input_data[2]
     y_test = input_data[3]
 
-    counts = np.bincount(y_train)
+    samples = max(np.bincount(y_train))
     classes = np.unique(y_train)
-    ratio = {classes[0]:max(counts), classes[1]:max(counts)}
+    ratio = {}
+    for c in classes:
+        ratio[c] = samples
     x_train, y_train = ADASYN(ratio=ratio).fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
@@ -150,20 +165,18 @@ def balance_data_naive(input_data, choice=2):
     counts = np.bincount(y_train)
     largest_count = max(counts)
     classes = np.unique(y_train)
+    output = []
+    labels = []
+    for c in classes:
+        indices = np.where(y_train==c, True, False)
+        samples = x_train[indices]
+        desired_samples = largest_count - samples.shape[0]
+        if desired_samples > 0:
+            samples = __augment_data_naive_helper(samples, desired_samples, choice)
+        output.append(samples)
+        labels.append(c)
 
-    class1 = np.where(y_train==classes[0], True, False)
-    x_pos = x_train[class1]
-    desired_samples = largest_count - x_pos.shape[0]
-    if desired_samples > 0:
-        x_pos = __augment_data_naive_helper(x_pos, desired_samples, choice)
-
-    class2 = np.invert(class1)
-    x_neg = x_train[class2]
-    desired_samples = largest_count - x_neg.shape[0]
-    if desired_samples > 0:
-        x_neg = __augment_data_naive_helper(x_neg, desired_samples, choice)
-
-    x_train, y_train = shuffle(x_pos, x_neg, 1, 0)
+    x_train, y_train = shuffle(output, labels)
     return (x_train, y_train, x_test, y_test)
 
 def balance_data_noise(input_data):
@@ -174,22 +187,19 @@ def balance_data_noise(input_data):
 
     counts = np.bincount(y_train)
     largest_count = max(counts)
-    largest_count = max(counts)
     classes = np.unique(y_train)
-    class1 = np.where(y_train==classes[0], True, False)
-    x_pos = x_train[class1]
-    desired_samples = largest_count - x_pos.shape[0]
-    if desired_samples > 0:
-        new_x_pos = x_pos[np.random.choice(x_pos.shape[0], desired_samples)]
-        x_pos = np.vstack((x_pos, new_x_pos))
+    output = []
+    labels = []
+    for c in classes:
+        indices = np.where(y_train==c, True, False)
+        samples = x_train[indices]
+        desired_samples = largest_count - samples.shape[0]
+        if desired_samples > 0:
+            new_samples = samples[np.random.choice(samples.shape[0], desired_samples)]
+            new_samples = np.random.randn(samples.shape[1]) + new_samples
+            samples = np.vstack((samples, new_samples))
+        output.append(samples)
+        labels.appends(c)
 
-    class2 = np.invert(class1)
-    x_neg = x_train[class2]
-    desired_samples = largest_count - x_neg.shape[0]
-    if desired_samples > 0:
-        new_x_neg = x_neg[np.random.choice(x_pos.shape[0], desired_samples)]
-        x_neg = np.vstack((x_neg, new_x_neg))
-
-    x_train, y_train = shuffle(x_pos, x_neg, 1, 0)
-
+    x_train, y_train = shuffle(samples, labels)
     return (x_train, y_train, x_test, y_test)

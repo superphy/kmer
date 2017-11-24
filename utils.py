@@ -2,8 +2,10 @@ import csv
 import os
 import random
 import json
+import sys
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
 def setup_files(filepath):
     """
@@ -54,23 +56,32 @@ def same_shuffle(a,b):
     return list(a),list(b)
 
 
-def shuffle(A, B, labelA, labelB):
-    """
-    Returns "data", a combined and shuffled version of datasets A and B, as well
-    as a secondary list that labels each element in "data" as originally
-    belonging to A or B
-    """
-    if type(A) == list:
-        data = A + B
-        labels = [labelA for x in A] +  [labelB for x in B]
-        return same_shuffle(data, labels)
-    elif type(A) == np.ndarray:
-        data = np.concatenate((A,B), axis=0)
-        labelsA = np.full(A.shape[0], labelA)
-        labelsB = np.full(B.shape[0], labelB)
-        labels = np.concatenate((labelsA, labelsB), axis=0)
-        data, labels = same_shuffle(data, labels)
-        return np.asarray(data), np.asarray(labels)
+def shuffle(data, labels):
+    try:
+        assert(len(data) == len(labels))
+        assert(type(data[0]) == list or type(data[0]) == np.ndarray)
+    except AssertionError as E:
+        print E
+    if type(data[0]) == list:
+        all_data = []
+        for x in data: all_data.extend(x)
+        all_labels = []
+        count = 0
+        for label in labels:
+            all_labels.extend([label for x in data[count]])
+            count += 1
+        all_data, all_labels = same_shuffle(all_data, all_labels)
+    elif type(data[0] == np.ndarray):
+        all_data = np.concatenate(data, axis=0)
+        all_labels = []
+        count = 0
+        for label in labels:
+            all_labels.append(np.full(data[count].shape[0], label))
+        all_labels = np.concatenate(all_labels, axis=0)
+        all_data, all_labels = same_shuffle(all_data, all_labels)
+        all_data = np.asarray(all_data)
+        all_labels = np.asarray(all_labels)
+    return all_data, all_labels
 
 def flatten(data):
     """
@@ -83,96 +94,115 @@ def make3D(data):
     """
     Takes a 2D numpy ndarray and makes it 3D
     """
-    data = data.reshape(data.shape + (1,))
+    data = data.reshape(data.shape[0], data.shape[1], 1)
     return data
 
 
 def sensitivity_specificity(predicted_values, true_values):
     """
-    Takes two arrays, one is the predicted_values from running a prediction, the
-    other is the true values. Returns the sensitivity and the specificity of the
-    machin learning model.
+    Parameters:
+        predicted_values:   Array, what the model predicted.
+        true_values:        Array, the true values.
+    Returns:
+        results:    Dictionary, keys are the classes, values are dictionaries
+                    with keys 'sensitivity' and 'specificity'
     """
-    true_pos = len([x for x in true_values if x == 1])
-    true_neg = len([x for x in true_values if x == 0])
-    false_pos = 0
-    false_neg = 0
-    for i in range(len(predicted_values)):
-        if true_values[i] == 0 and predicted_values[i] == 1:
-            false_pos += 1
-        if true_values[i] == 1 and predicted_values[i] == 0:
-            false_neg += 1
+    results = {}
+    if type(predicted_values) != np.ndarray:
+        predicted_values = np.asarray(predicted_values)
+    if type(true_values) != np.ndarray:
+        true_values = np.asarray(true_values)
 
-    sensitivity = (1.0*true_pos)/(true_pos + false_neg)
-    specificity = (1.0*true_neg)/(true_neg + false_pos)
+    classes = np.unique(true_values)
+    for c in classes:
+        indices = np.where(true_values==c, True, False)
+        non_indices = np.invert(indices)
+        true_pos = np.where(predicted_values[indices]==c).shape[0]
+        true_neg = np.where(predicted_values[non_indices]!=c).shape[0]
+        false_pos = np.where(predicted_values[non_indices]==c).shape[0]
+        false_neg = np.where(predicted_values[indices]!=c).shape[0]
 
-    return sensitivity, specificity
+        sensitivity = (1.0*true_pos)/(true_pos+false_neg)
+        specificity = (1.0*true_neg)/(ture_neg+false_pos)
+
+        results[str(c)] = {'sensitivity':sensitivity, 'specificity':specificity}
+
+    return results
 
 
-def parse_metadata(metadata, pos_label, neg_label, pos_path='', neg_path='',
-                   train_label='', test_label='', file_suffix='', sep='\t'):
+def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
+                   fasta_header='Filename', label_header='Classification',
+                   train_header='Dataset', extra_header=None, extra_label=None,
+                   train_label='Train', test_label='Test', prefix='', suffix='',
+                   sep=None, one_vs_all=None):
     """
     Parameters:
-        metadata:    A csv metadata sheet with 2 or 3 columns. The first row
-                     should be column headers.
-                     Col 1: The name of the genome
-                     Col 2: The classification label for the genome.
-                     Col 3: If present: Whether or not the genome is for
-                            training or testing.
-                            If not present: 80%% of genomes are placed in
-                            training, the rest in testing.
-        pos_label:   Label used to classify positive genomes in "metadata".
-        neg_label:   Label used to classify negative genomes in "metadata".
-        pos_path:    The path to the fasta files for positive genomes.
-        neg_path:    The path to the fasta files for negative genomes.
-        train_label: Label identifying train genomes in "metadata".
-        test_label:  Label identifying test genomes in "metadata".
-        file_suffix: Suffix to appened to genome names in "metadata".
-        sep:         The delimiter used in "metadata"
-
+        metadata:     A csv file, must contain at least one column of genome
+                      names and one column of their classifications.
+        fasta_header: String, header for the genome name column
+        label_header: String, header for the genome classification column
+        train_header: String, header for the column that contains train/test
+                      labels, if not given a random 80/20 split will be used to
+                      generate the train/test datasets.
+        train_label:  String, labels train genomes under train_header.
+        test_label:   String, labels test genomes under train_header.
+        extra_header: String, header for an additional column.
+        extra_label:  String, if a sample's value under the extra_header column
+                      does not match extra_label it will be removed.
+        prefix:       String, prefix to attach to the front of genome
+                      names, for instance the complete filepath.
+        suffix:       String, suffix to appened to the genome names for instance
+                      .fasta
+        sep:          The delimiter used in metadata, if None the
+                      delimiter is guessed.
+        one_vs_all:   String, changes a multiclass problem into a binary
+                      problem. All samples whose classification does not match
+                      one_vs_all will be combined into one class.
     Returns:
         x_train:   All the training fasta files
         y_train:   The labels for x_train
         x_test:    All the test fasta files.
         y_test:    The labels for x_test
     """
-    with open(metadata, 'r') as f:
-        pos_train = []
-        neg_train =[]
-        pos_test = []
-        neg_test = []
-        headers = f.readline()
-        line = f.readline()
-        while line:
-            line = line.rstrip('\n')
-            line = line.split(sep)
-            if train_label:
-                if line[1] == pos_label and line[2] == train_label:
-                    pos_train.append(pos_path+line[0]+file_suffix)
-                elif line[1] == neg_label and line[2] == train_label:
-                    neg_train.append(neg_path+line[0]+file_suffix)
-                elif line[1] == pos_label and line[2] == test_label:
-                    pos_test.append(pos_path+line[0]+file_suffix)
-                elif line[1] == neg_label and line[2] == test_label:
-                    neg_test.append(neg_path+line[0]+file_suffix)
+    if sep is None:
+        data = pd.read_csv(metadata, sep=sep, engine='python')
+    else:
+        data = pd.read_csv(metadata, sep=sep)
+    if extra_header:
+        data = data[data[extra_header] == extra_label]
+    if one_vs_all:
+        data[label_header] = data[label_header].where(data[label_header]==one_vs_all, 'Other')
+    all_labels = np.unique(data[label_header])
+    if train_header:
+        train_data = data[data[train_header]==train_label]
+        test_data = data[data[train_header]==test_label]
+        all_train_data = []
+        all_test_data = []
+        for label in all_labels:
+            all_train_data.append(train_data[train_data[label_header]==label])
+            all_test_data.append(test_data[test_data[label_header]==label])
+        all_train_data = [x[fasta_header].values for x in all_train_data]
+        all_test_data = [x[fasta_header].values for x in all_test_data]
+    else:
+        all_train_data = []
+        all_test_data = []
+        for label in all_labels:
+            label_data = data[data[label_header]==label]
+            label_data = label_data[fasta_header].values
+            np.random.shuffle(label_data)
+            if label_data.shape[0] == 1:
+                all_train_data.append(label_data[0:])
+                all_test_data.append(label_data[:0])
             else:
-                if line[1] == pos_label:
-                    pos_train.append(pos_path+line[0]+file_suffix)
-                elif line[1] == neg_label:
-                    neg_train.append(neg_path+line[0]+file_suffix)
-            line = f.readline()
-        if not train_label:
-            random.shuffle(pos_train)
-            random.shuffle(neg_train)
-            cutoff = int(0.8*len(pos_train))
-            pos_test = pos_train[cutoff:]
-            pos_train = pos_train[:cutoff]
-            cutoff = int(0.8*len(neg_train))
-            neg_test = neg_train[cutoff:]
-            neg_train = neg_train[:cutoff]
+                cutoff = int(0.8*label_data.shape[0])
+                all_train_data.append(label_data[:cutoff])
+                all_test_data.append(label_data[cutoff:])
 
-    x_train, y_train = shuffle(pos_train, neg_train, 1, 0)
-    x_test, y_test = shuffle(pos_test, neg_test, 1, 0)
+    all_train_data = [[prefix+str(x)+suffix for x in array] for array in all_train_data]
+    all_test_data = [[prefix+str(x)+suffix for x in array] for array in all_test_data]
+
+    x_train, y_train = shuffle(all_train_data, all_labels)
+    x_test, y_test = shuffle(all_test_data, all_labels)
 
     return x_train, y_train, x_test, y_test
 
@@ -186,12 +216,10 @@ def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
                     ".fasta"
         key:        The fasta filename identifier used in the json files.
         json_files: One or more json files to create a list of fasta files from.
-
     Returns:
         A list with as many elements as json files were input. Each element in
         the list is a list of the complete file paths to each valid genome
         contained in the corresponding json file.
-
     See Superphy/MoreSerotype/module/DownloadMetadata.py on Github for a script
     that can generate the json files.
     """
@@ -207,35 +235,14 @@ def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
 
     return output
 
-def parse_salmonella_metadata(metadata='/home/rboothman/PHAC/kmer/Data/amr_sorted.csv',
-                              antibiotic='ampicillin',
-                              path='/home/rboothman/Data/salmonella_amr/',
-                              suffix='.fna', pos_label='Susceptible',
-                              neg_label='Resistant'):
-    data = pd.read_csv(metadata)
-    filtered = data[data.Antibiotic == antibiotic]
-    susceptible = filtered[filtered.AMR == pos_label]
-    resistant = filtered[filtered.AMR == neg_label]
-    all_files = os.listdir(path)
-    susceptible = [path+str(x)+suffix for x in list(susceptible.Fasta) if str(x)+suffix in all_files]
-    resistant = [path+str(x)+suffix for x in list(resistant.Fasta) if str(x)+suffix in all_files]
-    x_train, y_train = shuffle(susceptible, resistant, 1, 0)
 
-    cutoff = int(0.8*len(x_train))
-    x_test = x_train[cutoff:]
-    y_test = y_train[cutoff:]
-
-    x_train = x_train[:cutoff]
-    y_train = y_train[:cutoff]
-
-    return (x_train, y_train, x_test, y_test)
-
-def parse_omnilog(headers='/home/rboothman/Data/ecomnilog/wide_format_header.txt'):
-    data = pd.read_csv(headers, sep=',', header=0, index_col=0)
-    # with open(headers, 'r') as f:
-    #     first = f.readline().split(',')
-    #     max_col = len(first)
-    # data = np.genfromtxt(headers, dtype='float64', delimiter=',', skip_header=1,
-    #                      missing_values=['NA'], filling_values=[np.nan],
-    #                      usecols = np.arange(1,max_col), autostrip=True)
-    return data
+def convert_to_numerical_classes(data):
+    le = LabelEncoder()
+    if len(data) > 3:
+        labels = data[1]+data[3]
+        le.fit(labels)
+        output_data = (data[0],le.transform(data[1]),data[2],le.transform(data[3]))
+    else:
+        le.fit(data[1])
+        output_data = (data[0], le.transform(data[1]), data[2])
+    return output_data, le
