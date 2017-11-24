@@ -5,6 +5,7 @@ import json
 import sys
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
 def setup_files(filepath):
     """
@@ -61,7 +62,6 @@ def shuffle(data, labels):
         assert(type(data[0]) == list or type(data[0]) == np.ndarray)
     except AssertionError as E:
         print E
-        sys.exit()
     if type(data[0]) == list:
         all_data = []
         for x in data: all_data.extend(x)
@@ -94,7 +94,7 @@ def make3D(data):
     """
     Takes a 2D numpy ndarray and makes it 3D
     """
-    data = data.reshape(data.shape + (1,))
+    data = data.reshape(data.shape[0], data.shape[1], 1)
     return data
 
 
@@ -132,30 +132,32 @@ def sensitivity_specificity(predicted_values, true_values):
 
 def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
                    fasta_header='Filename', label_header='Classification',
-                   train_header='Dataset', extra_header=None,
-                   train_label='Train', test_label='Test',  extra_label=None,
-                   prefix='', suffix='', sep=None):
+                   train_header='Dataset', extra_header=None, extra_label=None,
+                   train_label='Train', test_label='Test', prefix='', suffix='',
+                   sep=None, one_vs_all=None):
     """
     Parameters:
-        metadata:     A csv metadata sheet with 2 or 3 columns. One column
-                      containing genome names, one column containing genome
-                      classifications, and optionally a column containing
-                      train/test labels, If the final column is not present
-                      80%% of the genomes are used for training.
-        fasta_header: Header for the column that contains the genome names
-        label_header: Header for the genome classification column
-        train_header: Header for the column that contains train/test labels
-        extra_header: Header for an additional column to filter genomes by.
-        train_label:  Label identifying train genomes in "metadata".
-        test_label:   Label identifying test genomes in "metadata".
-        extra_label:  If extra_header is provided only rows whose value in
-                      extra_header matches extra_label will be kept.
-        prefix:       Prefix to attach to the front of genome names, for
-                      instance the complete filepath.
-        suffix:       Suffix to appened to the genome names for instance
-                      .fna
-        sep:          The delimiter used in "metadata", if None the
+        metadata:     A csv file, must contain at least one column of genome
+                      names and one column of their classifications.
+        fasta_header: String, header for the genome name column
+        label_header: String, header for the genome classification column
+        train_header: String, header for the column that contains train/test
+                      labels, if not given a random 80/20 split will be used to
+                      generate the train/test datasets.
+        train_label:  String, labels train genomes under train_header.
+        test_label:   String, labels test genomes under train_header.
+        extra_header: String, header for an additional column.
+        extra_label:  String, if a sample's value under the extra_header column
+                      does not match extra_label it will be removed.
+        prefix:       String, prefix to attach to the front of genome
+                      names, for instance the complete filepath.
+        suffix:       String, suffix to appened to the genome names for instance
+                      .fasta
+        sep:          The delimiter used in metadata, if None the
                       delimiter is guessed.
+        one_vs_all:   String, changes a multiclass problem into a binary
+                      problem. All samples whose classification does not match
+                      one_vs_all will be combined into one class.
     Returns:
         x_train:   All the training fasta files
         y_train:   The labels for x_train
@@ -168,6 +170,8 @@ def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
         data = pd.read_csv(metadata, sep=sep)
     if extra_header:
         data = data[data[extra_header] == extra_label]
+    if one_vs_all:
+        data[label_header] = data[label_header].where(data[label_header]==one_vs_all, 'Other')
     all_labels = np.unique(data[label_header])
     if train_header:
         train_data = data[data[train_header]==train_label]
@@ -184,12 +188,19 @@ def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
         all_test_data = []
         for label in all_labels:
             label_data = data[data[label_header]==label]
-            label_data = label_data.as_matrix(columns=[fasta_header])
-            cutoff = int(0.8*label_data.shape[0])
-            all_train_data.append(label_data[:cutoff])
-            all_test_data.append(label_data[cutoff:])
+            label_data = label_data[fasta_header].values
+            np.random.shuffle(label_data)
+            if label_data.shape[0] == 1:
+                all_train_data.append(label_data[0:])
+                all_test_data.append(label_data[:0])
+            else:
+                cutoff = int(0.8*label_data.shape[0])
+                all_train_data.append(label_data[:cutoff])
+                all_test_data.append(label_data[cutoff:])
+
     all_train_data = [[prefix+str(x)+suffix for x in array] for array in all_train_data]
     all_test_data = [[prefix+str(x)+suffix for x in array] for array in all_test_data]
+
     x_train, y_train = shuffle(all_train_data, all_labels)
     x_test, y_test = shuffle(all_test_data, all_labels)
 
@@ -205,12 +216,10 @@ def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
                     ".fasta"
         key:        The fasta filename identifier used in the json files.
         json_files: One or more json files to create a list of fasta files from.
-
     Returns:
         A list with as many elements as json files were input. Each element in
         the list is a list of the complete file paths to each valid genome
         contained in the corresponding json file.
-
     See Superphy/MoreSerotype/module/DownloadMetadata.py on Github for a script
     that can generate the json files.
     """
@@ -225,3 +234,15 @@ def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
         output.append(fasta_names)
 
     return output
+
+
+def convert_to_numerical_classes(data):
+    le = LabelEncoder()
+    if len(data) > 3:
+        labels = data[1]+data[3]
+        le.fit(labels)
+        output_data = (data[0],le.transform(data[1]),data[2],le.transform(data[3]))
+    else:
+        le.fit(data[1])
+        output_data = (data[0], le.transform(data[1]), data[2])
+    return output_data, le

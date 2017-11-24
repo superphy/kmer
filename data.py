@@ -1,4 +1,4 @@
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, Imputer
 from sklearn.model_selection import StratifiedShuffleSplit as SSS
 from kmer_counter import count_kmers, get_counts
 from utils import check_fasta, same_shuffle, shuffle, flatten, make3D, setup_files
@@ -13,22 +13,7 @@ import random
 filepath = '/home/rboothman/Data/ecoli/'
 
 
-def get_methods():
-    output = {'kmer_split': get_kmer_us_uk_split,
-              'kmer_mixed': get_kmer_us_uk_mixed,
-              'genome_mixed': get_genome_region_us_uk_mixed,
-              'genome_split': get_genome_region_us_uk_split,
-              'kmer_json': get_kmer_from_json,
-              'kmer_directory': get_kmer_from_directory,
-              'genome_filtered': get_genome_pre_filtered,
-              'genome_custom_filtered': get_genome_custom_filtered,
-              'genome_custom': get_genome_regions,
-              'salmonella': get_salmonella_kmer,
-              'kmer_custom': get_kmer}
-    return output
-
-
-def get_kmer(args, database="database", recount=False, k=7, l=13):
+def get_kmer(kwargs, database="database", recount=False, k=7, l=13):
     """
     Parameters:
         args:       The arguments to pass to parse_metadata.
@@ -40,7 +25,7 @@ def get_kmer(args, database="database", recount=False, k=7, l=13):
     Returns:
         x_train, y_train, x_test, y_test
     """
-    x_train, y_train, x_test, y_test = parse_metadata(*args)
+    x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
 
     if recount:
         allfiles = x_train + x_test
@@ -470,3 +455,49 @@ def get_salmonella_kmer(database='database2', recount=False, k=7, l=13,
     x_test = np.asarray(x_test, dtype='float64')
 
     return (x_train, y_train, x_test, y_test)
+
+def get_kmer_for_omnilog(database="database", recount=False, k=7, l=13,
+                         classification_header='Host', positive_label='Human'):
+    """
+    Wrapper for get_kmer, provides the args necessary to parse the ecomnilog
+    metadata sheet.
+    """
+    kwargs = {'metadata': '/home/rboothman/Data/ecomnilog/metadata.csv',
+            'fasta_header': 'Strain',
+            'label_header': classification_header,
+            'train_header': None,
+            'one_vs_all': positive_label,
+            'prefix': '/home/rboothman/Data/ecomnilog/fasta (copy)/',
+            'suffix': '.fasta'}
+    data = get_kmer(kwargs, database, recount, k, 7)
+    return data
+
+def get_omnilog_data(kwargs, classification_header='Host', positive_label='Human'):
+    """
+
+    """
+    # kwargs = {'metadata': '/home/rboothman/Data/ecomnilog/metadata.csv',
+    #         'fasta_header': 'Strain',
+    #         'label_header': classification_header,
+    #         'train_header': None,
+    #         'one_vs_all': positive_label}
+    input_data = list(parse_metadata(**kwargs))
+    omnilog_sheet='/home/rboothman/Data/ecomnilog/wide_format_header.txt'
+    omnilog_data = pd.read_csv(omnilog_sheet, index_col=0)
+    valid_cols = [input_data[0].index(x) for x in input_data[0] if x in list(omnilog_data)]
+    input_data[0] = [input_data[0][x] for x in valid_cols]
+    input_data[1] = [input_data[1][x] for x in valid_cols]
+    valid_cols = [input_data[2].index(x) for x in input_data[2] if x in list(omnilog_data)]
+    input_data[2] = [input_data[2][x] for x in valid_cols]
+    input_data[3] = [input_data[3][x] for x in valid_cols]
+
+    output_data = []
+    output_data.append(omnilog_data[input_data[0]].T.values)
+    output_data.append(input_data[1])
+    output_data.append(omnilog_data[input_data[2]].T.values)
+    output_data.append(input_data[3])
+
+    imputer = Imputer()
+    output_data[0] = imputer.fit_transform(output_data[0])
+    output_data[2] = imputer.transform(output_data[2])
+    return output_data
