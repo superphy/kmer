@@ -5,6 +5,7 @@ import json
 import sys
 import pandas as pd
 import numpy as np
+import constants
 from sklearn.preprocessing import LabelEncoder
 
 def setup_files(filepath):
@@ -77,6 +78,7 @@ def shuffle(data, labels):
         count = 0
         for label in labels:
             all_labels.append(np.full(data[count].shape[0], label))
+            count += 1
         all_labels = np.concatenate(all_labels, axis=0)
         all_data, all_labels = same_shuffle(all_data, all_labels)
         all_data = np.asarray(all_data)
@@ -92,7 +94,7 @@ def flatten(data):
 
 def make3D(data):
     """
-    Takes a 2D numpy ndarray and makes it 3D
+    Takes a 2D numpy ndarray and makes it 3D to be used in a Conv1D keras layer.
     """
     data = data.reshape(data.shape[0], data.shape[1], 1)
     return data
@@ -130,11 +132,11 @@ def sensitivity_specificity(predicted_values, true_values):
     return results
 
 
-def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
+def parse_metadata(metadata=constants.ECOLI_METADATA,
                    fasta_header='Filename', label_header='Classification',
                    train_header='Dataset', extra_header=None, extra_label=None,
                    train_label='Train', test_label='Test', prefix='', suffix='',
-                   sep=None, one_vs_all=None):
+                   sep=None, one_vs_all=None, remove=None):
     """
     Parameters:
         metadata:     A csv file, must contain at least one column of genome
@@ -170,6 +172,8 @@ def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
         data = pd.read_csv(metadata, sep=sep)
     if extra_header:
         data = data[data[extra_header] == extra_label]
+    if remove:
+        data = data.drop(data[data[label_header]==remove].index)
     if one_vs_all:
         data[label_header] = data[label_header].where(data[label_header]==one_vs_all, 'Other')
     all_labels = np.unique(data[label_header])
@@ -207,7 +211,7 @@ def parse_metadata(metadata='/home/rboothman/PHAC/kmer/Data/human_bovine.csv',
     return x_train, y_train, x_test, y_test
 
 
-def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
+def parse_json(path=constants.MORIA, suffix='.fasta',
                key='assembly_barcode', *json_files):
     """
     Parameters:
@@ -237,6 +241,11 @@ def parse_json(path='/home/rboothman/moria/entero_db/', suffix='.fasta',
 
 
 def convert_to_numerical_classes(data):
+    """
+    Uses a scikitlearn LabelEncoder to convert y_train and y_test (if it exists)
+    to numerical labels, returns data as well as the label encoder to allow the
+    labels to be converted back.
+    """
     le = LabelEncoder()
     if len(data) > 3:
         labels = data[1]+data[3]

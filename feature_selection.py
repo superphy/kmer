@@ -65,7 +65,7 @@ def select_k_best(input_data, score_func=f_classif, k=500):
     return (x_train, y_train, x_test, y_test)
 
 
-def select_percentile(input_data, score_func=f_classif, percentile=0.5):
+def select_percentile(input_data, score_func=f_classif, percentile=5):
     """
     Selects the best args[1] percentile of features in x_train, removes
     the rest of the features from x_train and x_test. Selects the best

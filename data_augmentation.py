@@ -42,7 +42,6 @@ def augment_data_naive(input_data, desired_samples=50):
         new_samples = __augment_data_naive_helper(samples, desired_samples)
         output.append(new_samples)
         labels.append(c)
-
     x_train, y_train = shuffle(output, labels)
     return (x_train, y_train, x_test, y_test)
 
@@ -102,7 +101,8 @@ def augment_data_adasyn(input_data, desired_samples=50):
     ratio = {}
     for c in range(len(classes)):
         ratio[classes[c]] = counts[c]+desired_samples
-    x_train, y_train = ADASYN(ratio=ratio).fit_sample(x_train, y_train)
+    adasyn = ADASYN(ratio=ratio)
+    x_train, y_train = adasyn.fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
 
@@ -123,8 +123,9 @@ def augment_data_noise(input_data, desired_samples=50):
         samples = np.vstack((samples, new_samples))
         output.append(samples)
         labels.append(c)
-
-    x_train, y_train = shuffle(output, labels)
+    output = np.asarray(output)
+    labels = np.asarray(labels)
+    x_train, y_train = shuffle(np.asarray(output), labels)
     return (x_train, y_train, x_test, y_test)
 
 
