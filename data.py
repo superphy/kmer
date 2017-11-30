@@ -38,9 +38,7 @@ def get_kmer(kwargs, database="database", recount=False, k=7, l=13):
     return (x_train, y_train, x_test, y_test)
 
 
-def get_genome_region(kwargs,
-                      table=constants.GENOME_REGION_TABLE,
-                      sep=None):
+def get_genome_region(kwargs, table=constants.GENOME_REGION_TABLE, sep=None):
     """
     Parameters:
         args:    The arguments to pass to parse_metadata.
@@ -111,7 +109,7 @@ def get_salmonella_kmer(antibiotic='ampicillin', database='database',
 
 
 def get_omnilog_kmer(database="database", recount=False, k=7, l=13,
-                         classification_header='Host', positive_label=None):
+                     classification_header='Host', positive_label=None):
     """
     Wraps get_kmer, to get kmer data for the omnilog fasta files.
     """
@@ -125,8 +123,7 @@ def get_omnilog_kmer(database="database", recount=False, k=7, l=13,
     return get_kmer(kwargs, database, recount, k, l)
 
 
-def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,
-                                  sep=None):
+def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None):
     """
     Wraps get_genome_region to get the US/UK mixed datasets genome region data to
     recreate the Lupolova et al paper.
@@ -137,8 +134,7 @@ def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,
     return get_genome_region(kwargs, table, sep)
 
 
-def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,
-                                  sep=None):
+def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None):
     """
     Wraps get_genome_region to get the US/UK split dataset genome region data to
     recreate the Lupolova et al paper.
@@ -352,12 +348,16 @@ def get_kmer_from_directory(database='database', recount=False, k=7, l=13,
 
     return output
 
-def get_omnilog_data(kwargs, classification_header='Host', positive_label='Human'):
+def get_omnilog_data(kwargs=None, classification_header='Host',
+                     positive_label='Human',
+                     omnilog_sheet=constants.OMNILOG_DATA):
     """
 
     """
-    input_data = list(parse_metadata(**kwargs))
-    omnilog_sheet= constants.OMNILOG_DATA
+    if kwargs:
+        input_data = list(parse_metadata(**kwargs))
+    else:
+        input_data = list(parse_metadata())
     omnilog_data = pd.read_csv(omnilog_sheet, index_col=0)
     valid_cols = [input_data[0].index(x) for x in input_data[0] if x in list(omnilog_data)]
     input_data[0] = [input_data[0][x] for x in valid_cols]
@@ -376,3 +376,100 @@ def get_omnilog_data(kwargs, classification_header='Host', positive_label='Human
     output_data[0] = imputer.fit_transform(output_data[0])
     output_data[2] = imputer.transform(output_data[2])
     return output_data
+
+def get_roary_data(kwargs=None, roary_sheet=constants.ROARY):
+    if kwargs:
+        input_data = list(parse_metadata(**kwargs))
+    else:
+        input_data = list(parse_metadata())
+    roary_data = pd.read_csv(roary_sheet,index_col=0)
+
+    valid_cols = [input_data[0].index(x) for x in input_data[0] if x in list(roary_data)]
+    input_data[0] = [input_data[0][x] for x in valid_cols]
+    input_data[1] = [input_data[1][x] for x in valid_cols]
+
+    valid_cols = [input_data[2].index(x) for x in input_data[2] if x in list(roary_data)]
+    input_data[2] = [input_data[2][x] for x in valid_cols]
+    input_data[3] = [input_data[3][x] for x in valid_cols]
+
+    output_data = []
+    output_data.append(roary_data[input_data[0]].T.values)
+    output_data.append(input_data[1])
+    output_data.append(roary_data[input_data[2]].T.values)
+    output_data.append(input_data[3])
+
+    return output_data
+
+def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10):
+    if kwargs:
+        input_data = list(parse_metadata(**kwargs))
+    else:
+        input_data = list(parse_metadata())
+
+    roary_data = pd.read_csv(roary_sheet, index_col=0)
+
+    class_labels = np.unique(input_data[1])
+    classes = []
+    for c in class_labels:
+        class_members = [x for x in input_data[0] if input_data[1][input_data[0].index(x)]==c]
+        print roary_data[class_members].mean(axis=1)*100
+        exit()
+        classes.append(roary_data[class_members].mean(axis=1)*100)
+
+    proportions = pd.concat(proportions, axis=1)
+    diffs = np.diff(proportions.values, axis=1)
+    idx = list(proportions.index)
+    col = ['Diff']
+    avg_diff=pd.DataFrame(np.absolute(diffs.mean(axis=1)),index=idx,columns=col)
+    invalid = list(avg_diff[avg_diff['Diff'] < limit].index)
+    roary_data = roary_data.drop(invalid)
+
+    valid_cols = [input_data[0].index(x) for x in input_data[0] if x in list(roary_data)]
+    input_data[0] = [input_data[0][x] for x in valid_cols]
+    input_data[1] = [input_data[1][x] for x in valid_cols]
+
+    valid_cols = [input_data[2].index(x) for x in input_data[2] if x in list(roary_data)]
+    input_data[2] = [input_data[2][x] for x in valid_cols]
+    input_data[3] = [input_data[3][x] for x in valid_cols]
+
+    output_data = []
+    output_data.append(roary_data[input_data[0]].T.values)
+    output_data.append(input_data[1])
+    output_data.append(roary_data[input_data[2]].T.values)
+    output_data.append(input_data[3])
+
+    return output_data
+
+def get_roary_from_list(kwargs=None,roary_sheet=constants.ROARY,
+                        gene_header='Gene',valid_header='Valid',
+                        valid_features_table=constants.ROARY_VALID):
+    if kwargs:
+        input_data = list(parse_metadata(**kwargs))
+    else:
+        input_data = list(parse_metadata())
+
+    roary_data = pd.read_csv(roary_sheet)
+    valid_features = pd.read_csv(valid_features_table)
+    features = list(valid_features[valid_header])
+    roary_data = roary_data[roary_data[gene_header].isin(features)]
+
+    valid_cols = [input_data[0].index(x) for x in input_data[0] if x in list(roary_data)]
+    input_data[0] = [input_data[0][x] for x in valid_cols]
+    input_data[1] = [input_data[1][x] for x in valid_cols]
+
+    valid_cols = [input_data[2].index(x) for x in input_data[2] if x in list(roary_data)]
+    input_data[2] = [input_data[2][x] for x in valid_cols]
+    input_data[3] = [input_data[3][x] for x in valid_cols]
+
+    output_data = []
+    output_data.append(roary_data[input_data[0]].T.values)
+    output_data.append(input_data[1])
+    output_data.append(roary_data[input_data[2]].T.values)
+    output_data.append(input_data[3])
+
+    return output_data
+
+
+if __name__=='__main__':
+    data = get_roary_from_list()
+    print data[0].shape, data[2].shape

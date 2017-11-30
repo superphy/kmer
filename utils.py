@@ -133,7 +133,7 @@ def sensitivity_specificity(predicted_values, true_values):
 
 
 def parse_metadata(metadata=constants.ECOLI_METADATA,
-                   fasta_header='Filename', label_header='Classification',
+                   fasta_header='Fasta', label_header='Class',
                    train_header='Dataset', extra_header=None, extra_label=None,
                    train_label='Train', test_label='Test', prefix='', suffix='',
                    sep=None, one_vs_all=None, remove=None):

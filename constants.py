@@ -11,6 +11,11 @@ GENOME_REGION_TABLE = '/home/rboothman/Data/genome_regions/binary_tables/binary_
 #omnilog data file
 OMNILOG_DATA = '/home/rboothman/Data/ecomnilog/wide_format_header.txt'
 
+#roary data file
+ROARY = '/home/rboothman/Data/Roary/roary_results.csv'
+#roary features used in paper
+ROARY_VALID = './Data/PNAS_valid.txt'
+
 #default filepaths to metadata sheets
 SALMONELLA_METADATA = './Data/amr_sorted.csv'
 ECOLI_METADATA = './Data/human_bovine.csv'
