@@ -21,3 +21,6 @@ SALMONELLA_METADATA = './Data/amr_sorted.csv'
 ECOLI_METADATA = './Data/human_bovine.csv'
 OMNILOG_METADATA= './Data/omnilog_metadata.csv'
 PREDICTIVE_RESULTS = './Data/hb_train_predictiveresults.csv'
+
+#path to the source code
+SOURCE = '/home/rboothman/PHAC/kmer/'

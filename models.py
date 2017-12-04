@@ -7,6 +7,7 @@ from keras.layers.convolutional import Conv1D
 from sklearn import svm
 from utils import flatten, make3D, convert_to_numerical_classes
 from keras.utils import to_categorical
+from sklearn.ensemble import RandomForestClassifier
 
 
 def neural_network_validation(input_data):
@@ -124,32 +125,27 @@ def support_vector_machine(input_data, kernel='linear', C=1):
     model.fit(x_train, y_train)
     return model.predict(predict)
 
-
-# The parameters in the below functions were found by performing a grid search.
-# The resutls from the grid search are in ~/Data/sgdc_parameters/
-def kmer_split_sgd(input_data):
-    model = SGDC(loss='log', n_jobs=-1, eta0=1.0,
-                 learning_rate='invscaling', penalty='none', tol=0.001,
-                 alpha=100000000.0)
-    model.fit(input_data[0], input_data[1])
-    return model.score(input_data[2], input_data[3])
-
-def kmer_mixed_sgd(input_data):
-    model = SGDC(loss='squared_hinge', n_jobs=-1, penalty='none',
-                 tol=0.001, alpha=10000000.0)
-    model.fit(input_data[0], input_data[1])
-    return model.score(input_data[2], input_data[3])
-
-def genome_split_sgd(input_data):
-    model = SGDC(loss='hinge', n_jobs=-1, eta0=0.1,
-                 learning_rate='invscaling', penalty='l1', tol=0.001,
-                 alpha=0.01)
-    model.fit(input_data[0], input_data[1])
-    return model.score(input_data[2], input_data[3])
-
-def genome_mixed_sgd(input_data):
-    model = SGDC(loss='log', n_jobs=-1, eta0=0.1,
-                 learning_rate='invscaling', penalty='l1', tol=0.001,
-                 alpha=0.001)
-    model.fit(input_data[0], input_data[1])
-    return model.score(input_data[2], input_data[3])
+def random_forest_validation(input_data,n_estimators=5,criterion='gini',
+                             max_features=None,max_depth=None,
+                             min_samples_split=5,min_samples_leaf=1,
+                             min_weight_fraction_leaf=0.1,
+                             max_leaf_nodes=10,min_impurity_decrease=0,
+                             bootstrap=True, n_jobs=-1):
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+    if len(x_train.shape) == 3:
+        x_train = flatten(x_train)
+        x_test = flatten(x_test)
+    kwargs = {'n_estimators': n_estimators, 'criterion': criterion,
+              'max_features': max_features, 'max_depth': max_depth,
+              'min_samples_split': min_samples_split,
+              'min_samples_leaf':min_samples_leaf,
+              'min_weight_fraction_leaf': min_weight_fraction_leaf,
+              'max_leaf_nodes':max_leaf_nodes,
+              'min_impurity_decrease': min_impurity_decrease,
+              'bootstrap': bootstrap, 'n_jobs': n_jobs}
+    model = RandomForestClassifier(**kwargs)
+    model.fit(x_train, y_train)
+    return model.score(x_test, y_test)
