@@ -42,7 +42,7 @@ def valid_file(test_files, *invalid_files):
     bad_files = []
     for file in invalid_files:
         with open(file, 'r') as temp:
-            bad_files.append(temp.read().split('\n'))
+            bad_files.extend(temp.read().split('\n'))
     return [x for x in test_files if x not in bad_files]
 
 
@@ -117,17 +117,20 @@ def sensitivity_specificity(predicted_values, true_values):
 
     classes = np.unique(true_values)
     for c in classes:
-        indices = np.where(true_values==c, True, False)
-        non_indices = np.invert(indices)
-        true_pos = np.where(predicted_values[indices]==c).shape[0]
-        true_neg = np.where(predicted_values[non_indices]!=c).shape[0]
-        false_pos = np.where(predicted_values[non_indices]==c).shape[0]
-        false_neg = np.where(predicted_values[indices]!=c).shape[0]
+        predicted_pos = np.where(predicted_values==c, 1, 0)
+        predicted_neg = np.where(predicted_values!=c, 1, 0)
+        true_pos = np.where(true_values==c, 1, 0)
+        true_neg = np.where(true_values!=c, 1, 0)
 
-        sensitivity = (1.0*true_pos)/(true_pos+false_neg)
-        specificity = (1.0*true_neg)/(ture_neg+false_pos)
+        TP = sum(true_pos)
+        TN = sum(true_neg)
+        FP = sum(true_neg & predicted_pos)
+        FN = sum(true_pos & predicted_neg)
 
-        results[str(c)] = {'sensitivity':sensitivity, 'specificity':specificity}
+        sensitivity = (1.0*TP)/(TP+FN)
+        specificity = (1.0*TN)/(TN+FP)
+
+        results[c] = {'sensitivity':sensitivity, 'specificity':specificity}
 
     return results
 
@@ -211,8 +214,8 @@ def parse_metadata(metadata=constants.ECOLI_METADATA,
     return x_train, y_train, x_test, y_test
 
 
-def parse_json(path=constants.MORIA, suffix='.fasta',
-               key='assembly_barcode', *json_files):
+def parse_json(json_files, path=constants.MORIA, suffix='.fasta',
+               key='assembly_barcode'):
     """
     Parameters:
         path:       File path to be appended to the beginning of each fasta file
