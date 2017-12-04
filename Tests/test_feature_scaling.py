@@ -12,8 +12,8 @@ class ScaleToRange(unittest.TestCase):
         y_train = np.random.randint(2, size=12)
         x_test = np.random.randint(10, size=(6,6)).astype('float64')
         y_test = np.random.randint(2, size=6)
-        self.start = -1
-        self.end = 1
+        self.start = -1.0
+        self.end = 1.0
         self.data = [x_train, y_train, x_test, y_test]
         self.new_data = scale_to_range(self.data, start=self.start, end=self.end)
 
@@ -25,7 +25,8 @@ class ScaleToRange(unittest.TestCase):
     def test_range(self):
         func = np.vectorize(lambda x: True if (x<=self.end and x>=self.start) else False)
         a = func(self.new_data[0])
-        self.assertTrue(a.all(), msg=str(a))
+        b = self.data[0][a]
+        self.assertTrue(a.all(), msg=str(b))
 
 if __name__=="__main__":
     loader = unittest.TestLoader()
