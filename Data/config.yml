@@ -1,0 +1,19 @@
+model: support_vector_machine_validation
+model_args: null
+data: get_kmer_us_uk_split
+data_args:
+  recount: no
+  k: 7
+  l: 13
+scaler: scale_to_range
+scaler_args:
+  start: -1
+  end: 1
+selection: select_k_best
+selection_args:
+  score_func: f_classif
+  k: 270
+augment: null
+augment_args: null
+validate: yes
+reps: 2
