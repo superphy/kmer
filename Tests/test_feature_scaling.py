@@ -26,7 +26,7 @@ class ScaleToRange(unittest.TestCase):
         func = np.vectorize(lambda x: True if (x<=self.end and x>=self.start) else False)
         a = func(self.new_data[0])
         b = self.data[0][a]
-        self.assertTrue(a.all(), msg=str(b))
+        self.assertTrue(a.all(), msg=str(b)+'\nShould all be <= %d and >= to %d'%(self.start,self.end))
 
 if __name__=="__main__":
     loader = unittest.TestLoader()

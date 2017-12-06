@@ -20,7 +20,7 @@ class SupportVectorMachineValidation(unittest.TestCase):
         pass
 
 
-class SUpportVectorMachine(unittest.TestCase):
+class SupportVectorMachine(unittest.TestCase):
     def setUp(self):
         pass
 
