@@ -66,8 +66,7 @@ def augment_data_smote(input_data, desired_samples=50):
     x_test = input_data[2]
     y_test = input_data[3]
 
-    counts = np.bincount(y_train)
-    classes = np.unique(y_train)
+    classes, counts = np.unique(y_train, return_counts=True)
     ratio = {}
     for c in range(len(classes)):
         ratio[classes[c]] = counts[c]+desired_samples
@@ -96,8 +95,7 @@ def augment_data_adasyn(input_data, desired_samples=50):
     x_test = input_data[2]
     y_test = input_data[3]
 
-    counts = np.bincount(y_train)
-    classes = np.unique(y_train)
+    classes, counts = np.unique(y_train, return_counts=True)
     ratio = {}
     for c in range(len(classes)):
         ratio[classes[c]] = counts[c]+desired_samples

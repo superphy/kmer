@@ -4,13 +4,13 @@ import numpy as np
 
 def scale_to_range(input_data, start=-1, end=1):
     """
-    Scales the features in x_train and x_test to lie within the range args[0],
-    args[1]
+    Scales the features in x_train and x_test to lie within the range start,
+    finish
     """
     x_train = np.asarray(input_data[0], dtype='float64')
-    y_train = input_data[1]
+    y_train = np.asarray(input_data[1])
     x_test = np.asarray(input_data[2], dtype='float64')
-    y_test = input_data[3]
+    y_test = np.asarray(input_data[3])
 
     scaler = MinMaxScaler(feature_range=(start, end))
     x_train = scaler.fit_transform(x_train)

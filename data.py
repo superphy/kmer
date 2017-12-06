@@ -11,7 +11,7 @@ import random
 import constants
 
 
-def get_kmer(kwargs, database="database", recount=False, k=7, l=13):
+def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13):
     """
     Parameters:
         args:       The arguments to pass to parse_metadata.
@@ -23,7 +23,10 @@ def get_kmer(kwargs, database="database", recount=False, k=7, l=13):
     Returns:
         (x_train, y_train, x_test, y_test) ready to be passed to a ml model
     """
-    x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
+    if kwargs:
+        x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
+    else:
+        x_train, y_train, x_test, y_test = parse_metadata()
 
     if recount:
         allfiles = x_train + x_test
@@ -33,12 +36,14 @@ def get_kmer(kwargs, database="database", recount=False, k=7, l=13):
     x_train = np.asarray(x_train, dtype='float64')
 
     x_test = get_counts(x_test, database)
-    x_test = np.asarray(list(x_test), dtype='float64')
+    x_test = np.asarray(x_test, dtype='float64')
+
+    # print x_train, y_train, x_test, y_test
 
     return (x_train, y_train, x_test, y_test)
 
 
-def get_genome_region(kwargs, table=constants.GENOME_REGION_TABLE, sep=None):
+def get_genome_region(kwargs=None,table=constants.GENOME_REGION_TABLE,sep=None):
     """
     Parameters:
         args:    The arguments to pass to parse_metadata.
@@ -46,7 +51,10 @@ def get_genome_region(kwargs, table=constants.GENOME_REGION_TABLE, sep=None):
     Returns:
         x_train, y_train, x_test, y_test
     """
-    labels = parse_metadata(**kwargs)
+    if kwargs:
+        labels = parse_metadata(**kwargs)
+    else:
+        labels = parse_metadata()
     x_train_labels = labels[0]
     y_train = labels[1]
     x_test_labels = labels[2]
@@ -71,7 +79,7 @@ def get_genome_region(kwargs, table=constants.GENOME_REGION_TABLE, sep=None):
     return (x_train, y_train, x_test, y_test)
 
 
-def get_kmer_us_uk_split(database="database", recount=False, k=7, l=13):
+def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13):
     """
     Wraps get_kmer to get the US/UK split dataset kmer data to recreate the
     Lupolova et al paper.
@@ -81,7 +89,7 @@ def get_kmer_us_uk_split(database="database", recount=False, k=7, l=13):
     return get_kmer(kwargs, database, recount, k, l)
 
 
-def get_kmer_us_uk_mixed(database="database", recount=False, k=7, l=13):
+def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13):
     """
     Wraps get_kmer to get the US/UK mixed dataset kmer data to recreate the
     Lupolova et al paper.
@@ -92,7 +100,7 @@ def get_kmer_us_uk_mixed(database="database", recount=False, k=7, l=13):
     return get_kmer(kwargs, database, recount, k, l)
 
 
-def get_salmonella_kmer(antibiotic='ampicillin', database='database',
+def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
                         recount=False, k=7, l=13):
     """
     Wraps get_kmer to get salmonella amr data.
@@ -108,7 +116,7 @@ def get_salmonella_kmer(antibiotic='ampicillin', database='database',
     return get_kmer(kwargs, database, recount, k, l)
 
 
-def get_omnilog_kmer(database="database", recount=False, k=7, l=13,
+def get_omnilog_kmer(database=constants.DB, recount=False, k=7, l=13,
                      classification_header='Host', positive_label=None):
     """
     Wraps get_kmer, to get kmer data for the omnilog fasta files.
@@ -253,7 +261,7 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
     return (x_train, y_train, x_test, y_test)
 
 
-def get_kmer_from_json(database='database',recount=False,k=7,l=13,
+def get_kmer_from_json(database=constants.DB,recount=False,k=7,l=13,
                        path=constants.MORIA,suffix='.fasta',
                        key='assembly_barcode',*json):
     """
@@ -301,7 +309,7 @@ def get_kmer_from_json(database='database',recount=False,k=7,l=13,
     return (x_train, y_train, x_test, y_test)
 
 
-def get_kmer_from_directory(database='database', recount=False, k=7, l=13,
+def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
                             threeD=True, scale=True, *directories):
     """
     Parameters:

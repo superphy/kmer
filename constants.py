@@ -1,3 +1,5 @@
+import os
+
 #default filepaths to data
 SALMONELLA = '/home/rboothman/Data/salmonella_amr/'
 ECOLI = '/home/rboothman/Data/ecoli/'
@@ -16,11 +18,20 @@ ROARY = '/home/rboothman/Data/Roary/roary_results.csv'
 #roary features used in paper
 ROARY_VALID = './Data/PNAS_valid.txt'
 
-#default filepaths to metadata sheets
-SALMONELLA_METADATA = './Data/amr_sorted.csv'
-ECOLI_METADATA = './Data/human_bovine.csv'
-OMNILOG_METADATA= './Data/omnilog_metadata.csv'
-PREDICTIVE_RESULTS = './Data/hb_train_predictiveresults.csv'
-
 #path to the source code
-SOURCE = '/home/rboothman/PHAC/kmer/'
+SOURCE = os.path.dirname(os.path.abspath(__file__)) + '/'
+
+#path to default kmer count database
+DB = SOURCE + 'database'
+
+#default run config file
+CONFIG = SOURCE + 'Data/config.yml'
+
+#default file to store results to
+OUTPUT = SOURCE + 'Data/run_results.yml'
+
+#default filepaths to metadata sheets
+SALMONELLA_METADATA = SOURCE + 'Data/amr_sorted.csv'
+ECOLI_METADATA = SOURCE + 'Data/human_bovine.csv'
+OMNILOG_METADATA= SOURCE + 'Data/omnilog_metadata.csv'
+PREDICTIVE_RESULTS = SOURCE + 'Data/hb_train_predictiveresults.csv'

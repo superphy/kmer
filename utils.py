@@ -135,11 +135,11 @@ def sensitivity_specificity(predicted_values, true_values):
     return results
 
 
-def parse_metadata(metadata=constants.ECOLI_METADATA,
-                   fasta_header='Fasta', label_header='Class',
-                   train_header='Dataset', extra_header=None, extra_label=None,
-                   train_label='Train', test_label='Test', prefix='', suffix='',
-                   sep=None, one_vs_all=None, remove=None):
+def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
+                   label_header='Class', train_header='Dataset',
+                   extra_header=None, extra_label=None, train_label='Train',
+                   test_label='Test', suffix='', prefix='',sep=None,
+                   one_vs_all=None, remove=None, validate=True):
     """
     Parameters:
         metadata:     A csv file, must contain at least one column of genome
@@ -180,6 +180,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA,
     if one_vs_all:
         data[label_header] = data[label_header].where(data[label_header]==one_vs_all, 'Other')
     all_labels = np.unique(data[label_header])
+    all_labels = all_labels[~pd.isnull(all_labels)]
     if train_header:
         train_data = data[data[train_header]==train_label]
         test_data = data[data[train_header]==test_label]
@@ -187,9 +188,13 @@ def parse_metadata(metadata=constants.ECOLI_METADATA,
         all_test_data = []
         for label in all_labels:
             all_train_data.append(train_data[train_data[label_header]==label])
-            all_test_data.append(test_data[test_data[label_header]==label])
+            if validate:
+                all_test_data.append(test_data[test_data[label_header]==label])
         all_train_data = [x[fasta_header].values for x in all_train_data]
-        all_test_data = [x[fasta_header].values for x in all_test_data]
+        if validate:
+            all_test_data = [x[fasta_header].values for x in all_test_data]
+        else:
+            all_test_data = test_data[fasta_header].values
     else:
         all_train_data = []
         all_test_data = []
@@ -206,10 +211,13 @@ def parse_metadata(metadata=constants.ECOLI_METADATA,
                 all_test_data.append(label_data[cutoff:])
 
     all_train_data = [[prefix+str(x)+suffix for x in array] for array in all_train_data]
-    all_test_data = [[prefix+str(x)+suffix for x in array] for array in all_test_data]
-
     x_train, y_train = shuffle(all_train_data, all_labels)
-    x_test, y_test = shuffle(all_test_data, all_labels)
+    if validate:
+        all_test_data = [[prefix+str(x)+suffix for x in array] for array in all_test_data]
+        x_test, y_test = shuffle(all_test_data, all_labels)
+    else:
+        x_test = [prefix+str(x)+suffix for x in all_test_data]
+        y_test = np.array([]) 
 
     return x_train, y_train, x_test, y_test
 
