@@ -106,7 +106,8 @@ def support_vector_machine_validation(input_data, kernel='linear', C=1):
         x_test = flatten(x_test)
     model = svm.SVC(kernel=kernel, C=C)
     model.fit(x_train, y_train)
-    return model.score(x_test, y_test)
+    output = model.score(x_test, y_test)
+    return output
 
 
 def support_vector_machine(input_data, kernel='linear', C=1):
@@ -123,14 +124,23 @@ def support_vector_machine(input_data, kernel='linear', C=1):
         x_test = flatten(x_test)
     model = svm.SVC(kernel=kernel, C=C)
     model.fit(x_train, y_train)
-    return model.predict(predict)
+    output = model.predict(predict)
+    return output
 
-def random_forest_validation(input_data,n_estimators=5,criterion='gini',
-                             max_features=None,max_depth=None,
-                             min_samples_split=5,min_samples_leaf=1,
-                             min_weight_fraction_leaf=0.1,
-                             max_leaf_nodes=10,min_impurity_decrease=0,
-                             bootstrap=True, n_jobs=-1):
+#First Optimization
+# def random_forest_validation(input_data,n_estimators=5,criterion='gini',
+#                              max_features=None,max_depth=None,
+#                              min_samples_split=5,min_samples_leaf=1,
+#                              min_weight_fraction_leaf=0.1,
+#                              max_leaf_nodes=10,min_impurity_decrease=0,
+#                              bootstrap=True, n_jobs=-1):
+#Second Optimization
+def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
+                             max_features='log2',max_depth=100,
+                             min_samples_split=2,min_samples_leaf=1,
+                             min_weight_fraction_leaf=0.01,
+                             max_leaf_nodes=25,min_impurity_decrease=0.001,
+                             bootstrap=False, n_jobs=-1):
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -149,3 +159,33 @@ def random_forest_validation(input_data,n_estimators=5,criterion='gini',
     model = RandomForestClassifier(**kwargs)
     model.fit(x_train, y_train)
     return model.score(x_test, y_test)
+
+
+# The parameters in the below functions were found by performing a grid search.
+# The resutls from the grid search are in ~/Data/sgdc_parameters/
+def kmer_split_sgd(input_data):
+    model = SGDC(loss='log', n_jobs=-1, eta0=1.0,
+                 learning_rate='invscaling', penalty='none', tol=0.001,
+                 alpha=100000000.0)
+    model.fit(input_data[0], input_data[1])
+    return model.score(input_data[2], input_data[3])
+
+def kmer_mixed_sgd(input_data):
+    model = SGDC(loss='squared_hinge', n_jobs=-1, penalty='none',
+                 tol=0.001, alpha=10000000.0)
+    model.fit(input_data[0], input_data[1])
+    return model.score(input_data[2], input_data[3])
+
+def genome_split_sgd(input_data):
+    model = SGDC(loss='hinge', n_jobs=-1, eta0=0.1,
+                 learning_rate='invscaling', penalty='l1', tol=0.001,
+                 alpha=0.01)
+    model.fit(input_data[0], input_data[1])
+    return model.score(input_data[2], input_data[3])
+
+def genome_mixed_sgd(input_data):
+    model = SGDC(loss='log', n_jobs=-1, eta0=0.1,
+                 learning_rate='invscaling', penalty='l1', tol=0.001,
+                 alpha=0.001)
+    model.fit(input_data[0], input_data[1])
+    return model.score(input_data[2], input_data[3])
