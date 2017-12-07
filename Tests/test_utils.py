@@ -517,6 +517,64 @@ class ParseJson(unittest.TestCase):
             count += 1
         self.assertEqual(count, 3)
 
+
+class EmptyDictionaries(unittest.TestCase):
+    def setUp(self):
+        self.default = parse_metadata()
+        self.empty = parse_metadata(**{})
+
+    def test_x_train(self):
+        count1 = 0
+        count2 = 0
+        for elem in self.default[0]:
+            count2+=1
+            if elem in self.empty[0]:
+                count1+=1
+        for elem in self.empty[0]:
+            count2+=1
+            if elem in self.default[0]:
+                count1+=1
+        self.assertEqual(count1, count2)
+
+    def test_y_train(self):
+        count1 = 0
+        count2 = 0
+        for elem in self.default[1]:
+            count2+=1
+            if elem in self.empty[1]:
+                count1+=1
+        for elem in self.empty[1]:
+            count2+=1
+            if elem in self.default[1]:
+                count1+=1
+        self.assertEqual(count1, count2)
+
+    def test_x_test(self):
+        count1 = 0
+        count2 = 0
+        for elem in self.default[2]:
+            count2+=1
+            if elem in self.empty[2]:
+                count1+=1
+        for elem in self.empty[2]:
+            count2+=1
+            if elem in self.default[2]:
+                count1+=1
+        self.assertEqual(count1, count2)
+
+    def test_y_test(self):
+        count1 = 0
+        count2 = 0
+        for elem in self.default[3]:
+            count2+=1
+            if elem in self.empty[3]:
+                count1+=1
+        for elem in self.empty[3]:
+            count2+=1
+            if elem in self.default[3]:
+                count1+=1
+        self.assertEqual(count1, count2)
+
 if __name__=="__main__":
     loader = unittest.TestLoader()
     all_tests = loader.discover('.', pattern='test_utils.py')

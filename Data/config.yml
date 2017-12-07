@@ -1,5 +1,5 @@
 model: support_vector_machine_validation
-model_args: null
+model_args: {}
 data: get_kmer_us_uk_split
 data_args:
   recount: no
@@ -14,6 +14,6 @@ selection_args:
   score_func: f_classif
   k: 270
 augment: null
-augment_args: null
+augment_args: {}
 validate: yes
 reps: 2

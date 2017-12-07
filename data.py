@@ -11,7 +11,7 @@ import random
 import constants
 
 
-def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13):
+def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13):
     """
     Parameters:
         args:       The arguments to pass to parse_metadata.
@@ -23,10 +23,7 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13):
     Returns:
         (x_train, y_train, x_test, y_test) ready to be passed to a ml model
     """
-    if kwargs:
-        x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
-    else:
-        x_train, y_train, x_test, y_test = parse_metadata()
+    x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
 
     if recount:
         allfiles = x_train + x_test
@@ -38,12 +35,10 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13):
     x_test = get_counts(x_test, database)
     x_test = np.asarray(x_test, dtype='float64')
 
-    # print x_train, y_train, x_test, y_test
-
     return (x_train, y_train, x_test, y_test)
 
 
-def get_genome_region(kwargs=None,table=constants.GENOME_REGION_TABLE,sep=None):
+def get_genome_region(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None):
     """
     Parameters:
         args:    The arguments to pass to parse_metadata.
@@ -51,14 +46,7 @@ def get_genome_region(kwargs=None,table=constants.GENOME_REGION_TABLE,sep=None):
     Returns:
         x_train, y_train, x_test, y_test
     """
-    if kwargs:
-        labels = parse_metadata(**kwargs)
-    else:
-        labels = parse_metadata()
-    x_train_labels = labels[0]
-    y_train = labels[1]
-    x_test_labels = labels[2]
-    y_test = labels[3]
+    x_train_labels, y_train, x_test_labels, y_test = parse_metadata(**kwargs)
 
     x_train = []
     x_test = []
@@ -356,16 +344,13 @@ def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
 
     return output
 
-def get_omnilog_data(kwargs=None, classification_header='Host',
+def get_omnilog_data(kwargs={}, classification_header='Host',
                      positive_label='Human',
                      omnilog_sheet=constants.OMNILOG_DATA):
     """
 
     """
-    if kwargs:
-        input_data = list(parse_metadata(**kwargs))
-    else:
-        input_data = list(parse_metadata())
+    input_data = list(parse_metadata(**kwargs))
     omnilog_data = pd.read_csv(omnilog_sheet, index_col=0)
     valid_cols = [input_data[0].index(x) for x in input_data[0] if x in list(omnilog_data)]
     input_data[0] = [input_data[0][x] for x in valid_cols]
@@ -385,11 +370,8 @@ def get_omnilog_data(kwargs=None, classification_header='Host',
     output_data[2] = imputer.transform(output_data[2])
     return output_data
 
-def get_roary_data(kwargs=None, roary_sheet=constants.ROARY):
-    if kwargs:
-        input_data = list(parse_metadata(**kwargs))
-    else:
-        input_data = list(parse_metadata())
+def get_roary_data(kwargs={}, roary_sheet=constants.ROARY):
+    input_data = list(parse_metadata(**kwargs))
     roary_data = pd.read_csv(roary_sheet,index_col=0)
 
     valid_cols = [input_data[0].index(x) for x in input_data[0] if x in list(roary_data)]
@@ -408,11 +390,8 @@ def get_roary_data(kwargs=None, roary_sheet=constants.ROARY):
 
     return output_data
 
-def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10):
-    if kwargs:
-        input_data = list(parse_metadata(**kwargs))
-    else:
-        input_data = list(parse_metadata())
+def get_filtered_roary_data(kwargs={}, roary_sheet=constants.ROARY, limit=10):
+    input_data = list(parse_metadata(**kwargs))
 
     roary_data = pd.read_csv(roary_sheet, index_col=0)
 
@@ -448,13 +427,10 @@ def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10):
 
     return output_data
 
-def get_roary_from_list(kwargs=None,roary_sheet=constants.ROARY,
+def get_roary_from_list(kwargs={},roary_sheet=constants.ROARY,
                         gene_header='Gene',valid_header='Valid',
                         valid_features_table=constants.ROARY_VALID):
-    if kwargs:
-        input_data = list(parse_metadata(**kwargs))
-    else:
-        input_data = list(parse_metadata())
+    input_data = list(parse_metadata(**kwargs))
 
     roary_data = pd.read_csv(roary_sheet)
     valid_features = pd.read_csv(valid_features_table)
@@ -476,8 +452,3 @@ def get_roary_from_list(kwargs=None,roary_sheet=constants.ROARY,
     output_data.append(input_data[3])
 
     return output_data
-
-
-if __name__=='__main__':
-    data = get_roary_from_list()
-    print data[0].shape, data[2].shape

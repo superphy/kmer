@@ -45,7 +45,7 @@ class CommandLineVariation1(unittest.TestCase):
                 else:
                     f.write('Test\n')
         self.config = {'model': 'support_vector_machine_validation',
-                       'model_args': None,
+                       'model_args': {},
                        'data': 'get_kmer',
                        'data_args': {'kwargs': {'metadata': self.metadata,
                                                 'prefix': self.fasta_dir,
@@ -131,7 +131,6 @@ class CommandLineVariation2(unittest.TestCase):
                 else:
                     f.write(',Test\n')
         self.config = {'model': 'support_vector_machine',
-                       'model_args': None,
                        'data': 'get_kmer',
                        'data_args': {'kwargs': {'metadata': self.metadata,
                                                 'prefix': self.fasta_dir,

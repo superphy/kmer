@@ -99,7 +99,6 @@ def make3D(data):
     data = data.reshape(data.shape[0], data.shape[1], 1)
     return data
 
-
 def sensitivity_specificity(predicted_values, true_values):
     """
     Parameters:
@@ -217,9 +216,9 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         x_test, y_test = shuffle(all_test_data, all_labels)
     else:
         x_test = [prefix+str(x)+suffix for x in all_test_data]
-        y_test = np.array([]) 
+        y_test = np.array([])
 
-    return x_train, y_train, x_test, y_test
+    return (x_train, y_train, x_test, y_test)
 
 
 def parse_json(json_files, path=constants.MORIA, suffix='.fasta',

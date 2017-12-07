@@ -6,6 +6,7 @@ import shutil
 from data import get_kmer, get_genome_region
 import numpy as np
 import tempfile
+import constants
 
 class GetKmer(unittest.TestCase):
     def setUp(self):

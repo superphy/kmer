@@ -20,11 +20,11 @@ for x in [models,data,feature_selection,feature_scaling,data_augmentation]:
     methods.update(temp)
 
 
-def run(model=models.support_vector_machine, model_args=None,
-        data=data.get_kmer_us_uk_split, data_args=None,
-        scaler=feature_scaling.scale_to_range, scaler_args=None,
-        selection=None, selection_args=None,
-        augment=None, augment_args=None, validate=False, reps=10):
+def run(model=models.support_vector_machine, model_args={},
+        data=data.get_kmer_us_uk_split, data_args={},
+        scaler=feature_scaling.scale_to_range, scaler_args={},
+        selection=None, selection_args={},
+        augment=None, augment_args={}, validate=False, reps=10):
     """
     Parameters:
         model:          The machine learning model to be used, see
@@ -61,29 +61,14 @@ def run(model=models.support_vector_machine, model_args=None,
         test_sizes = np.zeros(reps)
         for i in range(reps):
             start = time.time()
-            if data_args:
-                d = data(**data_args)
-            else:
-                d = data()
+            d = data(**data_args)
             if selection:
-                if selection_args:
-                    d = selection(d, **selection_args)
-                else:
-                    d = selection(d)
+                d = selection(d, **selection_args)
             if scaler:
-                if scaler_args:
-                    d = scaler(d, **scaler_args)
-                else:
-                    d = scaler(d)
+                d = scaler(d, **scaler_args)
             if augment:
-                if augment_args:
-                    d = augment(d, **augment_args)
-                else:
-                    d = augment(d)
-            if model_args:
-                score = model(d, **model_args)
-            else:
-                score = model(d)
+                d = augment(d, **augment_args)
+            score = model(d, **model_args)
             times[i] = time.time() - start
             results[i] = score
             train_sizes[i] = d[0].shape[0]
@@ -99,29 +84,14 @@ def run(model=models.support_vector_machine, model_args=None,
         output['repetitions'] = reps
     else:
         start = time.time()
-        if data_args:
-            d = data(**data_args)
-        else:
-            d = data()
+        d = data(**data_args)
         if selection:
-            if selection_args:
-                d = selection(d, **selection_args)
-            else:
-                d = selection(d)
+            d = selection(d, **selection_args)
         if scaler:
-            if scaler_args:
-                d = scaler(d, **scaler_args)
-            else:
-                d = scaler(d)
+            d = scaler(d, **scaler_args)
         if augment:
-            if augment_args:
-                d = augment(d, **augment_args)
-            else:
-                d = augment(d)
-        if model_args:
-            predictions = model(d, **model_args)
-        else:
-            predictions = model(d)
+            d = augment(d, **augment_args)
+        predictions = model(d, **model_args)
         total_time = time.time() - start
         output['predictions'] = predictions.tolist()
         output['run_time'] = total_time
