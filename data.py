@@ -1,6 +1,6 @@
 from sklearn.preprocessing import MinMaxScaler, Imputer
 from sklearn.model_selection import StratifiedShuffleSplit as SSS
-from kmer_counter import count_kmers, get_counts
+from kmer_counter import count_kmers, get_counts, get_kmer_names
 from utils import check_fasta, same_shuffle, shuffle, flatten, make3D, setup_files
 from utils import parse_metadata, parse_json
 import numpy as np
@@ -11,7 +11,8 @@ import random
 import constants
 
 
-def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13):
+def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
+             extract_features=False):
     """
     Parameters:
         args:       The arguments to pass to parse_metadata.
@@ -35,10 +36,19 @@ def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13):
     x_test = get_counts(x_test, database)
     x_test = np.asarray(x_test, dtype='float64')
 
-    return (x_train, y_train, x_test, y_test)
+    output_data = (x_train, y_train, x_test, y_test)
+
+    if extract_features:
+        feature_names = get_kmer_names(database)
+        output = (output_data, feature_names)
+    else:
+        output = output_data
+
+    return output
 
 
-def get_genome_region(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None):
+def get_genome_region(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
+                      extract_features=False):
     """
     Parameters:
         args:    The arguments to pass to parse_metadata.
@@ -64,20 +74,30 @@ def get_genome_region(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None):
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    return (x_train, y_train, x_test, y_test)
+    output_data = (x_train, y_train, x_test, y_test)
+
+    if extract_features:
+        feature_names = np.asarray(data.index)
+        output = (output_data, feature_names)
+    else:
+        output = output_data
+
+    return output
 
 
-def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13):
+def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13,
+                         extract_features=False):
     """
     Wraps get_kmer to get the US/UK split dataset kmer data to recreate the
     Lupolova et al paper.
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta'}
-    return get_kmer(kwargs, database, recount, k, l)
+    return get_kmer(kwargs, database, recount, k, l, extract_features)
 
 
-def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13):
+def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13,
+                         extract_feature=False):
     """
     Wraps get_kmer to get the US/UK mixed dataset kmer data to recreate the
     Lupolova et al paper.
@@ -85,11 +105,11 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13):
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
               'train_header': None}
-    return get_kmer(kwargs, database, recount, k, l)
+    return get_kmer(kwargs, database, recount, k, l, extract_features)
 
 
 def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
-                        recount=False, k=7, l=13):
+                        recount=False, k=7, l=13, extract_features=False):
     """
     Wraps get_kmer to get salmonella amr data.
     """
@@ -101,25 +121,27 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
               'extra_label': antibiotic,
               'prefix': constants.SALMONELLA,
               'suffix': '.fna'}
-    return get_kmer(kwargs, database, recount, k, l)
+    return get_kmer(kwargs, database, recount, k, l, extract_features)
 
 
-def get_omnilog_kmer(database=constants.DB, recount=False, k=7, l=13,
-                     classification_header='Host', positive_label=None):
-    """
-    Wraps get_kmer, to get kmer data for the omnilog fasta files.
-    """
-    kwargs = {'metadata': 'Data/metadata.csv',
-              'fasta_header': 'Strain',
-              'label_header': classification_header,
-              'train_header': None,
-              'one_vs_all': positive_label,
-              'prefix': constants.OMNILOG_FASTA,
-              'suffix': '.fasta'}
-    return get_kmer(kwargs, database, recount, k, l)
+# def get_omnilog_kmer(database=constants.DB, recount=False, k=7, l=13,
+#                      label_header='Host', one_vs_all=None,
+#                      extract_features=False):
+#     """
+#     Wraps get_kmer, to get kmer data for the omnilog fasta files.
+#     """
+#     kwargs = {'metadata': 'Data/metadata.csv',
+#               'fasta_header': 'Strain',
+#               'label_header': classification_header,
+#               'train_header': None,
+#               'one_vs_all': positive_label,
+#               'prefix': constants.OMNILOG_FASTA,
+#               'suffix': '.fasta'}
+#     return get_kmer(kwargs, database, recount, k, l, extract_features)
 
 
-def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None):
+def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None,
+                                  extract_features=False):
     """
     Wraps get_genome_region to get the US/UK mixed datasets genome region data to
     recreate the Lupolova et al paper.
@@ -127,17 +149,18 @@ def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None):
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
               'train_header': None}
-    return get_genome_region(kwargs, table, sep)
+    return get_genome_region(kwargs, table, sep, extract_features)
 
 
-def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None):
+def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None,
+                                  extract_features=False):
     """
     Wraps get_genome_region to get the US/UK split dataset genome region data to
     recreate the Lupolova et al paper.
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta'}
-    return get_genome_region(kwargs, table, sep)
+    return get_genome_region(kwargs, table, sep, extract_features)
 
 
 def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
@@ -344,8 +367,7 @@ def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
 
     return output
 
-def get_omnilog_data(kwargs={}, classification_header='Host',
-                     positive_label='Human',
+def get_omnilog_data(kwargs={}, extract_features=False,
                      omnilog_sheet=constants.OMNILOG_DATA):
     """
 
@@ -368,7 +390,11 @@ def get_omnilog_data(kwargs={}, classification_header='Host',
     imputer = Imputer()
     output_data[0] = imputer.fit_transform(output_data[0])
     output_data[2] = imputer.transform(output_data[2])
-    return output_data
+    if extract_features:
+        output = (output_data, np.asarray(omnilog_data.index))
+    else:
+        output = output_data
+    return output
 
 def get_roary_data(kwargs={}, roary_sheet=constants.ROARY):
     input_data = list(parse_metadata(**kwargs))

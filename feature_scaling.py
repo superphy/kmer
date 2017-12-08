@@ -2,7 +2,7 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
 
-def scale_to_range(input_data, start=-1, end=1):
+def scale_to_range(input_data, low=-1, high=1):
     """
     Scales the features in x_train and x_test to lie within the range start,
     finish
@@ -12,7 +12,7 @@ def scale_to_range(input_data, start=-1, end=1):
     x_test = np.asarray(input_data[2], dtype='float64')
     y_test = np.asarray(input_data[3])
 
-    scaler = MinMaxScaler(feature_range=(start, end))
+    scaler = MinMaxScaler(feature_range=(low, high))
     x_train = scaler.fit_transform(x_train)
     x_test = scaler.transform(x_test)
     return (x_train, y_train, x_test, y_test)

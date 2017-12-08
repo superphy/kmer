@@ -23,7 +23,7 @@ for x in [models,data,feature_selection,feature_scaling,data_augmentation]:
 def run(model=models.support_vector_machine, model_args={},
         data=data.get_kmer_us_uk_split, data_args={},
         scaler=feature_scaling.scale_to_range, scaler_args={},
-        selection=None, selection_args={},
+        selection=None, selection_args={}, extract_features=False,
         augment=None, augment_args={}, validate=False, reps=10):
     """
     Parameters:
@@ -59,20 +59,39 @@ def run(model=models.support_vector_machine, model_args={},
         times = np.zeros(reps)
         train_sizes = np.zeros(reps)
         test_sizes = np.zeros(reps)
+        if extract_features:
+            features = []
         for i in range(reps):
             start = time.time()
-            d = data(**data_args)
+            if extract_features:
+                data_args['extract_features'] = True
+                d,f = data(**data_args)
+            else:
+                d = data(**data_args)
+            output['num_genomes'] = d[0].shape[0] + d[2].shape[0]
             if selection:
-                d = selection(d, **selection_args)
+                if extract_features:
+                    selection_args['feature_names']=f
+                    d,f = selection(d, **selection_args)
+                    selection_args.pop('feature_names', None)
+                else:
+                    d = selection(d, **selection_args)
             if scaler:
                 d = scaler(d, **scaler_args)
             if augment:
                 d = augment(d, **augment_args)
-            score = model(d, **model_args)
+            if extract_features:
+                model_args['feature_names'] = f
+                score, f = model(d, **model_args)
+                model_args.pop('feature_names', None)
+            else:
+                score = model(d, **model_args)
             times[i] = time.time() - start
             results[i] = score
             train_sizes[i] = d[0].shape[0]
             test_sizes[i] = d[2].shape[0]
+            if extract_features:
+                features.append(f)
         output['train_sizes'] = train_sizes.tolist()
         output['test_sizes'] = test_sizes.tolist()
         output['avg_run_time'] = times.mean().tolist()
@@ -82,21 +101,42 @@ def run(model=models.support_vector_machine, model_args={},
         output['results'] = results.tolist()
         output['run_times'] = times.tolist()
         output['repetitions'] = reps
+        if extract_features:
+            features = np.concatenate(features, axis=0)
+            features = np.unique(features)
+            output['important_features'] = features.tolist()
     else:
         start = time.time()
-        d = data(**data_args)
+        if extract_features:
+            data_args['extract_features'] = True
+            d,f = data(**data_args)
+        else:
+            d = data(**data_args)
+        output['num_genomes'] = d[0].shape[0] + d[2].shape[0]
         if selection:
-            d = selection(d, **selection_args)
+            if extract_features:
+                selection_args['feature_names'] = f
+                d,f = selection(d, **selection_args)
+                selection_args.pop('feature_names', None)
+            else:
+                d = selection(d, **selection_args)
         if scaler:
             d = scaler(d, **scaler_args)
         if augment:
             d = augment(d, **augment_args)
-        predictions = model(d, **model_args)
+        if extract_features:
+            model_args['feature_names'] = f
+            predictions, f = model(d, **model_args)
+            model_args.pop('feature_names', None)
+        else:
+            predictions = model(d, **model_args)
         total_time = time.time() - start
         output['predictions'] = predictions.tolist()
         output['run_time'] = total_time
         output['train_size'] = len(d[0])
         output['test_size'] = len(d[2])
+        if extract_features:
+            output['important_features'] = f
     output['model'] = model
     output['model_args'] = model_args
     output['data'] = data
@@ -143,5 +183,5 @@ if __name__ == "__main__":
     with open(output_file, 'a') as f:
         f.write('---\n')
         f.write('#%s\n'%str(datetime.datetime.now()))
-        yaml.dump(output, f)
+        yaml.dump(output, f, default_flow_style=False)
         f.write('...\n')

@@ -92,7 +92,7 @@ def neural_network(input_data, binarize=True):
     return prediction
 
 
-def support_vector_machine_validation(input_data, kernel='linear', C=1):
+def support_vector_machine_validation(input_data, kernel='linear', C=1, feature_names=None):
     """
     Fits, trains, and test a support vector machine.
     Returns the accuracy of the model.
@@ -106,11 +106,21 @@ def support_vector_machine_validation(input_data, kernel='linear', C=1):
         x_test = flatten(x_test)
     model = svm.SVC(kernel=kernel, C=C)
     model.fit(x_train, y_train)
-    output = model.score(x_test, y_test)
+    output_data = model.score(x_test, y_test)
+
+    if feature_names is not None:
+        coefs = np.argsort(model.coef_.ravel())
+        top_pos_features = feature_names[coefs[-num_features:]]
+        top_neg_features = feature_names[coefs[:num_features]]
+        output = (output_data, top_pos_features, top_neg_features)
+    else:
+        output = output_data
+
     return output
 
 
-def support_vector_machine(input_data, kernel='linear', C=1):
+def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
+                           num_features = 10):
     """
     Fits, trains, and makes predictions with a support vector machine.
     Returns the predicted values for "predict"
@@ -124,7 +134,16 @@ def support_vector_machine(input_data, kernel='linear', C=1):
         x_test = flatten(x_test)
     model = svm.SVC(kernel=kernel, C=C)
     model.fit(x_train, y_train)
-    output = model.predict(predict)
+    output_data = model.predict(predict)
+
+    if feature_names is not None:
+        coefs = np.argsort(model.coef_.ravel())
+        top_pos_features = feature_names[coefs[-num_features/2:]]
+        top_neg_features = feature_names[coefs[:num_features/2]]
+        output = (output_data, top_pos_features, top_neg_features)
+    else:
+        output = output_data
+
     return output
 
 #First Optimization
@@ -140,7 +159,8 @@ def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
                              min_samples_split=2,min_samples_leaf=1,
                              min_weight_fraction_leaf=0.01,
                              max_leaf_nodes=25,min_impurity_decrease=0.001,
-                             bootstrap=False, n_jobs=-1):
+                             bootstrap=False, n_jobs=-1, feature_names=None,
+                             num_features=10):
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -158,7 +178,15 @@ def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
               'bootstrap': bootstrap, 'n_jobs': n_jobs}
     model = RandomForestClassifier(**kwargs)
     model.fit(x_train, y_train)
-    return model.score(x_test, y_test)
+    output_data = model.score(x_test, y_test)
+
+    if feature_names is not None:
+        importances = np.argsort(model.feature_importances_.ravel())
+        top_features = feature_names[importances[-num_features:]]
+        output = (output_data, top_features)
+    else:
+        output = output_data
+    return output
 
 
 # The parameters in the below functions were found by performing a grid search.
