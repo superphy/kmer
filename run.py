@@ -183,5 +183,5 @@ if __name__ == "__main__":
     with open(output_file, 'a') as f:
         f.write('---\n')
         f.write('#%s\n'%str(datetime.datetime.now()))
-        yaml.dump(output, f, default_flow_style=False)
+        yaml.dump(output, f)
         f.write('...\n')
