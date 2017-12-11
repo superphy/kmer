@@ -314,6 +314,18 @@ class ParseMetadata(unittest.TestCase):
             count2 += 1
         self.assertEqual(count1, count2)
 
+    def test_blacklist(self):
+        bl = np.unique(np.random.randint(self.length, size=(int(0.1*self.length))))
+        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,blacklist=bl)
+        count1 = 0
+        count2 = 0
+        for elem in bl:
+            count2 += 1
+            if elem not in x_train and elem not in x_test:
+                count1 += 1
+        self.assertEqual(count1, count2)
+
+
 class SetUpFiles(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.mkdtemp()

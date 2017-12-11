@@ -138,7 +138,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                    label_header='Class', train_header='Dataset',
                    extra_header=None, extra_label=None, train_label='Train',
                    test_label='Test', suffix='', prefix='',sep=None,
-                   one_vs_all=None, remove=None, validate=True):
+                   one_vs_all=None, remove=None, validate=True, blacklist=None):
     """
     Parameters:
         metadata:     A csv file, must contain at least one column of genome
@@ -176,6 +176,8 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         data = data[data[extra_header] == extra_label]
     if remove:
         data = data.drop(data[data[label_header]==remove].index)
+    if blacklist is not None:
+        data = data.drop(data[data[fasta_header].isin(blacklist)].index)
     if one_vs_all:
         data[label_header] = data[label_header].where(data[label_header]==one_vs_all, 'Other')
     all_labels = np.unique(data[label_header])
