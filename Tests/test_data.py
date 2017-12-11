@@ -270,7 +270,7 @@ class ExtractFeaturesOmnilog(unittest.TestCase):
             f.write(',A1,A2\na,3.1,3.0\nb,1,1\nc,0.01,0.1\n')
         with open(self.metadata, 'w') as f:
             f.write('Fasta,Class,Dataset\nA1,A,Train\nA2,A,Test')
-        kwargs = {'metadata': self.metadata, 'validate':False}
+        kwargs = {'metadata': self.metadata, 'validate':True}
         self.data = get_omnilog_data(kwargs,omnilog_sheet=self.omnilog,extract=True)
         self.correct_features = np.array(['a','b','c'])
 
