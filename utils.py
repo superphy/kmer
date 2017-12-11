@@ -101,7 +101,7 @@ def make3D(data):
 
 def sensitivity_specificity(predicted_values, true_values):
     """
-    Parameters:
+    Args:
         predicted_values:   Array, what the model predicted.
         true_values:        Array, the true values.
     Returns:
@@ -140,7 +140,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                    test_label='Test', suffix='', prefix='',sep=None,
                    one_vs_all=None, remove=None, validate=True):
     """
-    Parameters:
+    Args:
         metadata:     A csv file, must contain at least one column of genome
                       names and one column of their classifications.
         fasta_header: String, header for the genome name column
@@ -224,7 +224,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
 def parse_json(json_files, path=constants.MORIA, suffix='.fasta',
                key='assembly_barcode'):
     """
-    Parameters:
+    Args:
         path:       File path to be appended to the beginning of each fasta file
         suffix:     String to be appended to the end of each fasta file eg
                     ".fasta"

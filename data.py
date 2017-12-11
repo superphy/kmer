@@ -12,15 +12,16 @@ import constants
 
 
 def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
-             extract_features=False):
+             extract=False):
     """
-    Parameters:
+    Args:
         args:       The arguments to pass to parse_metadata.
         database:   lmdb database to store kmer counts.
         threeD:     If True the data is made three dimensional.
         recount:    If True the kmers are recounted.
         k:          Size of kmer to be counted. Ignored if recount is false.
         l:          kmer cutoff value. Ignored if recount is false.
+
     Returns:
         (x_train, y_train, x_test, y_test) ready to be passed to a ml model
     """
@@ -38,7 +39,7 @@ def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
 
     output_data = (x_train, y_train, x_test, y_test)
 
-    if extract_features:
+    if extract:
         feature_names = get_kmer_names(database)
         output = (output_data, feature_names)
     else:
@@ -47,12 +48,13 @@ def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
     return output
 
 
-def get_genome_region(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
-                      extract_features=False):
+def get_genome_regions(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
+                      extract=False):
     """
-    Parameters:
+    Args:
         args:    The arguments to pass to parse_metadata.
         table:   binary_table.txt output from panseq.
+
     Returns:
         x_train, y_train, x_test, y_test
     """
@@ -76,7 +78,7 @@ def get_genome_region(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
 
     output_data = (x_train, y_train, x_test, y_test)
 
-    if extract_features:
+    if extract:
         feature_names = np.asarray(data.index)
         output = (output_data, feature_names)
     else:
@@ -86,14 +88,14 @@ def get_genome_region(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
 
 
 def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13,
-                         extract_features=False):
+                         extract=False):
     """
     Wraps get_kmer to get the US/UK split dataset kmer data to recreate the
     Lupolova et al paper.
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta'}
-    return get_kmer(kwargs, database, recount, k, l, extract_features)
+    return get_kmer(kwargs, database, recount, k, l, extract)
 
 
 def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13,
@@ -105,11 +107,11 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13,
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
               'train_header': None}
-    return get_kmer(kwargs, database, recount, k, l, extract_features)
+    return get_kmer(kwargs, database, recount, k, l, extract)
 
 
 def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
-                        recount=False, k=7, l=13, extract_features=False):
+                        recount=False, k=7, l=13, extract=False):
     """
     Wraps get_kmer to get salmonella amr data.
     """
@@ -121,12 +123,12 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
               'extra_label': antibiotic,
               'prefix': constants.SALMONELLA,
               'suffix': '.fna'}
-    return get_kmer(kwargs, database, recount, k, l, extract_features)
+    return get_kmer(kwargs, database, recount, k, l, extract)
 
 
 # def get_omnilog_kmer(database=constants.DB, recount=False, k=7, l=13,
 #                      label_header='Host', one_vs_all=None,
-#                      extract_features=False):
+#                      extract=False):
 #     """
 #     Wraps get_kmer, to get kmer data for the omnilog fasta files.
 #     """
@@ -137,30 +139,30 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
 #               'one_vs_all': positive_label,
 #               'prefix': constants.OMNILOG_FASTA,
 #               'suffix': '.fasta'}
-#     return get_kmer(kwargs, database, recount, k, l, extract_features)
+#     return get_kmer(kwargs, database, recount, k, l, extract)
 
 
 def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None,
-                                  extract_features=False):
+                                  extract=False):
     """
-    Wraps get_genome_region to get the US/UK mixed datasets genome region data to
+    Wraps get_genome_regions to get the US/UK mixed datasets genome region data to
     recreate the Lupolova et al paper.
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
               'train_header': None}
-    return get_genome_region(kwargs, table, sep, extract_features)
+    return get_genome_regions(kwargs, table, sep, extract)
 
 
 def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None,
-                                  extract_features=False):
+                                  extract=False):
     """
-    Wraps get_genome_region to get the US/UK split dataset genome region data to
+    Wraps get_genome_regions to get the US/UK split dataset genome region data to
     recreate the Lupolova et al paper.
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta'}
-    return get_genome_region(kwargs, table, sep, extract_features)
+    return get_genome_regions(kwargs, table, sep, extract)
 
 
 def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
@@ -168,7 +170,7 @@ def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
                                sep=None,col='Ratio',cutoff=0.25,absolute=True,
                                greater=True,kwargs=None):
     """
-    Parameters:
+    Args:
         input_table:        A binary_table output by panseq
         filter_table:       A table to filter input_table by.
         sep:                The delimiter used in both tables.
@@ -224,7 +226,7 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
                             filter_table=constants.PREDICTIVE_RESULTS,
                             sep=None, count=50, args=None):
     """
-    Parameters:
+    Args:
         input_table:        A binary_table output by panseq
         filter_table:       A table containing all the same rows as input_table,
                             but different columns.
@@ -276,7 +278,7 @@ def get_kmer_from_json(database=constants.DB,recount=False,k=7,l=13,
                        path=constants.MORIA,suffix='.fasta',
                        key='assembly_barcode',*json):
     """
-    Parameters:
+    Args:
         database,threeD,recount,k,l: See get_kmer_us_uk_split
         path: Prefix to be added to the beginning of every fastafile in the json
         suffix: Suffix to be added to the end of every fasta file in the json
@@ -323,7 +325,7 @@ def get_kmer_from_json(database=constants.DB,recount=False,k=7,l=13,
 def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
                             threeD=True, scale=True, *directories):
     """
-    Parameters:
+    Args:
         database,threeD,recount,k,l: See get_kmer_us_uk_split
         Scale:                       If true the data is scaled to range (-1,1)
                                      if false the data is not scaled.
@@ -367,8 +369,8 @@ def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
 
     return output
 
-def get_omnilog_data(kwargs={}, extract_features=False,
-                     omnilog_sheet=constants.OMNILOG_DATA):
+def get_omnilog_data(kwargs={}, omnilog_sheet=constants.OMNILOG_DATA,
+                     extract=False):
     """
 
     """
@@ -390,7 +392,7 @@ def get_omnilog_data(kwargs={}, extract_features=False,
     imputer = Imputer()
     output_data[0] = imputer.fit_transform(output_data[0])
     output_data[2] = imputer.transform(output_data[2])
-    if extract_features:
+    if extract:
         output = (output_data, np.asarray(omnilog_data.index))
     else:
         output = output_data

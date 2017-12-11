@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import lmdb
 import numpy as np
-from kmer_counter import count_kmers, get_counts, add_counts
+from kmer_counter import count_kmers, get_counts, add_counts, get_kmer_names
 
 def create_temp_files():
     directory = tempfile.mkdtemp()
@@ -131,6 +131,29 @@ class AddCounts(unittest.TestCase):
         val = val and np.array_equal(self.counts[2], [2,2,1,2])
         val = val and np.array_equal(self.counts[3], [5,0,0,0])
         self.assertTrue(val)
+
+
+class GetKmerNames(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.mkdtemp() + '/'
+        self.fasta = self.dir + 'TEMP.fasta'
+        self.db = self.dir + 'TEMPDB'
+        with open(self.fasta, 'w') as f:
+            f.write('>label1\nATAT\n>label2\nCGCG\n>label3\nAAAA\n>label4\nAGGA\n>label5\nCGCG')
+        count_kmers(4, 0, [self.fasta], self.db)
+        self.names = get_kmer_names(self.db)
+
+    def tearDown(self):
+        shutil.rmtree(self.dir)
+
+    def test_names(self):
+        correct_names = np.array(['AAAA', 'AGGA', 'ATAT', 'CGCG'])
+        if np.array_equal(correct_names, self.names):
+            val = True
+        else:
+            val = False
+        self.assertTrue(val)
+
 
 if __name__=="__main__":
     loader = unittest.TestLoader()

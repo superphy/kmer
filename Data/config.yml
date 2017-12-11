@@ -1,14 +1,22 @@
-model: support_vector_machine_validation
+model: random_forest_validation
 model_args: {}
-data: get_kmer_us_uk_split
+data: get_kmer
 data_args:
-  recount: no
-  k: 7
-  l: 13
+  kwargs:
+    metadata: /home/rboothman/PHAC/kmer/Data/omnilog_metadata.csv
+    fasta_header: Strain
+    label_header: Host
+    train_header: no
+    one_vs_all: Human
+    validate: yes
+    remove: Unknown
+    prefix: /home/rboothman/Data/ecomnilog/fasta/
+    suffix: .fasta
+  database: database2
 scaler: scale_to_range
 scaler_args:
-  start: -1
-  end: 1
+  low: -1
+  high: 1
 selection: select_k_best
 selection_args:
   score_func: f_classif
@@ -16,4 +24,5 @@ selection_args:
 augment: null
 augment_args: {}
 validate: yes
-reps: 2
+reps: 10
+extract: yes

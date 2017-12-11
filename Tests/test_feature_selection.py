@@ -67,14 +67,15 @@ class RemoveConstantFeatures(unittest.TestCase):
         b = np.random.randint(15, size=(12,4))
         self.x_train = np.hstack((a,b,a))
         self.x_test = np.random.randint(15, size=(6,6))
-        self.new_x_train, self.new_x_test = remove_constant_features(self.x_train, self.x_test)
+        self.data = (self.x_train, [], self.x_test, [])
+        self.new_data = remove_constant_features(self.data)
         self.correct_x_train = b
         self.correct_x_test = np.delete(self.x_test, [0,5], axis=1)
 
     def test_values(self):
-        val1 = np.array_equal(self.new_x_train, self.correct_x_train)
-        val2 = np.array_equal(self.new_x_test, self.correct_x_test)
-        self.assertTrue(val1 and val2)
+        val1 = np.array_equal(self.new_data[0], self.correct_x_train)
+        val2 = np.array_equal(self.new_data[2], self.correct_x_test)
+        self.assertTrue(val1 and val2, msg='\n'+str(self.new_data[2])+'\n'+str(self.correct_x_test))
 
 
 class SelectKBest(unittest.TestCase):
