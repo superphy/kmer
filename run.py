@@ -98,9 +98,10 @@ def run(model=models.support_vector_machine, model_args={},
         output['run_times'] = times.tolist()
         output['repetitions'] = reps
         if extract:
-            features = np.concatenate(features, axis=0)
-            features = np.unique(features)
-            output['important_features'] = features.tolist()
+            features = list(np.concatenate(features, axis=0))
+            feature_counts = dict()
+            for f in features: feature_counts[str(f)] = feature_counts.get(f,0)+1
+            output['important_features'] = feature_counts
     else:
         start = time.time()
         if extract:
@@ -132,7 +133,7 @@ def run(model=models.support_vector_machine, model_args={},
         output['train_size'] = len(d[0])
         output['test_size'] = len(d[2])
         if extract:
-            output['important_features'] = f
+            output['important_features'] = f.tolist()
     output['model'] = model
     output['model_args'] = model_args
     output['data'] = data
@@ -216,5 +217,4 @@ if __name__ == "__main__":
     args = convert_yaml(config_file)
     output = run(**args)
     with open(output_file, 'a') as f:
-        f.write('#%s\n'%str(datetime.datetime.now()))
         yaml.dump(output, f, explicit_start=True, explicit_end=True)

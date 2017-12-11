@@ -1,18 +1,19 @@
 model: random_forest_validation
 model_args: {}
-data: get_kmer
+data: get_omnilog_data
 data_args:
   kwargs:
     metadata: /home/rboothman/PHAC/kmer/Data/omnilog_metadata.csv
     fasta_header: Strain
     label_header: Host
     train_header: no
-    one_vs_all: Human
+    one_vs_all: no
     validate: yes
     remove: Unknown
-    prefix: /home/rboothman/Data/ecomnilog/fasta/
-    suffix: .fasta
-  database: database2
+    blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
 scaler: scale_to_range
 scaler_args:
   low: -1
@@ -24,5 +25,5 @@ selection_args:
 augment: null
 augment_args: {}
 validate: yes
-reps: 10
+reps: 20
 extract: yes
