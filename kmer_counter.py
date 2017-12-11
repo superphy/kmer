@@ -2,6 +2,7 @@ import subprocess
 import os
 import lmdb
 import sys
+import numpy as np
 
 
 
@@ -239,6 +240,25 @@ def get_counts(files, database):
     env.close()
     return arrays
 
+
+def get_kmer_names(database):
+    """
+    Returns (as a numpy 1D array) every key in the databse, this should be an alphabetical
+    list of all the kmers in the database.
+    """
+    env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=4000)
+    data = env.open_db('master', dupsort=False)
+
+    with env.begin(write=False, db=data) as txn:
+
+        kmer_list = []
+        cursor = txn.cursor()
+
+        for key,val in cursor:
+            kmer_list.append(key)
+
+    env.close()
+    return np.asarray(kmer_list)
 
 
 def add_counts(files, database):

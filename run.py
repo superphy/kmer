@@ -13,44 +13,40 @@ import constants
 from sklearn.feature_selection import chi2, f_classif
 
 
-methods = {}
-for x in [models,data,feature_selection,feature_scaling,data_augmentation]:
-    temp = dict(inspect.getmembers(x))
-    temp = {k:v for k,v in temp.items() if inspect.isfunction(v)}
-    methods.update(temp)
-
-
 def run(model=models.support_vector_machine, model_args={},
         data=data.get_kmer_us_uk_split, data_args={},
-        scaler=feature_scaling.scale_to_range, scaler_args={},
-        selection=None, selection_args={},
-        augment=None, augment_args={}, validate=False, reps=10):
+        scaler=feature_scaling.scale_to_range, scaler_args={}, selection=None,
+        selection_args={}, augment=None, augment_args={}, validate=False,
+        reps=10, extract=False):
     """
-    Parameters:
-        model:          The machine learning model to be used, see
-                        best_models.py.
-        model_args:     The arguments to be passed to the model method.
-        data:           The method used to gather the data, see data.py
-        data_args:      The arguments to be passed to the data method
-        scaler:         The method used to scale the data see
-                        feature_scaling.py.
-        scaler_args:    The arguments to be passed to eh scaler method.
-        selection:      The method used to perform feature selection, see
-                        feature_selection.py.
-        selection_args: The arguments to be passed to the selection method.
-        augment:        The method used to augment the training data, see
-                        data_augmentation.py
-        augment_args:   The arguments to be passed to the augment method.
-        validate:       If true "data" should return x_train, y_train,
-                        x_test, and y_test and "model" should accept the
-                        output of data and return an accuracy. If false
-                        "data" should return x_train, y_train, and x_test
-                        and "model" should accept the output of "data" and
-                        return predictions for x_test.
-        reps:           How many times to run the model, if doing validation
+    Args:
+        model (function):       The machine learning model to be used, see
+                                best_models.py.
+        model_args (dict):      The arguments to be passed to the model method.
+        data (function):        The method used to gather the data, see data.py
+        data_args (dict):       The arguments to be passed to the data method
+        scaler (function):      The method used to scale the data see
+                                feature_scaling.py.
+        scaler_args (dict):     The arguments to be passed to eh scaler method.
+        selection (function):   The method used to perform feature selection, see
+                                feature_selection.py.
+        selection_args (dict):  The arguments to be passed to the selection method.
+        augment (function):     The method used to augment the training data, see
+                                data_augmentation.py
+        augment_args (dict):    The arguments to be passed to the augment method.
+        validate (bool):        If true "data" should return x_train, y_train,
+                                x_test, and y_test and "model" should accept the
+                                output of data and return an accuracy. If false
+                                "data" should return x_train, y_train, and x_test
+                                and "model" should accept the output of "data" and
+                                return predictions for x_test.
+        reps (int):             How many times to run the model, if doing validation
+        extract (bool):         If true the most important feautres used to
+                                to do the classification are returned.
+
     Returns:
-        The output of "model" when given "data". If validating the model
-        the output is the average over all repetitions.
+        A dictionary containing all of the passed arguments and the results of
+        the run.
     """
     output = {}
     output['datetime'] = datetime.datetime.now()
@@ -59,20 +55,39 @@ def run(model=models.support_vector_machine, model_args={},
         times = np.zeros(reps)
         train_sizes = np.zeros(reps)
         test_sizes = np.zeros(reps)
+        if extract:
+            features = []
         for i in range(reps):
             start = time.time()
-            d = data(**data_args)
+            if extract:
+                data_args['extract'] = True
+                d,f = data(**data_args)
+            else:
+                d = data(**data_args)
+            output['num_genomes'] = d[0].shape[0] + d[2].shape[0]
             if selection:
-                d = selection(d, **selection_args)
+                if extract:
+                    selection_args['feature_names']=f
+                    d,f = selection(d, **selection_args)
+                    selection_args.pop('feature_names', None)
+                else:
+                    d = selection(d, **selection_args)
             if scaler:
                 d = scaler(d, **scaler_args)
             if augment:
                 d = augment(d, **augment_args)
-            score = model(d, **model_args)
+            if extract:
+                model_args['feature_names'] = f
+                score, f = model(d, **model_args)
+                model_args.pop('feature_names', None)
+            else:
+                score = model(d, **model_args)
             times[i] = time.time() - start
             results[i] = score
             train_sizes[i] = d[0].shape[0]
             test_sizes[i] = d[2].shape[0]
+            if extract:
+                features.append(f)
         output['train_sizes'] = train_sizes.tolist()
         output['test_sizes'] = test_sizes.tolist()
         output['avg_run_time'] = times.mean().tolist()
@@ -82,21 +97,42 @@ def run(model=models.support_vector_machine, model_args={},
         output['results'] = results.tolist()
         output['run_times'] = times.tolist()
         output['repetitions'] = reps
+        if extract:
+            features = np.concatenate(features, axis=0)
+            features = np.unique(features)
+            output['important_features'] = features.tolist()
     else:
         start = time.time()
-        d = data(**data_args)
+        if extract:
+            data_args['extract'] = True
+            d,f = data(**data_args)
+        else:
+            d = data(**data_args)
+        output['num_genomes'] = d[0].shape[0] + d[2].shape[0]
         if selection:
-            d = selection(d, **selection_args)
+            if extract:
+                selection_args['feature_names'] = f
+                d,f = selection(d, **selection_args)
+                selection_args.pop('feature_names', None)
+            else:
+                d = selection(d, **selection_args)
         if scaler:
             d = scaler(d, **scaler_args)
         if augment:
             d = augment(d, **augment_args)
-        predictions = model(d, **model_args)
+        if extract:
+            model_args['feature_names'] = f
+            predictions, f = model(d, **model_args)
+            model_args.pop('feature_names', None)
+        else:
+            predictions = model(d, **model_args)
         total_time = time.time() - start
         output['predictions'] = predictions.tolist()
         output['run_time'] = total_time
         output['train_size'] = len(d[0])
         output['test_size'] = len(d[2])
+        if extract:
+            output['important_features'] = f
     output['model'] = model
     output['model_args'] = model_args
     output['data'] = data
@@ -109,11 +145,40 @@ def run(model=models.support_vector_machine, model_args={},
     output['augment_args'] = augment_args
     return output
 
-def parse_args(input_dictionary):
+
+def get_methods():
+    """
+    Gets a dictionary of all the methods defined and imported in the files
+    models.py, data.py, feature_selection.py feature_scaling.py, and
+    data_augmentation.py
+
+    Args:
+        None
+
+    Returns:
+        dict(str:function)
+    """
+    methods = {}
+    for x in [models,data,feature_selection,feature_scaling,data_augmentation]:
+        temp = dict(inspect.getmembers(x, inspect.isfunction))
+        methods.update(temp)
+    return methods
+
+
+def convert_methods(input_dictionary):
+    """
+    Args:
+        input_dictionary (dict): A dictionary of kwargs for run.
+
+    Returns:
+        (dict): Same keys as input_dictionary, but with method names converted
+                to actual methods.
+    """
     output_dictionary = {}
+    methods = get_methods()
     for key, value in input_dictionary.items():
         if type(value) == dict:
-            output = parse_args(value)
+            output = convert_methods(value)
         elif value in methods.keys():
             output = methods[value]
         else:
@@ -121,12 +186,22 @@ def parse_args(input_dictionary):
         output_dictionary[key] = output
     return output_dictionary
 
+
 def convert_yaml(input_file):
-    output_dictionary = {}
+    """
+    Args:
+        input_file (str): Path to a yaml file containing the config for run.
+
+    Returns:
+        output (dict): The data contained in input_file converted to a
+                       dictionary and passed through convert_methods.
+    """
+    output = {}
     with open(input_file, 'r') as f:
         input_dictionary = yaml.load(f)
-    output_dictionary = parse_args(input_dictionary)
-    return output_dictionary
+    output = convert_methods(input_dictionary)
+    return output
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 3:
@@ -141,7 +216,5 @@ if __name__ == "__main__":
     args = convert_yaml(config_file)
     output = run(**args)
     with open(output_file, 'a') as f:
-        f.write('---\n')
         f.write('#%s\n'%str(datetime.datetime.now()))
-        yaml.dump(output, f)
-        f.write('...\n')
+        yaml.dump(output, f, explicit_start=True, explicit_end=True)
