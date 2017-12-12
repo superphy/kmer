@@ -68,7 +68,7 @@ class CommandLineVariation1(unittest.TestCase):
             yaml.dump(self.config, f)
         try:
             command = constants.SOURCE + 'run.py'
-            args = ['python', command, self.config_file, self.results_file]
+            args=['python',command,'-i',self.config_file,'-o',self.results_file]
             self.output = subprocess.check_output(args)
         except subprocess.CalledProcessError:
             self.output = None
@@ -83,17 +83,17 @@ class CommandLineVariation1(unittest.TestCase):
             data = yaml.load(f)
         A = lambda x,y: [x==y, x, y]
         v = {}
-        v['reps']=A(data['repetitions'],self.reps)
-        v['results_length']=A(len(data['results']),self.reps)
-        v['run_times_length']=A(len(data['run_times']),self.reps)
-        v['test_size_length']=A(len(data['test_sizes']),self.reps)
-        v['train_size_length']=A(len(data['train_sizes']),self.reps)
-        v['std_results']=A(data['std_dev_results'],np.asarray(data['results']).std())
-        v['avg_results']=A(data['avg_result'],np.asarray(data['results']).mean())
-        v['std_time']=A(data['std_dev_run_times'],np.asarray(data['run_times']).std())
-        v['avg_time']=A(data['avg_run_time'],np.asarray(data['run_times']).mean())
-        v['test_sizes']=A(sum(data['test_sizes']),self.reps*(self.samples-self.train_size))
-        v['train_sizes']=A(sum(data['train_sizes']),self.reps*(self.train_size+(self.add_samples*self.classes)))
+        v['reps']=A(data['output']['repetitions'],self.reps)
+        v['results_length']=A(len(data['output']['results']),self.reps)
+        v['run_times_length']=A(len(data['output']['run_times']),self.reps)
+        v['test_size_length']=A(len(data['output']['test_sizes']),self.reps)
+        v['train_size_length']=A(len(data['output']['train_sizes']),self.reps)
+        v['std_results']=A(data['output']['std_dev_results'],np.asarray(data['output']['results']).std())
+        v['avg_results']=A(data['output']['avg_result'],np.asarray(data['output']['results']).mean())
+        v['std_time']=A(data['output']['std_dev_run_times'],np.asarray(data['output']['run_times']).std())
+        v['avg_time']=A(data['output']['avg_run_time'],np.asarray(data['output']['run_times']).mean())
+        v['test_sizes']=A(sum(data['output']['test_sizes']),self.reps*(self.samples-self.train_size))
+        v['train_sizes']=A(sum(data['output']['train_sizes']),self.reps*(self.train_size+(self.add_samples*self.classes)))
         vals = [x[0] for x in v.values()]
         val = False if False in vals else True
         self.assertTrue(val, msg={k:v[1:] for k,v in v.items() if not v[0]})
@@ -150,7 +150,7 @@ class CommandLineVariation2(unittest.TestCase):
             yaml.dump(self.config, f)
         try:
             command = constants.SOURCE + 'run.py'
-            args = ['python', command, self.config_file, self.results_file]
+            args=['python',command,'-i',self.config_file,'-o',self.results_file]
             self.output = subprocess.check_output(args)
         except subprocess.CalledProcessError:
             self.output = None
@@ -165,33 +165,12 @@ class CommandLineVariation2(unittest.TestCase):
             data = yaml.load(f)
         A = lambda x,y: [x==y, x, y]
         v = {}
-        v['predictions_length']=A(len(data['predictions']),self.samples-self.train_size)
-        v['test_sizes']=A(data['test_size'],(self.samples-self.train_size))
-        v['train_sizes']=A(data['train_size'],(self.train_size+(self.add_samples*self.classes)))
+        v['predictions_length']=A(len(data['output']['predictions']),self.samples-self.train_size)
+        v['test_sizes']=A(data['output']['test_size'],(self.samples-self.train_size))
+        v['train_sizes']=A(data['output']['train_size'],(self.train_size+(self.add_samples*self.classes)))
         vals = [x[0] for x in v.values()]
         val = False if False in vals else True
         self.assertTrue(val, msg={k:v[1:] for k,v in v.items() if not v[0]})
-
-
-class CommandLineVariation3(unittest.TestCase):
-    def setUp(self):
-        self.dir = tempfile.mkdtemp()
-        self.tempdb = self.dir + '/TEMPdb'
-        self.args = ['python',constants.SOURCE+'run.py','-ma','rbf','0.1','-da',
-                     self.tempd,'True','3','1','-Sa','0','2','-s',
-                     'select_percentile','-sa','chi2','25','-a',
-                     'augment_data_naive','-aa','10','--reps','3','-validate',
-                     'True','--record_time','True','--record_std_dev','True',
-                     '--record_data_size','True']
-        self.output = subprocess.check_output(self.args)
-
-    def tearDown(self):
-        shutil.rmtree(self.dir)
-
-
-class FromScript(unittest.TestCase):
-    def setUp(self):
-        pass
 
 if __name__=="__main__":
     loader = unittest.TestLoader()

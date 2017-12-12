@@ -10,6 +10,7 @@ import time
 import datetime
 import yaml
 import constants
+import argparse
 from sklearn.feature_selection import chi2, f_classif
 
 
@@ -19,6 +20,10 @@ def run(model=models.support_vector_machine, model_args={},
         selection_args={}, augment=None, augment_args={}, validate=False,
         reps=10, extract=False):
     """
+    Chains a data gathering method, data preprocessing methods, and a machine
+    learning model together. Stores the settings for all the methods and the
+    output of the model in a dictionary.
+
     Args:
         model (function):       The machine learning model to be used, see
                                 best_models.py.
@@ -100,7 +105,7 @@ def run(model=models.support_vector_machine, model_args={},
         if extract:
             features = list(np.concatenate(features, axis=0))
             feature_counts = dict()
-            for f in features: feature_counts[str(f)] = feature_counts.get(f,0)+1
+            for f in features: feature_counts[str(f)]=feature_counts.get(f,0)+1
             output['important_features'] = feature_counts
     else:
         start = time.time()
@@ -168,12 +173,15 @@ def get_methods():
 
 def convert_methods(input_dictionary):
     """
+    Converts any method names that are values in the input dictionary to actual
+    methods.
+
     Args:
         input_dictionary (dict): A dictionary of kwargs for run.
 
     Returns:
-        (dict): Same keys as input_dictionary, but with method names converted
-                to actual methods.
+        (dict): Same keys as input_dictionary, values that are method names are
+                converted to actual methods.
     """
     output_dictionary = {}
     methods = get_methods()
@@ -190,6 +198,9 @@ def convert_methods(input_dictionary):
 
 def convert_yaml(input_file):
     """
+    Converts the data in the input yaml file to a dictionary and passes the
+    result through convert_methods.
+
     Args:
         input_file (str): Path to a yaml file containing the config for run.
 
@@ -203,18 +214,38 @@ def convert_yaml(input_file):
     output = convert_methods(input_dictionary)
     return output
 
+def create_arg_parser():
+    """
+    Creates a namespace object for the command line arguments of run.
+
+    Args:
+        None
+    Returns:
+        Namespace object populated with the command line arguments.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input",
+                        help="""yaml configuration file for run. If not
+                                provided Data/config.yml is used.""",
+                        default='Data/config.yml')
+    parser.add_argument("-o", "--output",
+                        help="""yaml file where the results of the run will be
+                                stored. If not provided Data/run_results.yml is
+                                used.""",
+                        default='Data/run_results.yml')
+    parser.add_argument("-n", "--name",
+                        help="""What the yaml document will be named in the
+                                output file. If not provided the current
+                                Datetime is used. If using spaces, surround
+                                with quotes.""",
+                        default=datetime.datetime.now())
+    return parser.parse_args()
+
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 3:
-        config_file = sys.argv[1]
-        output_file = sys.argv[2]
-    elif len(sys.argv) == 2:
-        config_file = sys.argv[1]
-        output_file = constants.OUTPUT
-    else:
-        config_file = constants.CONFIG
-        output_file = constants.OUTPUT
-    args = convert_yaml(config_file)
+    cl_args = create_arg_parser()
+    args = convert_yaml(cl_args.input)
     output = run(**args)
-    with open(output_file, 'a') as f:
-        yaml.dump(output, f, explicit_start=True, explicit_end=True)
+    document = {'name':cl_args.name, 'output':output}
+    with open(cl_args.output, 'a') as f:
+        yaml.dump(document, f, explicit_start=True, explicit_end=True)

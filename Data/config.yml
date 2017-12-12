@@ -10,10 +10,6 @@ data_args:
     one_vs_all: no
     validate: yes
     remove: Unknown
-    blacklist:
-      - ECI-2624
-      - ECI-2859
-      - ECI-2836
 scaler: scale_to_range
 scaler_args:
   low: -1
