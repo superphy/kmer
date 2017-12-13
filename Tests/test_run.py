@@ -85,15 +85,10 @@ class CommandLineVariation1(unittest.TestCase):
         v = {}
         v['reps']=A(data['output']['repetitions'],self.reps)
         v['results_length']=A(len(data['output']['results']),self.reps)
-        v['run_times_length']=A(len(data['output']['run_times']),self.reps)
-        v['test_size_length']=A(len(data['output']['test_sizes']),self.reps)
-        v['train_size_length']=A(len(data['output']['train_sizes']),self.reps)
         v['std_results']=A(data['output']['std_dev_results'],np.asarray(data['output']['results']).std())
         v['avg_results']=A(data['output']['avg_result'],np.asarray(data['output']['results']).mean())
-        v['std_time']=A(data['output']['std_dev_run_times'],np.asarray(data['output']['run_times']).std())
-        v['avg_time']=A(data['output']['avg_run_time'],np.asarray(data['output']['run_times']).mean())
-        v['test_sizes']=A(sum(data['output']['test_sizes']),self.reps*(self.samples-self.train_size))
-        v['train_sizes']=A(sum(data['output']['train_sizes']),self.reps*(self.train_size+(self.add_samples*self.classes)))
+        v['test_sizes']=A(data['output']['test_sizes'],(self.samples-self.train_size))
+        v['train_sizes']=A(data['output']['train_sizes'],(self.train_size+(self.add_samples*self.classes)))
         vals = [x[0] for x in v.values()]
         val = False if False in vals else True
         self.assertTrue(val, msg={k:v[1:] for k,v in v.items() if not v[0]})
@@ -171,6 +166,18 @@ class CommandLineVariation2(unittest.TestCase):
         vals = [x[0] for x in v.values()]
         val = False if False in vals else True
         self.assertTrue(val, msg={k:v[1:] for k,v in v.items() if not v[0]})
+
+# TODO: Write this test
+class ScriptVariation(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_output(self):
+        self.assertTrue(1)
+
 
 if __name__=="__main__":
     loader = unittest.TestLoader()
