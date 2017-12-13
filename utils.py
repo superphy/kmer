@@ -6,12 +6,20 @@ import sys
 import pandas as pd
 import numpy as np
 import constants
+import re
 from sklearn.preprocessing import LabelEncoder
+
 
 def setup_files(filepath):
     """
     Takes a path to a directory, returns a list of the complete paths to each
     file in the directory
+
+    Args:
+        filepath (str): Path to directory of files.
+
+    Returns:
+        list(str): Complete path to every file in filepath.
     """
     if not filepath[-1] == '/':
         filepath += '/'
@@ -21,6 +29,12 @@ def setup_files(filepath):
 def check_fasta(file):
     """
     Returns True if the file is fasta or fastq, False otherwise.
+
+    Args:
+        file (str): File to check.
+
+    Returns:
+        bool: True if file is fasta|q otherwise False.
     """
     with open(file, 'r') as f:
         firstline = f.readline()
@@ -32,12 +46,15 @@ def check_fasta(file):
 
 def valid_file(test_files, *invalid_files):
     """
-    Params:
-        test_files:     a list of fasta file names.
-        *invalid_files: one or more files that contain a list of invalid fasta
-                        file names.
+    Checks a list of files against csv files that contain invalid file names,
+    removes any files from the input list that are in the csv files.
+
+    Args:
+        test_files (list(str)): Filenames to check.
+        *invalid_files (str):   One or more csv files that contain a list of
+                                invalid fasta file names.
     Returns:
-        test_files with any files that appeared in *invalid files removed.
+        list(str): list of file names with all invalid ones remvoved.
     """
     bad_files = []
     for file in invalid_files:
@@ -50,6 +67,14 @@ def same_shuffle(a,b):
     """
     Shuffles two lists so that the elements at index x in both lists before
     shuffling are at index y in their respective list after shuffling.
+
+    Args:
+        a (list): A list of elements to shuffle.
+        b (list): Another list of elements to shuffle, should have same length
+                  as a.
+
+    Returns:
+        tuple: a,b with their elements shuffled.
     """
     temp = list(zip(a, b))
     random.shuffle(temp)
@@ -85,28 +110,45 @@ def shuffle(data, labels):
         all_labels = np.asarray(all_labels)
     return all_data, all_labels
 
+
 def flatten(data):
     """
     Takes a 3D numpy ndarray and makes it 2D
+
+    Args:
+        data (ndarray): Numpy array to flatten.
+
+    Returns:
+        ndarray: The input array with its inner dimension removed.
     """
     data = data.reshape(data.shape[0], data.shape[1])
     return data
 
+
 def make3D(data):
     """
     Takes a 2D numpy ndarray and makes it 3D to be used in a Conv1D keras layer.
+
+    Args:
+        data (ndarray): Numpy array to make 3D
+
+    Returns:
+        ndarray: The input array with an additional dimension added.
     """
     data = data.reshape(data.shape[0], data.shape[1], 1)
     return data
 
+
 def sensitivity_specificity(predicted_values, true_values):
     """
+    Calculates the sensitivity and specificty of a machine learning model.
+
     Args:
-        predicted_values:   Array, what the model predicted.
-        true_values:        Array, the true values.
+        predicted_values:   What the model predicted.
+        true_values:        The true values.
     Returns:
-        results:    Dictionary, keys are the classes, values are dictionaries
-                    with keys 'sensitivity' and 'specificity'
+        dict(dict): Outer dictionary has keys for each class in the data, inner
+                    dictionary has keys for sensitivity and specificity.
     """
     results = {}
     if type(predicted_values) != np.ndarray:
@@ -140,48 +182,66 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                    test_label='Test', suffix='', prefix='',sep=None,
                    one_vs_all=None, remove=None, validate=True, blacklist=None):
     """
+    Gets filenames, classifications, and train/test splits from a metadata
+    sheet. Does not alter the metadata sheet in any way. Provides options to
+    not use specific genomes that are present in the metadata sheet.
+
     Args:
-        metadata:     A csv file, must contain at least one column of genome
-                      names and one column of their classifications.
-        fasta_header: String, header for the genome name column
-        label_header: String, header for the genome classification column
-        train_header: String, header for the column that contains train/test
-                      labels, if not given a random 80/20 split will be used to
-                      generate the train/test datasets.
-        train_label:  String, labels train genomes under train_header.
-        test_label:   String, labels test genomes under train_header.
-        extra_header: String, header for an additional column.
-        extra_label:  String, if a sample's value under the extra_header column
-                      does not match extra_label it will be removed.
-        prefix:       String, prefix to attach to the front of genome
-                      names, for instance the complete filepath.
-        suffix:       String, suffix to appened to the genome names for instance
-                      .fasta
-        sep:          The delimiter used in metadata, if None the
-                      delimiter is guessed.
-        one_vs_all:   String, changes a multiclass problem into a binary
-                      problem. All samples whose classification does not match
-                      one_vs_all will be combined into one class.
+        metadata (str):         A csv file, must contain at least one column of
+                                genome names and one column of their
+                                classifications.
+        fasta_header (str):     Header for the genome name column
+        label_header (str):     Header for the genome classification column
+        train_header (str):     Header for the column that contains train/test
+                                labels, if not given a random 80/20 split will
+                                be used to generate the train/test datasets.
+        extra_header (str):     Header for an additional column.
+        extra_label (str):      If a sample's value under the extra_header
+                                column does not match extra_label it will be
+                                removed.
+        train_label (str):      Labels for train genomes under train_header.
+        test_label (str):       Labels for test genomes under train_header.
+        suffix (str):           Suffix to appened to the end of genome names,
+                                for example .fasta
+        prefix (str):           Prefix to attach to the front of genome names,
+                                for example the complete filepath.
+        sep (str):              The delimiter used in metadata, if None the
+                                delimiter is guessed.
+        one_vs_all (str):       If given, changes a multiclass problem into a
+                                binary one. All samples whose classification
+                                does not match the given value will be combined
+                                to form one class.
+        remove (str):           If given, any samples whose classification
+                                matches the given value will be removed.
+        validate (bool):        If True y_test is created, if False y_test is an
+                                empty ndarray.
+        blacklist (list(str)):  A list of genome names to remove.
+
     Returns:
-        x_train:   All the training fasta files
-        y_train:   The labels for x_train
-        x_test:    All the test fasta files.
-        y_test:    The labels for x_test
+        tuple: x_train, y_train, x_test, y_test; x_train and x_test contain
+               filenames, not the actual data to be passed to a machine learning
+               model.
     """
     if sep is None:
         data = pd.read_csv(metadata, sep=sep, engine='python')
     else:
         data = pd.read_csv(metadata, sep=sep)
+
     if extra_header:
         data = data[data[extra_header] == extra_label]
+
     if remove:
         data = data.drop(data[data[label_header]==remove].index)
+
     if blacklist is not None:
         data = data.drop(data[data[fasta_header].isin(blacklist)].index)
+
     if one_vs_all:
         data[label_header] = data[label_header].where(data[label_header]==one_vs_all, 'Other')
+
     all_labels = np.unique(data[label_header])
     all_labels = all_labels[~pd.isnull(all_labels)]
+
     if train_header:
         train_data = data[data[train_header]==train_label]
         test_data = data[data[train_header]==test_label]
@@ -257,6 +317,12 @@ def convert_to_numerical_classes(data):
     Uses a scikitlearn LabelEncoder to convert y_train and y_test (if it exists)
     to numerical labels, returns data as well as the label encoder to allow the
     labels to be converted back.
+
+    Args:
+        tuple: x_train, y_train, x_test, y_test
+
+    Returns:
+        tuple: (x_train, y_train, x_test, y_test), LabelEncoder object
     """
     le = LabelEncoder()
     if len(data) > 3:
@@ -267,3 +333,25 @@ def convert_to_numerical_classes(data):
         le.fit(data[1])
         output_data = (data[0], le.transform(data[1]), data[2])
     return output_data, le
+
+
+def convert_well_index(well_index):
+    """
+    Converts the omnilog well coordinates to what was actually in the well.
+
+    Args:
+        well_index (str): The well index in form PM(number)...(Letter)(Number)
+
+    Returns:
+        str: The input well index simplified to PM(number)-(Letter)(number)
+             followed by what was in the well.
+    """
+    well_descriptions = pd.read_csv(constants.OMNILOG_WELLS)
+    first = re.compile('^PM\d+')
+    second = re.compile('[A-H]\d+$')
+    first_result = re.search(first, well_index)
+    second_result = re.search(second, well_index)
+    df_index = first_result.group(0) + '-' + second_result.group(0)
+    output = well_descriptions.loc[well_descriptions['Key'] == df_index]
+    output =  output.Key.item() + output.Value.item()
+    return output

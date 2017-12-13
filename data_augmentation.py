@@ -9,6 +9,15 @@ import inspect
 def __augment_data_naive_helper(data, desired_samples):
     """
     Helper method for augment_data_naive
+
+    Args:
+        data (ndarray): Data samples all from one class
+        desired_samples (int): The number of new samples to be created for this
+                               class.
+
+    Returns:
+        data (ndarray): The input data with additional samples of the same class
+                        added.
     """
     indices = np.random.randint(data.shape[0], size=2*desired_samples)
     temp = np.split(data[indices,:], desired_samples)
@@ -24,9 +33,13 @@ def augment_data_naive(input_data, desired_samples=50):
     Augments data by grabbing x random samples from a class and
     averaging their values to create another sample of the same class.
 
-    args:   A tuple where the first value is the number of new samples to
-            add to each class, and the second value is the number of
-            original samples to use when creating a new sample.
+    Args:
+        input_data (tuple): x_train, y_train, x_test, y_test
+        desired_samples (int): The number of samples to be added to each class.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test with samples added to x_train
+               and y_train.
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -56,10 +69,13 @@ def augment_data_smote(input_data, desired_samples=50):
     but we can ignore this since we are using SMOTE to augment data, not to
     correct for imbalanced data.
 
-    args:   A tuple where the first value is the number of smaples to be
-            added to each class, the second value is the label for the
-            lexicographically smaller of the classes, and the third value
-            is the label for the remaining class.
+    Args:
+        input_data (tuple): x_train, y_train, x_test, y_test
+        desired_samples (int): The number of samples to be added to each class.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test, with samples added to x_train
+               and y_train.
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -85,10 +101,13 @@ def augment_data_adasyn(input_data, desired_samples=50):
     but we can ignore this since we are using ADASYN to augment data, not to
     correct for imbalanced data.
 
-    args:   A tuple where the first value is the number of smaples to be
-            added to each class, the second value is the label for the
-            lexicographically smaller of the classes, and the third value
-            is the label for the remaining class.
+    Args:
+        input_data (tuple): x_train, y_train, x_test, y_test
+        desired_samples (int): The number of samples to be added to each class.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test, with samples added to x_train
+               and y_train.
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -105,6 +124,17 @@ def augment_data_adasyn(input_data, desired_samples=50):
 
 
 def augment_data_noise(input_data, desired_samples=50):
+    """
+    Augments data by adding random noise to samples.
+
+    Args:
+        input_data (tuple): x_train, y_train, x_test, y_test
+        desired_samples (int): The number of samples to be added to each class.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test, with samples added to x_train
+               and y_train.
+    """
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -128,6 +158,18 @@ def augment_data_noise(input_data, desired_samples=50):
 
 
 def balance_data_smote(input_data):
+    """
+    Uses the SMOTE algorithm to balance data by adding samples to all minority
+    classes until each class has the same number of samples.
+    See: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.SMOTE.html
+
+    Args:
+        input_data (tuple): x_train, y_train, x_test, y_test
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test, with samples added to x_train
+               and y_train.
+    """
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -142,6 +184,18 @@ def balance_data_smote(input_data):
     return (x_train, y_train, x_test, y_test)
 
 def balance_data_adasyn(input_data):
+    """
+    Uses the ADASYN algorithm to balance data by adding samples to all minority
+    classes until each class has the same number of samples.
+    See: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.ADASYN.html
+
+    Args:
+        input_data (tuple): x_train, y_train, x_test, y_test
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test, with samples added to x_train
+               and y_train.
+    """
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -156,6 +210,18 @@ def balance_data_adasyn(input_data):
     return (x_train, y_train, x_test, y_test)
 
 def balance_data_naive(input_data, choice=2):
+    """
+    Balances data by adding samples to all minority classes until each class has
+    the same number of samples. Creates new samples by grabbing x random samples
+    from the same class and averaging their values.
+
+    Args:
+        input_data (tuple): x_train, y_train, x_test, y_test
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test, with samples added to x_train
+               and y_train.
+    """
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -179,6 +245,18 @@ def balance_data_naive(input_data, choice=2):
     return (x_train, y_train, x_test, y_test)
 
 def balance_data_noise(input_data):
+    """
+    Balances data by adding samples to all minority classes until each class has
+    the same number of samples. Creates new samples by grabbing adding random
+    noise to samples.
+
+    Args:
+        input_data (tuple): x_train, y_train, x_test, y_test
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test, with samples added to x_train
+               and y_train.
+    """
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]

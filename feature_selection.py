@@ -7,8 +7,20 @@ import numpy as np
 
 def variance_threshold(input_data, threshold=0.16, feature_names=None):
     """
-    Removes all features from x_train and x_test whose variances is less
-    than args[0] in x_train.
+    Removes all features from x_train and x_test whose variances in x_train is
+    less than threshold. Uses scikit-learn's VarianceThreshold If feature_names
+    is given it is also returned with any features removed from x_train and
+    x_test also removed from feature_names.
+
+    Args:
+        input_data (tuple):     x_train, y_train, x_test, y_test
+        threshold (float):      Lower limit of variance for a feature to be kept
+        feature_names (list):   The names of all features before selection.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -38,6 +50,20 @@ def variance_threshold(input_data, threshold=0.16, feature_names=None):
 
 
 def remove_constant_features(input_data, feature_names=None):
+    """
+    Removes all features from x_train and x_test that are completely constant
+    in x_train. If feature_names is given it is also returned with any
+    features removed from x_train and x_test also removed from feature_names.
+
+    Args:
+        input_data (tuple):     x_train, y_train, x_test, y_test
+        feature_names (list):   The names of all features before selection.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
+    """
     x_train = pd.DataFrame(input_data[0])
     x_train = x_train.loc[:, x_train.var() != 0.0]
     x_test = pd.DataFrame(input_data[2])
@@ -53,11 +79,25 @@ def remove_constant_features(input_data, feature_names=None):
 
     return output
 
+# TODO: Make sure when f_classif is used that feature names is passed through remove_constant_features properly
 def select_k_best(input_data, score_func=f_classif, k=500, feature_names=None):
     """
-    Selects the k best features in x_train, removes all others from
-    x_train and x_test. Selects the best features by using the score
-    function score_func.
+    Selects the k best features in x_train, removes all others from x_train and
+    x_test. Selects the best features by using the score function score_func and
+    scikit-learn's SelectKBest. If feature_names is given it is also returned
+    with any features removed from x_train and x_test also removed from
+    feature_names.
+
+    Args:
+        input_data (tuple):     x_train, y_train, x_test, y_test
+        score_func (function):  The score function to be passed to SelectKBest
+        k (int):                How many features to keep.
+        feature_names (list):   The names of all features before selection.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
 
     if score_func == f_classif:
@@ -93,11 +133,25 @@ def select_k_best(input_data, score_func=f_classif, k=500, feature_names=None):
     return output
 
 
+# TODO: Make sure when f_classif is used that feature names is passed through remove_constant_features properly
 def select_percentile(input_data, score_func=f_classif, percentile=5, feature_names=None):
     """
-    Selects the best args[1] percentile of features in x_train, removes
-    the rest of the features from x_train and x_test. Selects the best
-    features by using the score function args[0].
+    Selects the percentile best features in x_train, removes the rest of the
+    features from x_train and x_test. Selects the best features by using the
+    score function score_func and scikit-learn's SelectPercentile. If
+    feature_names is given it is also returned with any features removed from
+    x_train and x_test also removed from feature_names.
+
+    Args:
+        input_data (tuple):     x_train, y_train, x_test, y_test
+        score_func (function):  The score function to be passed to SelectKBest
+        percentile (int):       Percentile of features to keep.
+        feature_names (list):   The names of all features before selection.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -132,10 +186,23 @@ def select_percentile(input_data, score_func=f_classif, percentile=5, feature_na
 def recursive_feature_elimination(input_data, estimator=SVC(kernel='linear'),
                                   n_features_to_select=None, step=0.1, feature_names=None):
     """
-    Recursively eliminates features from x_train and x_test, see
-    documentaion: http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html
-    If providing args, it should be of the form:
-    [estimator, n_features_to_select, step]
+    Recursively eliminates features from x_train and x_test using scikit-learn's
+    RFE, see documentation: http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html
+    If feature_names is given it is also returned with any features from
+    x_train and x_test also removed from feature_names.
+
+    Args:
+        input_data (tuple):                   x_train, y_train, x_test, y_test
+        estimator (object):                   Passed to RFE, see documentation
+        n_features_to_select (int or None):   Passed to RFE, see documentation
+        step (int or float):                  Passed to RFE, see documentation
+        feature_names:                        The names of all features before
+                                              feature selection.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -165,9 +232,23 @@ def recursive_feature_elimination(input_data, estimator=SVC(kernel='linear'),
 def recursive_feature_elimination_cv(input_data, estimator=SVC(kernel='linear'),
                                      step=0.1, cv=3, feature_names=None):
     """
-    Recursively elinates features from x_train and x_test using cross
-    validation, see documentation: http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFECV.html
-    If providing args, it should be of the form: [estimator, step, cv]
+    Recursively elinates features from x_train and x_test with cross validation,
+    uses scikit-learn's RFECV see documentation: http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFECV.html
+    If feature_names is given it is also returned with any features from
+    x_train and x_test also removed from feature_names.
+
+    Args:
+        input_data (tuple):                   x_train, y_train, x_test, y_test
+        estimator (object):                   Passed to RFECV, see documentation
+        step (int or float):                  Passed to RFECV, see documentation
+        cv (int):                             Passed to RFECV, see documentation
+        feature_names:                        The names of all features before
+                                              feature selection.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train = input_data[0]
     y_train = input_data[1]

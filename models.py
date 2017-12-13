@@ -92,9 +92,10 @@ def neural_network(input_data, binarize=True):
     return prediction
 
 
-def support_vector_machine_validation(input_data, kernel='linear', C=1, feature_names=None):
+def support_vector_machine_validation(input_data, kernel='linear', C=1,
+                                      feature_names=None, num_features=10):
     """
-    Fits, trains, and test a support vector machine.
+    Fits, trains, and tests a support vector machine.
     Returns the accuracy of the model.
     """
     x_train = input_data[0]
@@ -112,7 +113,8 @@ def support_vector_machine_validation(input_data, kernel='linear', C=1, feature_
         coefs = np.argsort(model.coef_.ravel())
         top_pos_features = feature_names[coefs[-num_features:]]
         top_neg_features = feature_names[coefs[:num_features]]
-        output = (output_data, top_pos_features, top_neg_features)
+        top_features = np.hstack((top_pos_features,top_neg_features))
+        output = (output_data, top_features)
     else:
         output = output_data
 
@@ -120,7 +122,7 @@ def support_vector_machine_validation(input_data, kernel='linear', C=1, feature_
 
 
 def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
-                           num_features = 10):
+                           num_features=10):
     """
     Fits, trains, and makes predictions with a support vector machine.
     Returns the predicted values for "predict"

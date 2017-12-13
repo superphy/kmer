@@ -14,16 +14,21 @@ import constants
 def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
              extract=False):
     """
+    Get kmer data for genomes specified in kwargs, uses kmer_counter and
+    utils.parse_metadata
+
     Args:
-        args:       The arguments to pass to parse_metadata.
-        database:   lmdb database to store kmer counts.
-        threeD:     If True the data is made three dimensional.
-        recount:    If True the kmers are recounted.
-        k:          Size of kmer to be counted. Ignored if recount is false.
-        l:          kmer cutoff value. Ignored if recount is false.
+        kwargs (dict):  The arguments to pass to parse_metadata.
+        database (str): lmdb database to store kmer counts.
+        recount (bool): If True the kmers are recounted.
+        k (int):        Size of kmer to be counted. Ignored if recount is false.
+        l (int):        kmer cutoff value. Ignored if recount is false.
+        extract (bool): If True a list of features names is also returned.
 
     Returns:
-        (x_train, y_train, x_test, y_test) ready to be passed to a ml model
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
 
@@ -51,12 +56,19 @@ def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
 def get_genome_regions(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
                       extract=False):
     """
+    Gets genome region presence absence data from a binary table output by
+    Panseq for the genomes specified by kwargs. Uses utils.parse_metadata
+
     Args:
-        args:    The arguments to pass to parse_metadata.
-        table:   binary_table.txt output from panseq.
+        kwargs (dict):      The arguments to pass to parse_metadata.
+        table (str):        binary_table.txt output from panseq.
+        sep (str or None):  The separator used in table.
+        extract (bool):     If True a list of feature names is also returned.
 
     Returns:
-        x_train, y_train, x_test, y_test
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train_labels, y_train, x_test_labels, y_test = parse_metadata(**kwargs)
 
@@ -92,6 +104,18 @@ def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13,
     """
     Wraps get_kmer to get the US/UK split dataset kmer data to recreate the
     Lupolova et al paper.
+
+    Args:
+        database (str): lmdb database to store kmer counts.
+        recount (bool): If True the kmers are recounted.
+        k (int):        Size of kmer to be counted. Ignored if recount is false.
+        l (int):        kmer cutoff value. Ignored if recount is false.
+        extract (bool): If True a list of features names is also returned.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta'}
@@ -103,6 +127,18 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13,
     """
     Wraps get_kmer to get the US/UK mixed dataset kmer data to recreate the
     Lupolova et al paper.
+
+    Args:
+        database (str): lmdb database to store kmer counts.
+        recount (bool): If True the kmers are recounted.
+        k (int):        Size of kmer to be counted. Ignored if recount is false.
+        l (int):        kmer cutoff value. Ignored if recount is false.
+        extract (bool): If True a list of features names is also returned.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
@@ -114,6 +150,20 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
                         recount=False, k=7, l=13, extract=False):
     """
     Wraps get_kmer to get salmonella amr data.
+
+    Args:
+        antibiotic (str): The anitibiotic to get amr data for.
+        database (str):   lmdb database to store kmer counts.
+        recount (bool):   If True the kmers are recounted.
+        k (int):          Size of kmer to be counted. Ignored if recount is
+                          false.
+        l (int):          kmer cutoff value. Ignored if recount is false.
+        extract (bool):   If True a list of features names is also returned.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     kwargs = {'metadata': constants.SALMONELLA_METADATA,
               'fasta_header': 'Fasta',
@@ -126,27 +176,21 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
     return get_kmer(kwargs, database, recount, k, l, extract)
 
 
-# def get_omnilog_kmer(database=constants.DB, recount=False, k=7, l=13,
-#                      label_header='Host', one_vs_all=None,
-#                      extract=False):
-#     """
-#     Wraps get_kmer, to get kmer data for the omnilog fasta files.
-#     """
-#     kwargs = {'metadata': 'Data/metadata.csv',
-#               'fasta_header': 'Strain',
-#               'label_header': classification_header,
-#               'train_header': None,
-#               'one_vs_all': positive_label,
-#               'prefix': constants.OMNILOG_FASTA,
-#               'suffix': '.fasta'}
-#     return get_kmer(kwargs, database, recount, k, l, extract)
-
-
 def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None,
                                   extract=False):
     """
     Wraps get_genome_regions to get the US/UK mixed datasets genome region data to
     recreate the Lupolova et al paper.
+
+    Args:
+        table (str):        binary_table.txt output from panseq.
+        sep (str or None):  The separator used in table.
+        extract (bool):     If True a list of feature names is also returned.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
@@ -159,6 +203,16 @@ def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None,
     """
     Wraps get_genome_regions to get the US/UK split dataset genome region data to
     recreate the Lupolova et al paper.
+
+    Args:
+        table (str):        binary_table.txt output from panseq.
+        sep (str or None):  The separator used in table.
+        extract (bool):     If True a list of feature names is also returned.
+
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta'}
@@ -168,24 +222,26 @@ def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None,
 def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
                                filter_table=constants.PREDICTIVE_RESULTS,
                                sep=None,col='Ratio',cutoff=0.25,absolute=True,
-                               greater=True,kwargs=None):
+                               greater=True,kwargs={}):
     """
+    Gets genome region presence absence data from input_table, but performs
+    initial feature selection using the values in col in filter_table. Uses
+    utils.parse_metadata
+
     Args:
-        input_table:        A binary_table output by panseq
-        filter_table:       A table to filter input_table by.
-        sep:                The delimiter used in both tables.
-        col:                Column name for the decision column in filter_table.
-        cutoff:             Float, what the values in col are compared to,
-        absolute:           If true the absolute value of values in col is used.
-        greater:            If true values in "col" must be greater than cutoff.
-        kwargs:             Dictionary of arguments for parse_metadata.
+        input_table (str):  A binary_table output by panseq
+        filter_table (str): A csv table to filter input_table by.
+        sep (str):          The delimiter used in both tables.
+        col (str):          Column name for the decision column in filter_table.
+        cutoff (float):     What the values in col are compared to,
+        absolute (bool):    If true the absolute value of values in col is used.
+        greater (bool):     If true values in "col" must be greater than cutoff.
+        kwargs (dict):      Arguments to be passed to parse_metadata.
+
     Returns:
-        x_train, y_train, x_test, y_test ready to be input into a ml model
+        tuple: x_train, y_train, x_test, y_test
     """
-    if args:
-        labels = parse_metadata(**kwargs)
-    else:
-        labels = parse_metadata()
+    labels = parse_metadata(**kwargs)
     x_train_labels = labels[0]
     y_train = labels[1]
     x_test_labels = labels[2]
@@ -222,27 +278,27 @@ def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
 
     return (x_train, y_train, x_test, y_test)
 
+
 def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
                             filter_table=constants.PREDICTIVE_RESULTS,
-                            sep=None, count=50, args=None):
+                            sep=None, count=50, kwargs={}):
     """
+    Gets genome region presence absence from input_table for the genomes
+    specified by kwargs. Does initial feature selection by using only the
+    features in the top count rows of filter_table. Uses utils.parse_metadata
+
     Args:
-        input_table:        A binary_table output by panseq
-        filter_table:       A table containing all the same rows as input_table,
+        input_table (str):  A binary_table output by panseq
+        filter_table (str): A table containing all the same rows as input_table,
                             but different columns.
-        sep:                The delimiter used in input_table and
-                            filter_table
-        count:              How many of the top rows to keep.
-        args:               A list of arguments to be passed to parse_metadata.
+        sep (str or None):  The delimiter used in input_table and filter_table
+        count (int):        How many of the top rows to keep.
+        kwargs (dict):      Arguments to be passed to parse_metadata.
+
     Returns:
-        x_train, y_train, x_test, y_test ready to be input into a ml model, with
-        all the rows that do not satisfy the constraints removed in
-        filter_table removed.
+        tuple: x_train, y_train, x_test, y_test
     """
-    if args:
-        labels = parse_metadata(*args)
-    else:
-        labels = parse_metadata()
+    labels = parse_metadata(**args)
     x_train_labels = labels[0]
     y_train = labels[1]
     x_test_labels = labels[2]
@@ -273,26 +329,35 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
 
     return (x_train, y_train, x_test, y_test)
 
-
-def get_kmer_from_json(database=constants.DB,recount=False,k=7,l=13,
-                       path=constants.MORIA,suffix='.fasta',
-                       key='assembly_barcode',*json):
+# TODO: convert *json to (*train_json, *test_json) where each json file contains genomes from only one class.
+def get_kmer_from_json(database=constants.DB, recount=False, k=7, l=13,
+                       prefix=constants.MORIA, suffix='.fasta',
+                       key='assembly_barcode', *json):
     """
+    Gets kmer data for the genomes specified in the json files. Divides genomes
+    into train and test sets passed on which json file they are specified in.
+    Uses parse_json
+
     Args:
-        database,threeD,recount,k,l: See get_kmer_us_uk_split
-        path: Prefix to be added to the beginning of every fastafile in the json
-        suffix: Suffix to be added to the end of every fasta file in the json
-        *json: Two or four json files, If two the first should contain only
-               positive genomes and the second should contain only negative
-               genomes. If four the first json file should contain all positive
-               training genomes, the second all negative training genomes, the
-               third all positive test genomes, the fourth all negative test
-               genomes.
-    Returns:
-        x_train, y_train, x_test, y_tes ready to be input into a ml model.
+        database (str): lmdb database to store kmer counts.
+        recount (bool): If True the kmers are recounted.
+        k (int):        Size of kmer to be counted. Ignored if recount is false.
+        l (int):        kmer cutoff value. Ignored if recount is false.
+        prefix (str):   String to be added to the beginning of every fasta file
+                        in the json, for example the correct path to the file.
+        suffix (str):   Suffix to be added to the end of every fasta file in the
+                        json, for example .fasta
+        *json (str):    Two or four json files, If two the first should contain
+                        only positive genomes and the second should contain only
+                        negative genomes. If four the first json file should
+                        contain all positive training genomes, the second all
+                        negative training genomes, the third all positive test
+                        genomes, the fourth all negative test genomes.
 
+    Returns:
+        tuple: x_train, y_train, x_test, y_test
     """
-    files = parse_json(path, suffix, key, *json)
+    files = parse_json(prefix, suffix, key, *json)
 
     if len(files) == 4:
         x_train, y_train = shuffle(files[0], files[1], 1, 0)
@@ -321,23 +386,25 @@ def get_kmer_from_json(database=constants.DB,recount=False,k=7,l=13,
 
     return (x_train, y_train, x_test, y_test)
 
-
+# TODO: Convert this to work with run i.e. needs to return x_train, y_train, x_test, y_test
 def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
-                            threeD=True, scale=True, *directories):
+                            *directories):
     """
+    Gets kmer data from the fasta files in *directories. Does not work with
+    run.py instead of separating output into train and test sets, the genomes
+    and grouped based on the directory they were stored in.
+
     Args:
-        database,threeD,recount,k,l: See get_kmer_us_uk_split
-        Scale:                       If true the data is scaled to range (-1,1)
-                                     if false the data is not scaled.
-        *directories:                One or more directories containing fasta
-                                     files.
+        database (str):     lmdb database to store kmer counts.
+        recount (bool):     If True the kmers are recounted.
+        k (int):            Size of kmer to be counted. Ignored if recount is
+                            false.
+        l (int):            kmer cutoff value. Ignored if recount is false.
+        *directories (str): One or more directories containing fasta files.
+
     Returns:
-        A list of arrays of kmer count data. The list has the same number of
-        elements as directories passed to the method. The first element of the
-        list contains the kmer counts for the first directory passed into the
-        method, the second element corresponds to the second directory etc. The
-        scaling of the data will be done based on the first directory passed to
-        the method. The files contained in  the directories will not be shuffled
+        tuple: Has as many items as *directories, each element is an array of
+               kmer count data.
     """
     all_files = []
     for directory in directories:
@@ -352,26 +419,24 @@ def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
         temp = np.asarray(temp, dtype='float64')
         output.append(a)
 
-    if scale:
-        scaler = MinMaxScaler(feature_range(-1,1))
-        temp = output
-        output = []
-        output.append(scaler.fit_transform(temp[0]))
-        for array in temp[1:]:
-            output.append(scaler.transform(array))
-
-    if threeD:
-        temp = output
-        output = []
-        for array in temp:
-            array = make3D(array)
-            output.append(array)
-
     return output
+
 
 def get_omnilog_data(kwargs={}, omnilog_sheet=constants.OMNILOG_DATA,
                      extract=False):
     """
+    Gets the omnilog data contained in omnilog_sheet for the genomes specified
+    by kwargs. Uses utils.parse_metadata
+
+    Args:
+        kwargs (dict): The arguments to pass to parse_metadata.
+        omnilog_sheet (str): File containing omnilog data.
+        extract (bool): If True a list of features is also returned.
+
+    Returns:
+        list: x_train, y_train, x_test, y_test
+        or
+        tuple: ([x_train, y_train, x_test, y_test], feature_names)
 
     """
     input_data = list(parse_metadata(**kwargs))
@@ -398,7 +463,19 @@ def get_omnilog_data(kwargs={}, omnilog_sheet=constants.OMNILOG_DATA,
         output = output_data
     return output
 
+
 def get_roary_data(kwargs={}, roary_sheet=constants.ROARY):
+    """
+    Get the Roary data from roary_sheet for the genomes specified by kwargs,
+    uses utils.parse_metadata.
+
+    Args:
+        kwargs (dict):      The arguments to pass to parse_metadata.
+        roary_sheet (str):  File containing Roary data.
+
+    Returns:
+        list: x_train, y_train, x_test, y_test
+    """
     input_data = list(parse_metadata(**kwargs))
     roary_data = pd.read_csv(roary_sheet,index_col=0)
 
@@ -418,7 +495,22 @@ def get_roary_data(kwargs={}, roary_sheet=constants.ROARY):
 
     return output_data
 
+
 def get_filtered_roary_data(kwargs={}, roary_sheet=constants.ROARY, limit=10):
+    """
+    Gets the Roary data from roary_sheet for the genomes specified by kwargs,
+    uses utils.parse_metadata. Does initial feature selection by removing
+    features whose in proportion between classes is less than limit, based on
+    the feature selection done by Lupolova et. al.
+
+    Args:
+        kwargs (dict):      The arguments to pass to parse_metadata.
+        roary_sheet (str):  File containing Roary data.
+        limit (int):        Value used to determine which features are removed
+
+    Returns:
+        list: x_train, y_train, x_test, y_test
+    """
     input_data = list(parse_metadata(**kwargs))
 
     roary_data = pd.read_csv(roary_sheet, index_col=0)
@@ -455,9 +547,28 @@ def get_filtered_roary_data(kwargs={}, roary_sheet=constants.ROARY, limit=10):
 
     return output_data
 
+
 def get_roary_from_list(kwargs={},roary_sheet=constants.ROARY,
                         gene_header='Gene',valid_header='Valid',
                         valid_features_table=constants.ROARY_VALID):
+    """
+    Gets the Roary data from roary_sheet for the genomes specified by kwargs,
+    uses utils.parse_metadata. Does initial feature selection by removing
+    features who are not labeled as valid in valid_features_table.
+
+    Args:
+        kwargs (dict):              The arguments to pass to parse_metadata.
+        roary_sheet (str):          File containing Roary data.
+        gene_header (str):          Header for the column that contains the gene
+                                    names.
+        valid_header (str):         Header for the column that contains T/F
+                                    values determining if a gene is valid.
+        valid_features_table (str): csv table containing a list of valid/invalid
+                                    genes.
+
+    Returns:
+        list: x_train, y_train, x_test, y_test
+    """
     input_data = list(parse_metadata(**kwargs))
 
     roary_data = pd.read_csv(roary_sheet)

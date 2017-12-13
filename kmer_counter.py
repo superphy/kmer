@@ -5,14 +5,24 @@ import sys
 import numpy as np
 
 
-
-def __start(filename, k, limit, env, txn, data):
+def start(filename, k, limit, env, txn, data):
     """
     Performs a kmer count on filename, counting kmers with a length of k and
     removing any kmer that has a count less than limit. Resets the master
     database data and then writes each kmer as a key with value -1 to data.
     Creates a new database called filename, writes each kmer/count pair to the
     new database as a key value pair.
+
+    Args:
+        filename (str):             Fasta file to perform a kmer count on
+        k (int):                    The length of kmer to count
+        limit (int):                Minimum frequency of kmer count to be output
+        env (lmdb.Environment):
+        txn (lmdb.Transaction):
+        data (Environment handle):
+
+    Returns:
+        None
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
             '%s' % filename, '-o', 'counts.jf', '-L', '%d' % limit]
@@ -34,8 +44,7 @@ def __start(filename, k, limit, env, txn, data):
         txn.put(line[0], line[1], db=current)
 
 
-
-def __firstpass(filename, k, limit, env, txn):
+def firstpass(filename, k, limit, env, txn):
     """
     Performs a kmer count on filename, counting kmers with a length of k and
     removing any kmer that has a count less than limit. Creates a new database
@@ -43,6 +52,16 @@ def __firstpass(filename, k, limit, env, txn):
     new database. Only writes kmers that are already present in the master
     database that txn points to. Removes any kmer from the master database that
     is not present in filename.
+
+    Args:
+        filename (str):         Fasta file to perform a kmer count on.
+        k (int):                Length of kmer to count.
+        limit (int):            Minimum frequency of kmer to be output.
+        env (lmdb.Environment):
+        txn (lmdb.Transaction):
+
+    Returns:
+        None
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
             '%s' % filename, '-o', 'counts.jf', '-L', '%d' % limit]
@@ -73,10 +92,19 @@ def __firstpass(filename, k, limit, env, txn):
                 txn.put(key, '-1')
 
 
-
-def __secondstart(filename, k, env, txn, data):
+def secondstart(filename, k, env, txn, data):
     """
     Resets the master database so that it matches the database named filename.
+
+    Args:
+        filename (str):             Fasta file to perform a kmer count on.
+        k (int):                    Length of kmer to count.
+        env (lmdb.Environment):
+        txn (lmdb.Transaction):
+        data (Environment handle):
+
+    Returns:
+        None
     """
     string = '%s'%filename
     current = env.open_db(string, txn=txn)
@@ -86,11 +114,19 @@ def __secondstart(filename, k, env, txn, data):
             txn.put(key, val)
 
 
-
-def __secondpass(filename, k, env, txn):
+def secondpass(filename, k, env, txn):
     """
     Removes every kmer from the database named filename that is not present in
     the master database.
+
+    Args:
+        filename (str):         Fasta file to perform a kmer count on.
+        k (int):                Length of kmer to count.
+        env (lmdb.Environment):
+        txn (lmdb.Transaction):
+
+    Returns:
+        None
     """
     string = '%s'%filename
     current = env.open_db(string, txn=txn)
@@ -100,10 +136,16 @@ def __secondpass(filename, k, env, txn):
                 txn.delete(key, val, db = current)
 
 
-
-def __print_status(counter, total):
+def print_status(counter, total):
     """
     Outputs a progress bar.
+
+    Args:
+        counter (int):  Numer of steps completed.
+        total (int):    Total number of steps.
+
+    Returns:
+        None
     """
     percent = (counter*100)/total
     sys.stdout.write('\r')
@@ -111,47 +153,65 @@ def __print_status(counter, total):
     sys.stdout.flush()
 
 
-
-def __setup_data(files, k, limit, env, txn, data):
+def setup_data(files, k, limit, env, txn, data):
     """
     Takes a list of paths to fasta files, a kmer length, a lower limit on how
     many times a kmer needs to occur in order for it to be output, and an lmdb
     environment, transaction and database.
+
+    Args:
+        files (list(str)):          The fasta files to count kmers from.
+        k (int):                    Length of kmer to count.
+        limit (int):                Minimum frequency for a kmer to be output.
+        env (lmdb.Environment):
+        txn (lmdb.Transaction):
+        data (environment handle):
+
+    Returns:
+        None
     """
     counter = 0
     total = len(files)
     print "First Pass"
-    __start(files[0], k, limit, env, txn, data)
+    start(files[0], k, limit, env, txn, data)
     temp = files.pop(0)
     counter += 1
     for filename in files:
-        __print_status(counter, total)
-        __firstpass(filename, k, limit, env, txn)
+        print_status(counter, total)
+        firstpass(filename, k, limit, env, txn)
         counter += 1
 
     files.insert(0, temp)
 
-    __print_status(counter, total)
+    print_status(counter, total)
     print "\nSecond Pass"
     counter = 0
-    __secondstart(files[-1], k, env, txn, data)
+    secondstart(files[-1], k, env, txn, data)
     counter += 1
     i = len(files)-2
     while i >= 0:
-        __print_status(counter, total)
-        __secondpass(files[i], k, env, txn)
+        print_status(counter, total)
+        secondpass(files[i], k, env, txn)
         i-=1
         counter += 1
 
-    __print_status(counter, total)
+    print_status(counter, total)
     print "\n"
 
 
-
-def __add(filename, k, env, txn):
+def add(filename, k, env, txn):
     """
     Counts kmers in filename and adds them to the database pointed to by env.
     Only counts kmers that already exists in env.
+
+    Args:
+        filename (str):         Fasta file to perform a kmer count on.
+        k (int):                Length of kmer to count.
+        env (lmdb.Environment):
+        txn (lmdb.Transaction):
+
+    Returns:
+        None
     """
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
             '%s' % filename, '-o', 'counts.jf']
@@ -179,22 +239,29 @@ def __add(filename, k, env, txn):
                 txn.put(key, '0', overwrite=True, db=current)
 
 
-
-def __add_to_database(files, k, env, txn):
+def add_to_database(files, k, env, txn):
     """
     Adds the kmer counts in files to an already created database, does not
     remove any kmer counts from the data base.
+
+    Args:
+        files (list(str)):      The fasta files to count kmers from.
+        k (int):                The length of kmer to count.
+        env (lmdb.Environment):
+        txn (lmdb.Transaction):
+
+    Returns:
+        None
     """
     counter = 0
     total = len(files)
     print "Begin"
     for file in files:
-        __print_status(counter, total)
-        __add(file, k, env, txn)
+        print_status(counter, total)
+        add(file, k, env, txn)
         counter += 1
-    __print_status(counter, total)
+    print_status(counter, total)
     print "\n"
-
 
 
 def count_kmers(k, limit, files, database):
@@ -202,16 +269,24 @@ def count_kmers(k, limit, files, database):
     Counts all kmers of length "k" in the fasta files "files", removing any that
     appear fewer than "limit" times. Stores the output in a lmdb database named
     "database".
+
+    Args:
+        k (int):            The length of kmer to count.
+        limit (int):        Minimum frequency for a kmer to be output.
+        files (list(str)):  The fasta files to count kmers from.
+        database (str):     Name of database where the counts will be stored.
+
+    Returns:
+        None
     """
     env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=4000)
     data = env.open_db('master', dupsort=False)
 
     with env.begin(write=True, db=data) as txn:
 
-        __setup_data(files, k, limit, env, txn, data)
+        setup_data(files, k, limit, env, txn, data)
 
     env.close()
-
 
 
 def get_counts(files, database):
@@ -220,6 +295,15 @@ def get_counts(files, database):
     contained in the lmdb database named "database". The length and lower limit
     of the kmer counts will be the same as when they were calculated using
     count_kmers.
+
+    Args:
+        files (list(str)): The fasta files whose kmer counts you would like to
+                           retrieve. The kmer counts must already have been
+                           calculated using count_kmers.
+        database (str):    The databse where the kmer counts are stored.
+
+    Returns:
+        list(list): The kmer counts for each genome in files.
     """
     env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=4000)
     data = env.open_db('master', dupsort=False)
@@ -245,6 +329,12 @@ def get_kmer_names(database):
     """
     Returns (as a numpy 1D array) every key in the databse, this should be an alphabetical
     list of all the kmers in the database.
+
+    Args:
+        database (str): The name of the database to get the keys from.
+
+    Returns:
+        list(str): Every kmer in the database sorted alphabetically.
     """
     env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=4000)
     data = env.open_db('master', dupsort=False)
@@ -270,6 +360,14 @@ def add_counts(files, database):
     you want to make predictions on using an already trained machine learning
     model. The kmer size and cutoff used here will match the kmer size and
     cutoff used when the database was originally created.
+
+    Args:
+        files (list(str)): The fasta files containing the genomes whose kmer
+                           counts you want added to the database.
+        database (str):    The name of the database to add the kmer counts to.
+
+    Returns:
+        None
     """
     env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=100000)
     master = env.open_db('master', dupsort=False)
@@ -280,6 +378,6 @@ def add_counts(files, database):
             key, val = cursor.item()
             k = len(key)
 
-        __add_to_database(files, k, env, txn)
+        add_to_database(files, k, env, txn)
 
     env.close()

@@ -12,6 +12,7 @@ import yaml
 import constants
 import argparse
 from sklearn.feature_selection import chi2, f_classif
+import utils
 
 
 def run(model=models.support_vector_machine, model_args={},
@@ -93,19 +94,19 @@ def run(model=models.support_vector_machine, model_args={},
             test_sizes[i] = d[2].shape[0]
             if extract:
                 features.append(f)
-        output['train_sizes'] = train_sizes.tolist()
-        output['test_sizes'] = test_sizes.tolist()
+        output['train_sizes'] = train_sizes.mean().tolist()
+        output['test_sizes'] = test_sizes.mean().tolist()
         output['avg_run_time'] = times.mean().tolist()
         output['std_dev_run_times'] = times.std().tolist()
         output['avg_result'] = results.mean().tolist()
         output['std_dev_results'] = results.std().tolist()
         output['results'] = results.tolist()
-        output['run_times'] = times.tolist()
         output['repetitions'] = reps
         if extract:
             features = list(np.concatenate(features, axis=0))
             feature_counts = dict()
             for f in features: feature_counts[str(f)]=feature_counts.get(f,0)+1
+            feature_counts = {utils.convert_well_index(k):v for k,v in feature_counts.items()}
             output['important_features'] = feature_counts
     else:
         start = time.time()
@@ -138,6 +139,7 @@ def run(model=models.support_vector_machine, model_args={},
         output['train_size'] = len(d[0])
         output['test_size'] = len(d[2])
         if extract:
+            f = [utils.convert_well_index(x) for x in f]
             output['important_features'] = f.tolist()
     output['model'] = model
     output['model_args'] = model_args
@@ -248,4 +250,6 @@ if __name__ == "__main__":
     output = run(**args)
     document = {'name':cl_args.name, 'output':output}
     with open(cl_args.output, 'a') as f:
-        yaml.dump(document, f, explicit_start=True, explicit_end=True)
+        yaml.dump(document, f, explicit_start=True, explicit_end=True,
+                  default_flow_style=False, allow_unicode=True)
+        f.write('\n\n\n')
