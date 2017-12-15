@@ -320,6 +320,8 @@ def convert_to_numerical_classes(data):
 
     Args:
         tuple: x_train, y_train, x_test, y_test
+        or
+        tuple: x_train, y_train, x_test
 
     Returns:
         tuple: (x_train, y_train, x_test, y_test), LabelEncoder object
@@ -355,3 +357,27 @@ def convert_well_index(well_index):
     output = well_descriptions.loc[well_descriptions['Key'] == df_index]
     output =  output.Key.item() + output.Value.item()
     return output
+
+def make_unique(input_array):
+    """
+    Transforms input array so that each row of the array has the same elements
+    as every other row, just in different orders. Removes any element that Does
+    not appear in every row of the input array.
+
+    Args:
+        input_array list(list): The array to transform.
+
+    Returns:
+        None
+    """
+    remove_from_row = lambda x,row:row.remove(x) if x in row else None
+    remove_from_array = lambda x,arr:map(lambda y:remove_from_row(x,y), arr)
+
+    check = lambda x,row:True if x in row else False
+    check_all_rows = lambda x,arr:True if np.asarray(map(lambda y:check(x,y),arr)).all() else False
+
+    remove_element = lambda x,arr: remove_from_array(x,arr) if not check_all_rows(x,arr) else None
+
+    remove_all = lambda arr: map(lambda x: remove_element(x,arr), [elem for subarr in arr for elem in subarr])
+
+    remove_all(input_array)

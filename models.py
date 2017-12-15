@@ -6,6 +6,7 @@ from keras.layers.pooling import AveragePooling1D
 from keras.layers.convolutional import Conv1D
 from sklearn import svm
 from utils import flatten, make3D, convert_to_numerical_classes
+from utils import convert_well_index, make_unique
 from keras.utils import to_categorical
 from sklearn.ensemble import RandomForestClassifier
 
@@ -56,12 +57,9 @@ def neural_network(input_data, binarize=True):
     predictions will be 0's and 1's if not the predictions will be floats
     between 0.0 and 1.0 with values closer to 0.0 and 1.0 indicating a higher
     probability of the prediction being correct.
-    If args is not provided, default values will be used.
     """
     input_data = input_data[:-1]
     input_data, le = convert_to_numerical_classes(input_data)
-
-    print le.inverse_transform([0,1,2,3,4])
 
     x_train = input_data[0]
     y_train = input_data[1]
@@ -89,14 +87,31 @@ def neural_network(input_data, binarize=True):
     prediction = model.predict(predict)
     if binarize:
         prediction = np.where(prediction > 0.5, 1, 0)
+    print input_data[3]
     return prediction
 
 
 def support_vector_machine_validation(input_data, kernel='linear', C=1,
-                                      feature_names=None, num_features=10):
+                                      feature_names=None, num_features=0):
     """
-    Fits, trains, and tests a support vector machine.
-    Returns the accuracy of the model.
+    Fits, trains, and tests a support vector machine on the input_data. Returns
+    the model's accuracy.
+
+    Args:
+        input_data (tuple):     x_train, y_train, x_test, y_test
+        kernel (str):           The kernel to use for the SVM.
+        C (int or float):       The regularization parameter for the svm
+        feature_names (list):   The names of every feature in input_data, if
+                                give, a sorted [high to low] list of the most
+                                important features used to make predictions is
+                                also returned.
+        num_features (int):     How many of the important features to return, if
+                                zero all of the features are returned.
+
+    Returns:
+        float: model_accuracy
+        or
+        tuple: model_accuracy, top_features
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -110,10 +125,9 @@ def support_vector_machine_validation(input_data, kernel='linear', C=1,
     output_data = model.score(x_test, y_test)
 
     if feature_names is not None:
-        coefs = np.argsort(model.coef_.ravel())
-        top_pos_features = feature_names[coefs[-num_features:]]
-        top_neg_features = feature_names[coefs[:num_features]]
-        top_features = np.hstack((top_pos_features,top_neg_features))
+        coefs = np.absolute(np.argsort(model.coef_.ravel()))
+        top_features = feature_names[coefs[-num_features:]]
+        top_features = [convert_well_index(x) for x in top_features[::-1]]
         output = (output_data, top_features)
     else:
         output = output_data
@@ -122,10 +136,26 @@ def support_vector_machine_validation(input_data, kernel='linear', C=1,
 
 
 def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
-                           num_features=10):
+                           num_features=0):
     """
-    Fits, trains, and makes predictions with a support vector machine.
-    Returns the predicted values for "predict"
+    Fits, trains, and makes predictions with a support vector machine. Returns
+    the predicted values.
+
+    Args:
+        input_data (tuple):     x_train, y_train, x_test
+        kernel (str):           The kernel to be used by the SVM
+        C (int or float):       The regularization parameter for the SVM
+        feature_names (list):   The names of every feature in input_data, if
+                                give, a sorted [high to low] list of the most
+                                important features used to make predictions is
+                                also returned.
+        num_features (int):     How many of the important features to return, if
+                                zero all of the features are returned.
+
+    Returns:
+        list: The predicted classes for each sample in x_test
+        or
+        tuple: prdicted classes, top features
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -139,10 +169,10 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
     output_data = model.predict(predict)
 
     if feature_names is not None:
-        coefs = np.argsort(model.coef_.ravel())
-        top_pos_features = feature_names[coefs[-num_features/2:]]
-        top_neg_features = feature_names[coefs[:num_features/2]]
-        output = (output_data, top_pos_features, top_neg_features)
+        coefs = np.absolute(np.argsort(model.coef_.ravel()))
+        top_features = feature_names[coefs[-num_features:]]
+        top_features = [convert_well_index(x) for x in top_features[::-1]]
+        output = (output_data, top_features)
     else:
         output = output_data
 
@@ -162,7 +192,7 @@ def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
                              min_weight_fraction_leaf=0.01,
                              max_leaf_nodes=25,min_impurity_decrease=0.001,
                              bootstrap=False, n_jobs=-1, feature_names=None,
-                             num_features=10):
+                             num_features=0):
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -185,6 +215,7 @@ def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
     if feature_names is not None:
         importances = np.argsort(model.feature_importances_.ravel())
         top_features = feature_names[importances[-num_features:]]
+        top_features = [convert_well_index(x) for x in top_features[::-1]]
         output = (output_data, top_features)
     else:
         output = output_data
@@ -192,7 +223,7 @@ def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
 
 
 # The parameters in the below functions were found by performing a grid search.
-# The resutls from the grid search are in ~/Data/sgdc_parameters/
+# The results from the grid search are in ~/Data/sgdc_parameters/
 def kmer_split_sgd(input_data):
     model = SGDC(loss='log', n_jobs=-1, eta0=1.0,
                  learning_rate='invscaling', penalty='none', tol=0.001,

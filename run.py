@@ -103,11 +103,8 @@ def run(model=models.support_vector_machine, model_args={},
         output['results'] = results.tolist()
         output['repetitions'] = reps
         if extract:
-            features = list(np.concatenate(features, axis=0))
-            feature_counts = dict()
-            for f in features: feature_counts[str(f)]=feature_counts.get(f,0)+1
-            feature_counts = {utils.convert_well_index(k):v for k,v in feature_counts.items()}
-            output['important_features'] = feature_counts
+            utils.make_unique(features)
+            output['important_features'] = features
     else:
         start = time.time()
         if extract:
