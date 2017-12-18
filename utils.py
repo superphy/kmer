@@ -326,7 +326,7 @@ def convert_to_numerical_classes(data):
     """
     le = LabelEncoder()
     if len(data) > 3:
-        labels = data[1]+data[3]
+        labels = data[1].tolist()+data[3].tolist()
         le.fit(labels)
         output_data = (data[0],le.transform(data[1]),data[2],le.transform(data[3]))
     else:

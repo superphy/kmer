@@ -123,7 +123,7 @@ def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13,
 
 
 def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13,
-                         extract_feature=False):
+                         extract=False):
     """
     Wraps get_kmer to get the US/UK mixed dataset kmer data to recreate the
     Lupolova et al paper.
