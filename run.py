@@ -103,8 +103,7 @@ def run(model=models.support_vector_machine, model_args={},
         output['results'] = results.tolist()
         output['repetitions'] = reps
         if extract:
-            utils.make_unique(features)
-            output['important_features'] = features
+            output['important_features'] = utils.combine_lists(features)
     else:
         start = time.time()
         if extract:

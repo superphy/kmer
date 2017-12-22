@@ -125,7 +125,7 @@ def support_vector_machine_validation(input_data, kernel='linear', C=1,
     output_data = model.score(x_test, y_test)
 
     if feature_names is not None:
-        coefs = np.absolute(np.argsort(model.coef_.ravel()))
+        coefs = np.argsort(np.absolute(model.coef_.ravel()))
         top_features = feature_names[coefs[-num_features:]]
         top_features = [convert_well_index(x) for x in top_features[::-1]]
         output = (output_data, top_features)

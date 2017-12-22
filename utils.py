@@ -328,7 +328,7 @@ def convert_to_numerical_classes(data):
     """
     le = LabelEncoder()
     if len(data) > 3:
-        labels = data[1]+data[3]
+        labels = data[1].tolist()+data[3].tolist()
         le.fit(labels)
         output_data = (data[0],le.transform(data[1]),data[2],le.transform(data[3]))
     else:
@@ -381,3 +381,30 @@ def make_unique(input_array):
     remove_all = lambda arr: map(lambda x: remove_element(x,arr), [elem for subarr in arr for elem in subarr])
 
     remove_all(input_array)
+
+
+def combine_lists(input_lists):
+    """
+    Performs a rank aggregation on a set of input lists. The ranking of element x
+    is determined by the sum (1/(l*i)) for each list where l is the number of
+    lists being aggregated and i is the position of x in the current list. The
+    position of the first element in a list is considered to be 1 for the
+    purpose of this method
+
+    Args:
+        input_lists (list(list)): A list of lists to be aggregated together.
+
+    Returns:
+        list: A ranked (from best to worst) list of all unique elements in
+              input_lists.
+    """
+    weight = 1.0/len(input_lists)
+    all_features = [elem for ranked_list in input_lists for elem in ranked_list]
+    unique_features = np.unique(np.asarray(all_features)).tolist()
+    feature_rankings = {k:0 for k in unique_features}
+    for ranked_list in input_lists:
+        for elem in ranked_list:
+            val = weight*(1.0/(ranked_list.index(elem)+1))
+            feature_rankings[elem] += val
+    output = sorted(feature_rankings, key=lambda k: feature_rankings[k], reverse=True)
+    return output
