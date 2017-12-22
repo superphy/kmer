@@ -16,10 +16,9 @@ import utils
 
 
 def run(model=models.support_vector_machine, model_args={},
-        data=data.get_kmer_us_uk_split, data_args={},
-        scaler=feature_scaling.scale_to_range, scaler_args={}, selection=None,
-        selection_args={}, augment=None, augment_args={}, validate=False,
-        reps=10, extract=False):
+        data=data.get_kmer_us_uk_split, data_args={}, scaler=utils.skip,
+        scaler_args={}, selection=utils.skip, selection_args={},
+        augment=utils.skip, augment_args={}, validate=False, reps=10):
     """
     Chains a data gathering method, data preprocessing methods, and a machine
     learning model together. Stores the settings for all the methods and the
@@ -61,39 +60,36 @@ def run(model=models.support_vector_machine, model_args={},
         times = np.zeros(reps)
         train_sizes = np.zeros(reps)
         test_sizes = np.zeros(reps)
-        if extract:
-            features = []
+        all_features = []
         for i in range(reps):
             start = time.time()
-            if extract:
-                data_args['extract'] = True
-                d,f = data(**data_args)
-            else:
-                d = data(**data_args)
+
+            # Get input data
+            d,features,labels = data(**data_args)
             output['num_genomes'] = d[0].shape[0] + d[2].shape[0]
-            if selection:
-                if extract:
-                    selection_args['feature_names']=f
-                    d,f = selection(d, **selection_args)
-                    selection_args.pop('feature_names', None)
-                else:
-                    d = selection(d, **selection_args)
-            if scaler:
-                d = scaler(d, **scaler_args)
-            if augment:
-                d = augment(d, **augment_args)
-            if extract:
-                model_args['feature_names'] = f
-                score, f = model(d, **model_args)
-                model_args.pop('feature_names', None)
-            else:
-                score = model(d, **model_args)
+
+            # Perform feature selection on input_data
+            selection_args['feature_names']=features
+            d,features = selection(d, **selection_args)
+            selection_args.pop('feature_names', None)
+
+            # Scale input data
+            d = scaler(d, **scaler_args)
+
+            # Augment training data
+            d = augment(d, **augment_args)
+
+            # Build and validate model
+            model_args['feature_names'] = features
+            score,features = model(d, **model_args)
+            model_args.pop('feature_names', None)
+
+            # Record information about the run
             times[i] = time.time() - start
             results[i] = score
             train_sizes[i] = d[0].shape[0]
             test_sizes[i] = d[2].shape[0]
-            if extract:
-                features.append(f)
+            all_features.append(features)
         output['train_sizes'] = train_sizes.mean().tolist()
         output['test_sizes'] = test_sizes.mean().tolist()
         output['avg_run_time'] = times.mean().tolist()
@@ -102,19 +98,20 @@ def run(model=models.support_vector_machine, model_args={},
         output['std_dev_results'] = results.std().tolist()
         output['results'] = results.tolist()
         output['repetitions'] = reps
-        if extract:
-            features = list(np.concatenate(features, axis=0))
-            feature_counts = dict()
-            for f in features: feature_counts[str(f)]=feature_counts.get(f,0)+1
-            feature_counts = {utils.convert_well_index(k):v for k,v in feature_counts.items()}
-            output['important_features'] = feature_counts
+        all_features = list(np.concatenate(all_features, axis=0))
+        feature_counts = dict()
+        for f in all_features: feature_counts[str(f)]=feature_counts.get(f,0)+1
+        feature_counts = {utils.convert_well_index(k):v for k,v in feature_counts.items()}
+        output['important_features'] = feature_counts
     else:
         start = time.time()
+        data_args['validate'] = False
+        data_args['kwargs']['validate'] = False
         if extract:
             data_args['extract'] = True
-            d,f = data(**data_args)
+            d,f,l = data(**data_args)
         else:
-            d = data(**data_args)
+            d,l = data(**data_args)
         output['num_genomes'] = d[0].shape[0] + d[2].shape[0]
         if selection:
             if extract:
@@ -133,8 +130,9 @@ def run(model=models.support_vector_machine, model_args={},
             model_args.pop('feature_names', None)
         else:
             predictions = model(d, **model_args)
+        predictions = dict(zip(t, predictions.tolist()))
         total_time = time.time() - start
-        output['predictions'] = predictions.tolist()
+        output['predictions'] = predictions
         output['run_time'] = total_time
         output['train_size'] = len(d[0])
         output['test_size'] = len(d[2])

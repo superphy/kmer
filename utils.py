@@ -355,3 +355,11 @@ def convert_well_index(well_index):
     output = well_descriptions.loc[well_descriptions['Key'] == df_index]
     output =  output.Key.item() + output.Value.item()
     return output
+
+
+def skip(input_data, **kwargs):
+    if 'feature_names' in kwargs:
+        output = (input_data, kwargs['feature_names'])
+    else:
+        output = input_data
+    return output

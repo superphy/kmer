@@ -12,25 +12,34 @@ import constants
 
 
 def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
-             extract=False):
+             extract=False, validate=True):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
     utils.parse_metadata
 
     Args:
-        kwargs (dict):  The arguments to pass to parse_metadata.
-        database (str): lmdb database to store kmer counts.
-        recount (bool): If True the kmers are recounted.
-        k (int):        Size of kmer to be counted. Ignored if recount is false.
-        l (int):        kmer cutoff value. Ignored if recount is false.
-        extract (bool): If True a list of features names is also returned.
+        kwargs (dict):   The arguments to pass to parse_metadata
+        database (str):  lmdb database to store kmer counts
+        recount (bool):  If True the kmers are recounted
+        k (int):         Size of kmer to be counted. Ignored if recount is false
+        l (int):         kmer cutoff value. Ignored if recount is false
+        extract (bool):  If True a list of features names is also returned
+        validate (bool): If True a list of the file names being predicted on is
+                         returned
 
     Returns:
         tuple: x_train, y_train, x_test, y_test
         or
         tuple: (x_train, y_train, x_test, y_test), feature_names
+        or
+        tuple: (x_train, y_train, x_test, y_test), filenames
+        or
+        tuple: (x_train, y_train, x_test, y_test), feature_names, filenmaes
     """
-    x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
+    if validate:
+        (x_train, y_train, x_test, y_test), labels = parse_metadata(**kwargs)
+    else:
+        x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
 
     if recount:
         allfiles = x_train + x_test
@@ -44,17 +53,22 @@ def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
 
     output_data = (x_train, y_train, x_test, y_test)
 
-    if extract:
-        feature_names = get_kmer_names(database)
+    feature_names = get_kmer_names(database)
+
+    if extract and validate:
+        output = (output_data, feature_names, filenames)
+    elif extract and not validate:
         output = (output_data, feature_names)
-    else:
+    elif not extract and validate:
+        output = (output_data, filenames)
+    elif not extract and not validate:
         output = output_data
 
     return output
 
 
 def get_genome_regions(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
-                      extract=False):
+                      extract=False, validate=True):
     """
     Gets genome region presence absence data from a binary table output by
     Panseq for the genomes specified by kwargs. Uses utils.parse_metadata

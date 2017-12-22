@@ -45,7 +45,7 @@ def main(filepath, title, xlabel, ylabel, x_range, enforce_x, y_range, enforce_y
         files = [filepath + x for x in valid]
     else:
         files = [filepath + x for x in os.listdir(filepath) if '.py' not in x]
-	files = sorted(files, key=lambda x: int(filter(str.isdigit, x)))
+	#      files = sorted(files, key=lambda x: int(filter(str.isdigit, x)))
 	count = 1
     for f in files:
         data = get_data(f)
