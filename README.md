@@ -4,55 +4,30 @@ Wrapper to gather data, preprocess the data, perform feature selection, build th
 
 ### Command Line Usage
 
-To use with default options:
-
 ```
-python run.py
+python run.py -i [config file] -o [output file] -n [name of run to use in outputfile]
 ```
 
-To use with custom options:
-
 ```
-usage: run.py [-h] [--model MODEL]
-              [--model_arguments [MODEL_ARGUMENTS [MODEL_ARGUMENTS ...]]]
-              [--data DATA] [--data_args [DATA_ARGS [DATA_ARGS ...]]]
-              [--scaler SCALER]
-              [--scaler_args [SCALER_ARGS [SCALER_ARGS ...]]]
-              [--selection SELECTION]
-              [--selection_args [SELECTION_ARGS [SELECTION_ARGS ...]]]
-              [--augment AUGMENT]
-              [--augment_args [AUGMENT_ARGS [AUGMENT_ARGS ...]]] [--reps REPS]
-              [--validate {True,False}]
+usage: run.py [-h] [-i INPUT] [-o OUTPUT] [-n NAME]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --model MODEL, -m MODEL
-                        Machine learning model to use, see best_models.py
-  --model_arguments [MODEL_ARGUMENTS [MODEL_ARGUMENTS ...]], -ma [MODEL_ARGUMENTS [MODEL_ARGUMENTS ...]]
-                        The arguments to be passed to the model method.
-  --data DATA, -d DATA  The method to get the input data, see data.py
-  --data_args [DATA_ARGS [DATA_ARGS ...]], -da [DATA_ARGS [DATA_ARGS ...]]
-                        The arguments to be passed to the data method
-  --scaler SCALER, -S SCALER
-                        The scaling method to apply to the data.
-  --scaler_args [SCALER_ARGS [SCALER_ARGS ...]], -Sa [SCALER_ARGS [SCALER_ARGS ...]]
-                        The arguments to be passed to the scaling method.
-  --selection SELECTION, -s SELECTION
-                        The method used to perform feature selection on the
-                        data
-  --selection_args [SELECTION_ARGS [SELECTION_ARGS ...]], -sa [SELECTION_ARGS [SELECTION_ARGS ...]]
-                        The arguments to be passed to the feature selection
-                        method
-  --augment AUGMENT, -a AUGMENT
-                        The method used to augment the trianing data
-  --augment_args [AUGMENT_ARGS [AUGMENT_ARGS ...]], -aa [AUGMENT_ARGS [AUGMENT_ARGS ...]]
-                        The arguments to be passed to the augment method.
-  --reps REPS, -r REPS  How many times to run the model, ignored if validate
-                        is False
-  --validate {True,False}, -v {True,False}
-                        If True the model should return a score if False the
-                        model should return predictions
+  -i INPUT, --input INPUT
+                        yaml configuration file for run. If not provided
+                        Data/config.yml is used.
+  -o OUTPUT, --output OUTPUT
+                        yaml file where the results of the run will be stored.
+                        If not provided Data/run_results.yml is used.
+  -n NAME, --name NAME  What the yaml document will be named in the output
+                        file. If not provided the current Datetime is used. If
+                        using spaces, surround with quotes.
 ```
+
+
+The input file should be a yaml file specifying all of the arguments to use during the run. An example can be found in Data/config.yaml
+
+The output file will also be a yaml file containing the complete results from the run as well as all the parameters used in the run.
 
 ### To use in another script
 
