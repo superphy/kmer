@@ -1,4 +1,4 @@
-from sklearn.preprocessing import MinMaxScaler, Imputer
+from sklearn.preprocessing import MinMaxScaler, Imputer, LabelEncoder
 from sklearn.model_selection import StratifiedShuffleSplit as SSS
 from kmer_counter import count_kmers, get_counts, get_kmer_names
 from utils import check_fasta, same_shuffle, shuffle, flatten, make3D, setup_files
@@ -11,8 +11,7 @@ import random
 import constants
 
 
-def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
-             extract=False, validate=True):
+def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
     utils.parse_metadata
@@ -23,23 +22,17 @@ def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
         recount (bool):  If True the kmers are recounted
         k (int):         Size of kmer to be counted. Ignored if recount is false
         l (int):         kmer cutoff value. Ignored if recount is false
-        extract (bool):  If True a list of features names is also returned
         validate (bool): If True a list of the file names being predicted on is
                          returned
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
-        tuple: (x_train, y_train, x_test, y_test), feature_names
-        or
-        tuple: (x_train, y_train, x_test, y_test), filenames
-        or
-        tuple: (x_train, y_train, x_test, y_test), feature_names, filenmaes
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
-    if validate:
-        (x_train, y_train, x_test, y_test), labels = parse_metadata(**kwargs)
-    else:
-        x_train, y_train, x_test, y_test = parse_metadata(**kwargs)
+
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
 
     if recount:
         allfiles = x_train + x_test
@@ -51,24 +44,20 @@ def get_kmer(kwargs={}, database=constants.DB, recount=False, k=7, l=13,
     x_test = get_counts(x_test, database)
     x_test = np.asarray(x_test, dtype='float64')
 
-    output_data = (x_train, y_train, x_test, y_test)
-
     feature_names = get_kmer_names(database)
 
-    if extract and validate:
-        output = (output_data, feature_names, filenames)
-    elif extract and not validate:
-        output = (output_data, feature_names)
-    elif not extract and validate:
-        output = (output_data, filenames)
-    elif not extract and not validate:
-        output = output_data
+    le = LabelEncoder()
+    all_labels = np.unique(np.concatenate((y_train, y_test)))
+    le.fit(all_labels)
+    y_train = le.transform(y_train)
+    y_test = le.transform(y_test)
 
-    return output
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_files, le)
 
 
-def get_genome_regions(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
-                      extract=False, validate=True):
+def get_genome_regions(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None):
     """
     Gets genome region presence absence data from a binary table output by
     Panseq for the genomes specified by kwargs. Uses utils.parse_metadata
@@ -77,14 +66,13 @@ def get_genome_regions(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
         kwargs (dict):      The arguments to pass to parse_metadata.
         table (str):        binary_table.txt output from panseq.
         sep (str or None):  The separator used in table.
-        extract (bool):     If True a list of feature names is also returned.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
-    x_train_labels, y_train, x_test_labels, y_test = parse_metadata(**kwargs)
+
+    (train_label,y_train,test_label,y_test) = parse_metadata(**kwargs)
 
     x_train = []
     x_test = []
@@ -93,75 +81,70 @@ def get_genome_regions(kwargs={},table=constants.GENOME_REGION_TABLE,sep=None,
     else:
         data = pd.read_csv(table, sep=sep, index_col=0)
 
-    for header in x_train_labels:
+    for header in train_label:
         x_train.append(data[header].tolist())
 
-    for header in x_test_labels:
+    for header in test_label:
         x_test.append(data[header].tolist())
 
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
+    feature_names = np.asarray(data.index)
+
+    le = LabelEncoder()
+    le.fit(np.concatenate((y_train, y_test)))
+    y_train = le.transform(y_train)
+    y_test = le.transform(y_test)
+
     output_data = (x_train, y_train, x_test, y_test)
 
-    if extract:
-        feature_names = np.asarray(data.index)
-        output = (output_data, feature_names)
-    else:
-        output = output_data
-
-    return output
+    return (output_data, feature_names, test_label, le)
 
 
-def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13,
-                         extract=False):
+def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13):
     """
-    Wraps get_kmer to get the US/UK split dataset kmer data to recreate the
-    Lupolova et al paper.
+    Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et al
+    paper with kmer input data.
 
     Args:
         database (str): lmdb database to store kmer counts.
         recount (bool): If True the kmers are recounted.
         k (int):        Size of kmer to be counted. Ignored if recount is false.
         l (int):        kmer cutoff value. Ignored if recount is false.
-        extract (bool): If True a list of features names is also returned.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
-        tuple: (x_train, y_train, x_test, y_test), feature_names
-    """
-    kwargs = {'prefix': constants.ECOLI,
-              'suffix': '.fasta'}
-    return get_kmer(kwargs, database, recount, k, l, extract)
-
-
-def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13,
-                         extract_feature=False):
-    """
-    Wraps get_kmer to get the US/UK mixed dataset kmer data to recreate the
-    Lupolova et al paper.
-
-    Args:
-        database (str): lmdb database to store kmer counts.
-        recount (bool): If True the kmers are recounted.
-        k (int):        Size of kmer to be counted. Ignored if recount is false.
-        l (int):        kmer cutoff value. Ignored if recount is false.
-        extract (bool): If True a list of features names is also returned.
-
-    Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
-              'train_header': None}
-    return get_kmer(kwargs, database, recount, k, l, extract)
+              'validate': True}
+    return get_kmer(kwargs, database, recount, k, l)
+
+
+def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13):
+    """
+    Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et al
+    paper with kmer input data.
+
+    Args:
+        database (str): lmdb database to store kmer counts.
+        recount (bool): If True the kmers are recounted.
+        k (int):        Size of kmer to be counted. Ignored if recount is false.
+        l (int):        kmer cutoff value. Ignored if recount is false.
+
+    Returns:
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
+    """
+    kwargs = {'prefix': constants.ECOLI,
+              'suffix': '.fasta',
+              'train_header': None,
+              'validate': True}
+    return get_kmer(kwargs, database, recount, k, l)
 
 
 def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
-                        recount=False, k=7, l=13, extract=False):
+                        recount=False, k=7, l=13):
     """
     Wraps get_kmer to get salmonella amr data.
 
@@ -172,12 +155,9 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
         k (int):          Size of kmer to be counted. Ignored if recount is
                           false.
         l (int):          kmer cutoff value. Ignored if recount is false.
-        extract (bool):   If True a list of features names is also returned.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
     """
     kwargs = {'metadata': constants.SALMONELLA_METADATA,
               'fasta_header': 'Fasta',
@@ -186,12 +166,12 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
               'extra_header': 'Antibiotic',
               'extra_label': antibiotic,
               'prefix': constants.SALMONELLA,
-              'suffix': '.fna'}
-    return get_kmer(kwargs, database, recount, k, l, extract)
+              'suffix': '.fna',
+              'validate': True}
+    return get_kmer(kwargs, database, recount, k, l)
 
 
-def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None,
-                                  extract=False):
+def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None):
     """
     Wraps get_genome_regions to get the US/UK mixed datasets genome region data to
     recreate the Lupolova et al paper.
@@ -199,21 +179,18 @@ def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,sep=None,
     Args:
         table (str):        binary_table.txt output from panseq.
         sep (str or None):  The separator used in table.
-        extract (bool):     If True a list of feature names is also returned.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
-              'train_header': None}
-    return get_genome_regions(kwargs, table, sep, extract)
+              'train_header': None,
+              'validate': True}
+    return get_genome_regions(kwargs, table, sep)
 
 
-def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None,
-                                  extract=False):
+def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None):
     """
     Wraps get_genome_regions to get the US/UK split dataset genome region data to
     recreate the Lupolova et al paper.
@@ -221,16 +198,14 @@ def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,sep=None,
     Args:
         table (str):        binary_table.txt output from panseq.
         sep (str or None):  The separator used in table.
-        extract (bool):     If True a list of feature names is also returned.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
     """
     kwargs = {'prefix': constants.ECOLI,
-              'suffix': '.fasta'}
-    return get_genome_regions(kwargs, table, sep, extract)
+              'suffix': '.fasta',
+              'validate': True}
+    return get_genome_regions(kwargs, table, sep)
 
 
 def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
@@ -453,7 +428,8 @@ def get_omnilog_data(kwargs={}, omnilog_sheet=constants.OMNILOG_DATA,
         tuple: ([x_train, y_train, x_test, y_test], feature_names)
 
     """
-    input_data = list(parse_metadata(**kwargs))
+    input_data = parse_metadata(**kwargs)
+    input_data = list(input_data)
     omnilog_data = pd.read_csv(omnilog_sheet, index_col=0)
     valid_cols = [input_data[0].index(x) for x in input_data[0] if x in list(omnilog_data)]
     input_data[0] = [input_data[0][x] for x in valid_cols]
@@ -525,7 +501,7 @@ def get_filtered_roary_data(kwargs={}, roary_sheet=constants.ROARY, limit=10):
     Returns:
         list: x_train, y_train, x_test, y_test
     """
-    input_data = list(parse_metadata(**kwargs))
+    input_datar = list(parse_metadata(**kwargs))
 
     roary_data = pd.read_csv(roary_sheet, index_col=0)
 

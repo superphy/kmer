@@ -270,7 +270,6 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                 cutoff = int(0.8*label_data.shape[0])
                 all_train_data.append(label_data[:cutoff])
                 all_test_data.append(label_data[cutoff:])
-
     all_train_data = [[prefix+str(x)+suffix for x in array] for array in all_train_data]
     x_train, y_train = shuffle(all_train_data, all_labels)
     if validate:
@@ -278,7 +277,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         x_test, y_test = shuffle(all_test_data, all_labels)
     else:
         x_test = [prefix+str(x)+suffix for x in all_test_data]
-        y_test = np.array([])
+        y_test = np.array([], dtype='S32')
 
     return (x_train, y_train, x_test, y_test)
 
@@ -351,13 +350,30 @@ def convert_well_index(well_index):
     second = re.compile('[A-H]\d+$')
     first_result = re.search(first, well_index)
     second_result = re.search(second, well_index)
-    df_index = first_result.group(0) + '-' + second_result.group(0)
-    output = well_descriptions.loc[well_descriptions['Key'] == df_index]
-    output =  output.Key.item() + output.Value.item()
+    if first_result and second_result:
+        df_index = first_result.group(0) + '-' + second_result.group(0)
+        output = well_descriptions.loc[well_descriptions['Key'] == df_index]
+        output =  output.Key.item() + output.Value.item()
+    else:
+        output = well_index
     return output
 
 
-def skip(input_data, **kwargs):
+def do_nothing(input_data, **kwargs):
+    """
+    A method that does nothing. Takes an input and returns it, also returns
+    feature names if it is passed though kwargs. Used to remove complex if/else
+    statements from run.run 
+
+    Args:
+        input_data (tuple):  x_train, y_train, x_test, y_test
+        **kwargs (iterable): Optional arguments to pass through.
+
+    Returns:
+        (tuple): input_data unchanged.
+        or
+        (tuple): input_data unchanged, feature_names if given in kwargs.
+    """
     if 'feature_names' in kwargs:
         output = (input_data, kwargs['feature_names'])
     else:

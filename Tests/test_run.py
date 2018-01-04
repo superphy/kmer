@@ -46,7 +46,7 @@ class CommandLineVariation1(unittest.TestCase):
                     f.write('Test\n')
         self.config = {'model': 'support_vector_machine_validation',
                        'model_args': {},
-                       'data': 'get_kmer',
+                       'data_method': 'get_kmer',
                        'data_args': {'kwargs': {'metadata': self.metadata,
                                                 'prefix': self.fasta_dir,
                                                 'suffix': '.fasta'},
@@ -126,11 +126,14 @@ class CommandLineVariation2(unittest.TestCase):
                 else:
                     f.write(',Test\n')
         self.config = {'model': 'support_vector_machine',
-                       'data': 'get_kmer',
+                       'data_method': 'get_kmer',
                        'data_args': {'kwargs': {'metadata': self.metadata,
                                                 'prefix': self.fasta_dir,
                                                 'suffix': '.fasta',
-                                                'validate': False},
+                                                'validate': False,
+                                                'train_header': 'Dataset',
+                                                'train_label': 'Train',
+                                                'test_label': 'Test'},
                                      'database': self.db,
                                      'recount': True,
                                      'k': 4,
@@ -148,11 +151,12 @@ class CommandLineVariation2(unittest.TestCase):
             args=['python',command,'-i',self.config_file,'-o',self.results_file]
             self.output = subprocess.check_output(args)
         except subprocess.CalledProcessError:
-            self.output = None
+             self.output = None
 
     def tearDown(self):
-        shutil.rmtree(self.dir)
-        shutil.rmtree(self.fasta_dir)
+        pass
+        # shutil.rmtree(self.dir)
+        # shutil.rmtree(self.fasta_dir)
 
     def test_output(self):
         self.assertIsNotNone(self.output)

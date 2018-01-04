@@ -61,7 +61,6 @@ def neural_network(input_data, binarize=True):
     input_data = input_data[:-1]
     input_data, le = convert_to_numerical_classes(input_data)
 
-    print le.inverse_transform([0,1,2,3,4])
 
     x_train = input_data[0]
     y_train = input_data[1]
@@ -142,7 +141,8 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
         coefs = np.argsort(model.coef_.ravel())
         top_pos_features = feature_names[coefs[-num_features/2:]]
         top_neg_features = feature_names[coefs[:num_features/2]]
-        output = (output_data, top_pos_features, top_neg_features)
+        top_features = np.hstack((top_pos_features,top_neg_features))
+        output = (output_data, top_features)
     else:
         output = output_data
 
@@ -155,6 +155,7 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
 #                              min_weight_fraction_leaf=0.1,
 #                              max_leaf_nodes=10,min_impurity_decrease=0,
 #                              bootstrap=True, n_jobs=-1):
+
 #Second Optimization
 def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
                              max_features='log2',max_depth=100,

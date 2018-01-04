@@ -13,12 +13,13 @@ import constants
 import argparse
 from sklearn.feature_selection import chi2, f_classif
 import utils
+from utils import do_nothing
 
 
 def run(model=models.support_vector_machine, model_args={},
-        data=data.get_kmer_us_uk_split, data_args={}, scaler=utils.skip,
-        scaler_args={}, selection=utils.skip, selection_args={},
-        augment=utils.skip, augment_args={}, validate=False, reps=10):
+        data_method=data.get_kmer_us_uk_split, data_args={}, scaler=do_nothing,
+        scaler_args={}, selection=do_nothing, selection_args={},
+        augment=do_nothing, augment_args={}, validate=False, reps=10):
     """
     Chains a data gathering method, data preprocessing methods, and a machine
     learning model together. Stores the settings for all the methods and the
@@ -28,7 +29,7 @@ def run(model=models.support_vector_machine, model_args={},
         model (function):       The machine learning model to be used, see
                                 best_models.py.
         model_args (dict):      The arguments to be passed to the model method.
-        data (function):        The method used to gather the data, see data.py
+        data_method (function): The method used to gather the data, see data.py
         data_args (dict):       The arguments to be passed to the data method
         scaler (function):      The method used to scale the data see
                                 feature_scaling.py.
@@ -46,102 +47,92 @@ def run(model=models.support_vector_machine, model_args={},
                                 and "model" should accept the output of "data" and
                                 return predictions for x_test.
         reps (int):             How many times to run the model, if doing validation
-        extract (bool):         If true the most important feautres used to
-                                to do the classification are returned.
 
     Returns:
-        A dictionary containing all of the passed arguments and the results of
-        the run.
+        (dict):   Contains all of the arguments and results from the run.
     """
+    # Ensure that all stages of the run are all doing or not doing validation
+    data_args['kwargs']['validate'] = validate
+
+    # Ensure that non validation runs are done only once
+    if not validate:
+        reps = 1
+
     output = {}
     output['datetime'] = datetime.datetime.now()
+
+    # convert optional methods to do_nothing if they are given as False or None
+    scaler = scaler if scaler else do_nothing
+    selection = selection if selection else do_nothing
+    augment = augment if augment else do_nothing
+
     if validate:
         results = np.zeros(reps)
-        times = np.zeros(reps)
-        train_sizes = np.zeros(reps)
-        test_sizes = np.zeros(reps)
-        all_features = []
-        for i in range(reps):
-            start = time.time()
+    times = np.zeros(reps)
+    train_sizes = np.zeros(reps)
+    test_sizes = np.zeros(reps)
+    all_features = []
 
-            # Get input data
-            d,features,labels = data(**data_args)
-            output['num_genomes'] = d[0].shape[0] + d[2].shape[0]
+    for i in range(reps):
+        start = time.time()
+        # Get input data
+        data,features,files,le = data_method(**data_args)
+        output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
 
-            # Perform feature selection on input_data
-            selection_args['feature_names']=features
-            d,features = selection(d, **selection_args)
-            selection_args.pop('feature_names', None)
+        # Perform feature selection on input_data
+        selection_args['feature_names']=features
+        data,features = selection(data, **selection_args)
+        selection_args.pop('feature_names', None)
 
-            # Scale input data
-            d = scaler(d, **scaler_args)
+        # Scale input data
+        data = scaler(data, **scaler_args)
 
-            # Augment training data
-            d = augment(d, **augment_args)
+        # Augment training data
+        data = augment(data, **augment_args)
 
-            # Build and validate model
-            model_args['feature_names'] = features
-            score,features = model(d, **model_args)
-            model_args.pop('feature_names', None)
+        # Build and use the model
+        model_args['feature_names'] = features
+        output_data,features = model(data, **model_args)
+        model_args.pop('feature_names', None)
 
-            # Record information about the run
-            times[i] = time.time() - start
-            results[i] = score
-            train_sizes[i] = d[0].shape[0]
-            test_sizes[i] = d[2].shape[0]
-            all_features.append(features)
-        output['train_sizes'] = train_sizes.mean().tolist()
-        output['test_sizes'] = test_sizes.mean().tolist()
-        output['avg_run_time'] = times.mean().tolist()
-        output['std_dev_run_times'] = times.std().tolist()
+        # Record information about run
+        times[i] = time.time() - start
+        if validate:
+            results[i] = output_data
+        else:
+            results = output_data
+        train_sizes[i] = data[0].shape[0]
+        test_sizes[i] = data[2].shape[0]
+        all_features.append(features)
+
+    # Store information about the run in a dictionary
+    output['train_sizes'] = train_sizes.mean().tolist()
+    output['test_sizes'] = test_sizes.mean().tolist()
+    output['avg_run_time'] = times.mean().tolist()
+    output['std_dev_run_times'] = times.std().tolist()
+
+    if validate:
+        # Compute the mean and std dev of all the runs
         output['avg_result'] = results.mean().tolist()
         output['std_dev_results'] = results.std().tolist()
         output['results'] = results.tolist()
-        output['repetitions'] = reps
-        all_features = list(np.concatenate(all_features, axis=0))
-        feature_counts = dict()
-        for f in all_features: feature_counts[str(f)]=feature_counts.get(f,0)+1
-        feature_counts = {utils.convert_well_index(k):v for k,v in feature_counts.items()}
-        output['important_features'] = feature_counts
     else:
-        start = time.time()
-        data_args['validate'] = False
-        data_args['kwargs']['validate'] = False
-        if extract:
-            data_args['extract'] = True
-            d,f,l = data(**data_args)
-        else:
-            d,l = data(**data_args)
-        output['num_genomes'] = d[0].shape[0] + d[2].shape[0]
-        if selection:
-            if extract:
-                selection_args['feature_names'] = f
-                d,f = selection(d, **selection_args)
-                selection_args.pop('feature_names', None)
-            else:
-                d = selection(d, **selection_args)
-        if scaler:
-            d = scaler(d, **scaler_args)
-        if augment:
-            d = augment(d, **augment_args)
-        if extract:
-            model_args['feature_names'] = f
-            predictions, f = model(d, **model_args)
-            model_args.pop('feature_names', None)
-        else:
-            predictions = model(d, **model_args)
-        predictions = dict(zip(t, predictions.tolist()))
-        total_time = time.time() - start
-        output['predictions'] = predictions
-        output['run_time'] = total_time
-        output['train_size'] = len(d[0])
-        output['test_size'] = len(d[2])
-        if extract:
-            f = [utils.convert_well_index(x) for x in f]
-            output['important_features'] = f.tolist()
+        # Create dictionary with test files as keys and their predictions as values
+        results = le.inverse_transform(results) # Convert classes back to their orignal values
+        import pdb; pdb.set_trace()
+        output['results'] = dict(zip(files, results.tolist()))
+    output['repetitions'] = reps
+
+    all_features = list(np.concatenate(all_features, axis=0))
+    feature_counts = dict()
+    for f in all_features:
+        feature_counts[str(f)]=feature_counts.get(f,0)+1
+    feature_counts = {utils.convert_well_index(k):v for k,v in feature_counts.items()}
+
+    output['important_features'] = feature_counts
     output['model'] = model
     output['model_args'] = model_args
-    output['data'] = data
+    output['data'] = data_method
     output['data_args'] = data_args
     output['scaler'] = scaler
     output['scaler_args'] = scaler_args
