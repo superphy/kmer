@@ -1,22 +1,21 @@
-model: support_vector_machine_validation
+model: support_vector_machine
 model_args: {}
-data: get_kmer
+data_method: get_kmer
 data_args:
-  extract: false
   kwargs:
     blacklist:
     - ECI-2624
     - ECI-2859
     - ECI-2836
-    fasta_header: Strain
-    label_header: Serotype
-    metadata: /home/rboothman/PHAC/kmer/Data/omnilog_metadata.csv
+    fasta_header: Fasta
+    label_header: Class
+    metadata: /home/rboothman/PHAC/kmer/Data/human_bovine0.csv
     one_vs_all: false
     remove: false
-    train_header: false
-    prefix: /home/rboothman/Data/ecomnilog/fasta/
+    train_header: Dataset
+    prefix: /home/rboothman/Data/ecoli/
     suffix: .fasta
-  database: database2
+  database: database
 scaler: scale_to_range
 scaler_args:
   low: -1
@@ -27,6 +26,5 @@ selection_args:
   k: 270
 augment: null
 augment_args: {}
-validate: yes
-reps: 20
-extract: no
+validate: false
+reps: 1
