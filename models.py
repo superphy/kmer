@@ -1,13 +1,17 @@
+"""
+Contains defintions for machine learning models.
+"""
+
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import SGDClassifier as SGDC
 from keras.layers import Dense, Flatten
 from keras.models import Sequential
-from keras.layers.pooling import AveragePooling1D
 from keras.layers.convolutional import Conv1D
-from sklearn import svm
-from utils import flatten, make3D, convert_to_numerical_classes
 from keras.utils import to_categorical
-from sklearn.ensemble import RandomForestClassifier
+from utils import flatten, make3D, convert_to_numerical_classes
+
 
 
 def neural_network_validation(input_data):
@@ -15,6 +19,7 @@ def neural_network_validation(input_data):
     Constructs, compiles, trains, and tests a neural network.
     Returns the accuracy of the model.
     """
+    # TODO: No longer invert label encodings in convert_to_numerical_classes
     input_data, le = convert_to_numerical_classes(input_data)
 
     x_train = input_data[0]
@@ -38,12 +43,12 @@ def neural_network_validation(input_data):
                      kernel_size=3,
                      activation='relu',
                      padding='same',
-                     input_shape = (x_train.shape[1], 1)))
+                     input_shape=(x_train.shape[1], 1)))
     model.add(Flatten())
     model.add(Dense(num_classes, activation='softmax'))
-    model.compile(optimizer = 'adam',
-                  loss = 'binary_crossentropy',
-                  metrics = ['accuracy'])
+    model.compile(optimizer='adam',
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
     model.fit(x_train, y_train, epochs=50, batch_size=10, verbose=0)
     evaluation = model.evaluate(x_test, y_test, batch_size=1, verbose=0)
     return evaluation[1]
@@ -59,6 +64,7 @@ def neural_network(input_data, binarize=True):
     If args is not provided, default values will be used.
     """
     input_data = input_data[:-1]
+    # TODO: No longer invert label encodings in convert_to_numerical_classes
     input_data, le = convert_to_numerical_classes(input_data)
 
 
@@ -78,12 +84,12 @@ def neural_network(input_data, binarize=True):
     model.add(Conv1D(filters=10,
                      kernel_size=3,
                      activation='relu',
-                     input_shape = (x_train.shape[1], 1)))
+                     input_shape=(x_train.shape[1], 1)))
     model.add(Flatten())
     model.add(Dense(num_classes, activation='softmax'))
     model.compile(optimizer='adam',
-                  loss = 'binary_crossentropy',
-                  metrics = ['accuracy'])
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
     model.fit(x_train, y_train, epochs=50, batch_size=10, verbose=0)
     prediction = model.predict(predict)
     if binarize:
@@ -112,7 +118,7 @@ def support_vector_machine_validation(input_data, kernel='linear', C=1,
         coefs = np.argsort(model.coef_.ravel())
         top_pos_features = feature_names[coefs[-num_features:]]
         top_neg_features = feature_names[coefs[:num_features]]
-        top_features = np.hstack((top_pos_features,top_neg_features))
+        top_features = np.hstack((top_pos_features, top_neg_features))
         output = (output_data, top_features)
     else:
         output = output_data
@@ -132,7 +138,7 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
 
     if len(x_train.shape) == 3:
         x_train = flatten(x_train)
-        x_test = flatten(x_test)
+        predict = flatten(predict)
     model = svm.SVC(kernel=kernel, C=C)
     model.fit(x_train, y_train)
     output_data = model.predict(predict)
@@ -141,7 +147,7 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
         coefs = np.argsort(model.coef_.ravel())
         top_pos_features = feature_names[coefs[-num_features/2:]]
         top_neg_features = feature_names[coefs[:num_features/2]]
-        top_features = np.hstack((top_pos_features,top_neg_features))
+        top_features = np.hstack((top_pos_features, top_neg_features))
         output = (output_data, top_features)
     else:
         output = output_data
@@ -157,13 +163,16 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
 #                              bootstrap=True, n_jobs=-1):
 
 #Second Optimization
-def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
-                             max_features='log2',max_depth=100,
-                             min_samples_split=2,min_samples_leaf=1,
+def random_forest_validation(input_data, n_estimators=50, criterion='entropy',
+                             max_features='log2', max_depth=100,
+                             min_samples_split=2, min_samples_leaf=1,
                              min_weight_fraction_leaf=0.01,
-                             max_leaf_nodes=25,min_impurity_decrease=0.001,
+                             max_leaf_nodes=25, min_impurity_decrease=0.001,
                              bootstrap=False, n_jobs=-1, feature_names=None,
                              num_features=10):
+    """
+    Fits, trains, and evaluates a random forest learning, returns an accuracy.
+    """
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -195,6 +204,10 @@ def random_forest_validation(input_data,n_estimators=50,criterion='entropy',
 # The parameters in the below functions were found by performing a grid search.
 # The resutls from the grid search are in ~/Data/sgdc_parameters/
 def kmer_split_sgd(input_data):
+    """
+    Stochastic gradient descent model with params optimized for kmer data on the
+    lupolova et al split dataset
+    """
     model = SGDC(loss='log', n_jobs=-1, eta0=1.0,
                  learning_rate='invscaling', penalty='none', tol=0.001,
                  alpha=100000000.0)
@@ -202,12 +215,20 @@ def kmer_split_sgd(input_data):
     return model.score(input_data[2], input_data[3])
 
 def kmer_mixed_sgd(input_data):
+    """
+    Stochastic gradient descent model with params optimized for kmer data on the
+    lupolova et al mixed dataset
+    """
     model = SGDC(loss='squared_hinge', n_jobs=-1, penalty='none',
                  tol=0.001, alpha=10000000.0)
     model.fit(input_data[0], input_data[1])
     return model.score(input_data[2], input_data[3])
 
 def genome_split_sgd(input_data):
+    """
+    Stochastic gradient descent model with params optimized for genome region
+    data on the lupolova split data set.
+    """
     model = SGDC(loss='hinge', n_jobs=-1, eta0=0.1,
                  learning_rate='invscaling', penalty='l1', tol=0.001,
                  alpha=0.01)
@@ -215,6 +236,10 @@ def genome_split_sgd(input_data):
     return model.score(input_data[2], input_data[3])
 
 def genome_mixed_sgd(input_data):
+    """
+    Stochastic gradient descent model with params optimized for genome region
+    data on the lupolova mixed dataset.
+    """
     model = SGDC(loss='log', n_jobs=-1, eta0=0.1,
                  learning_rate='invscaling', penalty='l1', tol=0.001,
                  alpha=0.001)

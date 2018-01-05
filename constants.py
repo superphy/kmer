@@ -1,3 +1,10 @@
+"""
+Contains constants used in the other modules of the program. Defines things
+such as default paths to data and metadata, this allows a user to update
+everything from just one file ofter starting to use the program on their
+computer.
+"""
+
 import os
 
 #default filepaths to data
@@ -33,6 +40,6 @@ OUTPUT = SOURCE + 'Data/run_results.yml'
 #default filepaths to metadata sheets
 SALMONELLA_METADATA = SOURCE + 'Data/amr_sorted.csv'
 ECOLI_METADATA = SOURCE + 'Data/human_bovine.csv'
-OMNILOG_METADATA= SOURCE + 'Data/omnilog_metadata.csv'
+OMNILOG_METADATA = SOURCE + 'Data/omnilog_metadata.csv'
 PREDICTIVE_RESULTS = SOURCE + 'Data/hb_train_predictiveresults.csv'
 OMNILOG_WELLS = SOURCE + 'Data/omnilog_wells.csv'

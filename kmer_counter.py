@@ -1,7 +1,12 @@
+"""
+Wraps Jellyfish kmer counter to store the results in a database and ensure that
+the results can be passed to a machine learning model i.e. if multiple genomes
+are passed to jellyfish only the kmers that appear in all the genoms will be
+returned this ensures that the data is "rectangular".
+"""
 import subprocess
-import os
-import lmdb
 import sys
+import lmdb
 import numpy as np
 
 
@@ -192,7 +197,7 @@ def setup_data(files, k, limit, env, txn, data):
     while i >= 0:
         print_status(counter, total)
         secondpass(files[i], k, env, txn)
-        i-=1
+        i -= 1
         counter += 1
 
     print_status(counter, total)
@@ -256,9 +261,9 @@ def add_to_database(files, k, env, txn):
     counter = 0
     total = len(files)
     print "Begin"
-    for file in files:
+    for f in files:
         print_status(counter, total)
-        add(file, k, env, txn)
+        add(f, k, env, txn)
         counter += 1
     print_status(counter, total)
     print "\n"
@@ -314,7 +319,7 @@ def get_counts(files, database):
 
         for f in files:
             array = []
-            current = env.open_db('%s'%f, txn = txn)
+            current = env.open_db('%s'%f, txn=txn)
             cursor = txn.cursor(db=current)
             for key, val in cursor:
                 array.append(int(val))
@@ -344,7 +349,7 @@ def get_kmer_names(database):
         kmer_list = []
         cursor = txn.cursor()
 
-        for key,val in cursor:
+        for key, val in cursor:
             kmer_list.append(key)
 
     env.close()

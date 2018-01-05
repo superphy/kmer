@@ -1,25 +1,26 @@
+"""
+This is essentially the main method for the program.
+"""
+import inspect
+import time
+import datetime
+import argparse
 import models
-import data
-import sys
+import get_data
 import feature_scaling
 import feature_selection
 import data_augmentation
-import inspect
 import numpy as np
-import time
-import datetime
 import yaml
-import constants
-import argparse
-from sklearn.feature_selection import chi2, f_classif
 import utils
 from utils import do_nothing
 
 
-def run(model=models.support_vector_machine, model_args={},
-        data_method=data.get_kmer_us_uk_split, data_args={}, scaler=do_nothing,
-        scaler_args={}, selection=do_nothing, selection_args={},
-        augment=do_nothing, augment_args={}, validate=False, reps=10):
+def run(model=models.support_vector_machine, model_args=None,
+        data_method=get_data.get_kmer_us_uk_split, data_args=None,
+        scaler=do_nothing, scaler_args=None, selection=do_nothing,
+        selection_args=None, augment=do_nothing, augment_args=None,
+        validate=False, reps=10):
     """
     Chains a data gathering method, data preprocessing methods, and a machine
     learning model together. Stores the settings for all the methods and the
@@ -33,20 +34,23 @@ def run(model=models.support_vector_machine, model_args={},
         data_args (dict):       The arguments to be passed to the data method
         scaler (function):      The method used to scale the data see
                                 feature_scaling.py.
-        scaler_args (dict):     The arguments to be passed to eh scaler method.
-        selection (function):   The method used to perform feature selection, see
-                                feature_selection.py.
-        selection_args (dict):  The arguments to be passed to the selection method.
-        augment (function):     The method used to augment the training data, see
-                                data_augmentation.py
-        augment_args (dict):    The arguments to be passed to the augment method.
+        scaler_args (dict):     The arguments to be passed to the scaler method.
+        selection (function):   The method used to perform feature selection,
+                                see feature_selection.py.
+        selection_args (dict):  The arguments to be passed to the selection
+                                method.
+        augment (function):     The method used to augment the training data,
+                                see data_augmentation.py
+        augment_args (dict):    The arguments to be passed to the augment
+                                method.
         validate (bool):        If true "data" should return x_train, y_train,
                                 x_test, and y_test and "model" should accept the
                                 output of data and return an accuracy. If false
-                                "data" should return x_train, y_train, and x_test
-                                and "model" should accept the output of "data" and
-                                return predictions for x_test.
-        reps (int):             How many times to run the model, if doing validation
+                                "data" should return x_train, y_train, and
+                                x_test and "model" should accept the output of
+                                "data" and return predictions for x_test.
+        reps (int):             How many times to run the model, if doing
+                                validation
 
     Returns:
         (dict):   Contains all of the arguments and results from the run.
@@ -62,9 +66,16 @@ def run(model=models.support_vector_machine, model_args={},
     output['datetime'] = datetime.datetime.now()
 
     # convert optional methods to do_nothing if they are given as False or None
-    scaler = scaler if scaler else do_nothing
-    selection = selection if selection else do_nothing
-    augment = augment if augment else do_nothing
+    scaler = scaler or do_nothing
+    selection = selection or do_nothing
+    augment = augment or do_nothing
+
+    # convert unentered arguments to empty dictionaries
+    model_args = model_args or {}
+    data_args = data_args or {}
+    scaler_args = scaler_args or {}
+    selection_args = selection_args or {}
+    augment_args = augment_args or {}
 
     if validate:
         results = np.zeros(reps)
@@ -76,12 +87,12 @@ def run(model=models.support_vector_machine, model_args={},
     for i in range(reps):
         start = time.time()
         # Get input data
-        data,features,files,le = data_method(**data_args)
+        data, features, files, le = data_method(**data_args)
         output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
 
         # Perform feature selection on input_data
-        selection_args['feature_names']=features
-        data,features = selection(data, **selection_args)
+        selection_args['feature_names'] = features
+        data, features = selection(data, **selection_args)
         selection_args.pop('feature_names', None)
 
         # Scale input data
@@ -92,7 +103,7 @@ def run(model=models.support_vector_machine, model_args={},
 
         # Build and use the model
         model_args['feature_names'] = features
-        output_data,features = model(data, **model_args)
+        output_data, features = model(data, **model_args)
         model_args.pop('feature_names', None)
 
         # Record information about run
@@ -117,17 +128,18 @@ def run(model=models.support_vector_machine, model_args={},
         output['std_dev_results'] = results.std().tolist()
         output['results'] = results.tolist()
     else:
-        # Create dictionary with test files as keys and their predictions as values
-        results = le.inverse_transform(results) # Convert classes back to their orignal values
-        import pdb; pdb.set_trace()
+        # Create dictionary with test files as keys and predictions as values
+        # Convert classes back to their original values
+        results = le.inverse_transform(results)
         output['results'] = dict(zip(files, results.tolist()))
     output['repetitions'] = reps
 
     all_features = list(np.concatenate(all_features, axis=0))
     feature_counts = dict()
     for f in all_features:
-        feature_counts[str(f)]=feature_counts.get(f,0)+1
-    feature_counts = {utils.convert_well_index(k):v for k,v in feature_counts.items()}
+        feature_counts[str(f)] = feature_counts.get(f, 0)+1
+    feature_counts = feature_counts.items()
+    feature_counts = {utils.convert_well_index(k):v for k, v in feature_counts}
 
     output['important_features'] = feature_counts
     output['model'] = model
@@ -156,7 +168,8 @@ def get_methods():
         dict(str:function)
     """
     methods = {}
-    for x in [models,data,feature_selection,feature_scaling,data_augmentation]:
+    for x in [models, get_data, feature_selection,
+              feature_scaling, data_augmentation]:
         temp = dict(inspect.getmembers(x, inspect.isfunction))
         methods.update(temp)
     return methods
@@ -177,7 +190,7 @@ def convert_methods(input_dictionary):
     output_dictionary = {}
     methods = get_methods()
     for key, value in input_dictionary.items():
-        if type(value) == dict:
+        if isinstance(value, dict):
             output = convert_methods(value)
         elif value in methods.keys():
             output = methods[value]
@@ -236,9 +249,9 @@ def create_arg_parser():
 if __name__ == "__main__":
     cl_args = create_arg_parser()
     args = convert_yaml(cl_args.input)
-    output = run(**args)
-    document = {'name':cl_args.name, 'output':output}
-    with open(cl_args.output, 'a') as f:
-        yaml.dump(document, f, explicit_start=True, explicit_end=True,
+    run_output = run(**args)
+    document = {'name':cl_args.name, 'output':run_output}
+    with open(cl_args.output, 'a') as output_file:
+        yaml.dump(document, output_file, explicit_start=True, explicit_end=True,
                   default_flow_style=False, allow_unicode=True)
-        f.write('\n\n\n')
+        output_file.write('\n\n\n')

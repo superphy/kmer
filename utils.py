@@ -1,12 +1,14 @@
-import csv
+"""
+Odds and ends used by other modules in the program.
+"""
+
 import os
 import random
 import json
-import sys
+import re
 import pandas as pd
 import numpy as np
 import constants
-import re
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -26,22 +28,19 @@ def setup_files(filepath):
     return [filepath + x for x in os.listdir(filepath)]
 
 
-def check_fasta(file):
+def check_fasta(filename):
     """
     Returns True if the file is fasta or fastq, False otherwise.
 
     Args:
-        file (str): File to check.
+        filename (str): File to check.
 
     Returns:
         bool: True if file is fasta|q otherwise False.
     """
-    with open(file, 'r') as f:
+    with open(filename, 'r') as f:
         firstline = f.readline()
-        if firstline[0] == '>' or firstline[0] == '@':
-            return True
-        else:
-            return False
+        return bool(firstline[0] == '>' or firstline[0] == '@')
 
 
 def valid_file(test_files, *invalid_files):
@@ -57,13 +56,13 @@ def valid_file(test_files, *invalid_files):
         list(str): list of file names with all invalid ones remvoved.
     """
     bad_files = []
-    for file in invalid_files:
-        with open(file, 'r') as temp:
+    for f in invalid_files:
+        with open(f, 'r') as temp:
             bad_files.extend(temp.read().split('\n'))
     return [x for x in test_files if x not in bad_files]
 
 
-def same_shuffle(a,b):
+def same_shuffle(a, b):
     """
     Shuffles two lists so that the elements at index x in both lists before
     shuffling are at index y in their respective list after shuffling.
@@ -78,19 +77,28 @@ def same_shuffle(a,b):
     """
     temp = list(zip(a, b))
     random.shuffle(temp)
-    a,b = zip(*temp)
-    return list(a),list(b)
+    a, b = zip(*temp)
+    return list(a), list(b)
 
 
 def shuffle(data, labels):
+    """
+    Args:
+        data (list):
+        labels (list):
+
+    Returns:
+        tuple: all_data, all_labels
+    """
     try:
-        assert(len(data) == len(labels))
-        assert(type(data[0]) == list or type(data[0]) == np.ndarray)
+        assert len(data) == len(labels)
+        assert isinstance(data[0], (list, np.ndarray))
     except AssertionError as E:
         print E
-    if type(data[0]) == list:
+    if isinstance(data[0], list):
         all_data = []
-        for x in data: all_data.extend(x)
+        for x in data:
+            all_data.extend(x)
         all_labels = []
         count = 0
         for label in labels:
@@ -151,17 +159,17 @@ def sensitivity_specificity(predicted_values, true_values):
                     dictionary has keys for sensitivity and specificity.
     """
     results = {}
-    if type(predicted_values) != np.ndarray:
+    if isinstance(predicted_values, np.ndarray):
         predicted_values = np.asarray(predicted_values)
-    if type(true_values) != np.ndarray:
+    if isinstance(true_values, np.ndarray):
         true_values = np.asarray(true_values)
 
     classes = np.unique(true_values)
     for c in classes:
-        predicted_pos = np.where(predicted_values==c, 1, 0)
-        predicted_neg = np.where(predicted_values!=c, 1, 0)
-        true_pos = np.where(true_values==c, 1, 0)
-        true_neg = np.where(true_values!=c, 1, 0)
+        predicted_pos = np.where(predicted_values == c, 1, 0)
+        predicted_neg = np.where(predicted_values != c, 1, 0)
+        true_pos = np.where(true_values == c, 1, 0)
+        true_neg = np.where(true_values != c, 1, 0)
 
         TP = sum(true_pos)
         TN = sum(true_neg)
@@ -179,7 +187,7 @@ def sensitivity_specificity(predicted_values, true_values):
 def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                    label_header='Class', train_header='Dataset',
                    extra_header=None, extra_label=None, train_label='Train',
-                   test_label='Test', suffix='', prefix='',sep=None,
+                   test_label='Test', suffix='', prefix='', sep=None,
                    one_vs_all=None, remove=None, validate=True, blacklist=None):
     """
     Gets filenames, classifications, and train/test splits from a metadata
@@ -231,26 +239,26 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         data = data[data[extra_header] == extra_label]
 
     if remove:
-        data = data.drop(data[data[label_header]==remove].index)
+        data = data.drop(data[data[label_header] == remove].index)
 
     if blacklist is not None:
         data = data.drop(data[data[fasta_header].isin(blacklist)].index)
 
     if one_vs_all:
-        data[label_header] = data[label_header].where(data[label_header]==one_vs_all, 'Other')
+        data[label_header] = data[label_header].where(data[label_header] == one_vs_all, 'Other')
 
     all_labels = np.unique(data[label_header])
     all_labels = all_labels[~pd.isnull(all_labels)]
 
     if train_header:
-        train_data = data[data[train_header]==train_label]
-        test_data = data[data[train_header]==test_label]
+        train_data = data[data[train_header] == train_label]
+        test_data = data[data[train_header] == test_label]
         all_train_data = []
         all_test_data = []
         for label in all_labels:
-            all_train_data.append(train_data[train_data[label_header]==label])
+            all_train_data.append(train_data[train_data[label_header] == label])
             if validate:
-                all_test_data.append(test_data[test_data[label_header]==label])
+                all_test_data.append(test_data[test_data[label_header] == label])
         all_train_data = [x[fasta_header].values for x in all_train_data]
         if validate:
             all_test_data = [x[fasta_header].values for x in all_test_data]
@@ -260,7 +268,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         all_train_data = []
         all_test_data = []
         for label in all_labels:
-            label_data = data[data[label_header]==label]
+            label_data = data[data[label_header] == label]
             label_data = label_data[fasta_header].values
             np.random.shuffle(label_data)
             if label_data.shape[0] == 1:
@@ -299,8 +307,8 @@ def parse_json(json_files, path=constants.MORIA, suffix='.fasta',
     that can generate the json files.
     """
     output = []
-    for file in json_files:
-        with open(file, 'r') as f:
+    for f in json_files:
+        with open(f, 'r') as f:
             data = json.load(f)
             fasta_names = [str(x[key]) for x in data]
             fasta_names = [x for x in fasta_names if valid_file(x)]
@@ -327,7 +335,7 @@ def convert_to_numerical_classes(data):
     if len(data) > 3:
         labels = data[1]+data[3]
         le.fit(labels)
-        output_data = (data[0],le.transform(data[1]),data[2],le.transform(data[3]))
+        output_data = (data[0], le.transform(data[1]), data[2], le.transform(data[3]))
     else:
         le.fit(data[1])
         output_data = (data[0], le.transform(data[1]), data[2])
@@ -346,14 +354,14 @@ def convert_well_index(well_index):
              followed by what was in the well.
     """
     well_descriptions = pd.read_csv(constants.OMNILOG_WELLS)
-    first = re.compile('^PM\d+')
-    second = re.compile('[A-H]\d+$')
+    first = re.compile(r'^PM\d+')
+    second = re.compile(r'[A-H]\d+$')
     first_result = re.search(first, well_index)
     second_result = re.search(second, well_index)
     if first_result and second_result:
         df_index = first_result.group(0) + '-' + second_result.group(0)
         output = well_descriptions.loc[well_descriptions['Key'] == df_index]
-        output =  output.Key.item() + output.Value.item()
+        output = output.Key.item() + output.Value.item()
     else:
         output = well_index
     return output
@@ -363,7 +371,7 @@ def do_nothing(input_data, **kwargs):
     """
     A method that does nothing. Takes an input and returns it, also returns
     feature names if it is passed though kwargs. Used to remove complex if/else
-    statements from run.run 
+    statements from run.run
 
     Args:
         input_data (tuple):  x_train, y_train, x_test, y_test
