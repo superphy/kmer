@@ -1,5 +1,5 @@
 import models
-import data
+import get_data
 import sys
 import feature_scaling
 import feature_selection
@@ -16,7 +16,7 @@ import utils
 
 
 def run(model=models.support_vector_machine, model_args={},
-        data=data.get_kmer_us_uk_split, data_args={},
+        data=get_data.get_kmer_us_uk_split, data_args={},
         scaler=feature_scaling.scale_to_range, scaler_args={}, selection=None,
         selection_args={}, augment=None, augment_args={}, validate=False,
         reps=10, extract=False):
@@ -163,7 +163,7 @@ def get_methods():
         dict(str:function)
     """
     methods = {}
-    for x in [models,data,feature_selection,feature_scaling,data_augmentation]:
+    for x in [models,get_data,feature_selection,feature_scaling,data_augmentation]:
         temp = dict(inspect.getmembers(x, inspect.isfunction))
         methods.update(temp)
     return methods

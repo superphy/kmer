@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import unittest
 import shutil
-from data import get_kmer, get_genome_regions, get_omnilog_data
+from get_data import get_kmer, get_genome_regions, get_omnilog_data
 import numpy as np
 import pandas as pd
 import tempfile

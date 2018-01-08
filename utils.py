@@ -398,13 +398,18 @@ def combine_lists(input_lists):
         list: A ranked (from best to worst) list of all unique elements in
               input_lists.
     """
-    weight = 1.0/len(input_lists)
+
+    length_of_list = len(input_lists[0])
+    num_of_lists = len(input_lists)
+    weight = 1.0/(length_of_list*num_of_lists)
+
     all_features = [elem for ranked_list in input_lists for elem in ranked_list]
     unique_features = np.unique(np.asarray(all_features)).tolist()
     feature_rankings = {k:0 for k in unique_features}
+
     for ranked_list in input_lists:
         for elem in ranked_list:
-            val = weight*(1.0/(ranked_list.index(elem)+1))
+            val = weight*(length_of_list - ranked_list.index(elem))
             feature_rankings[elem] += val
     output = sorted(feature_rankings, key=lambda k: feature_rankings[k], reverse=True)
     return output
