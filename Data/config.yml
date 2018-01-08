@@ -1,15 +1,21 @@
-model: random_forest_validation
+model: support_vector_machine
 model_args: {}
-data: get_omnilog_data
+data_method: get_kmer
 data_args:
   kwargs:
-    metadata: /home/rboothman/PHAC/kmer/Data/omnilog_metadata.csv
-    fasta_header: Strain
-    label_header: Host
-    train_header: no
-    one_vs_all: no
-    validate: yes
-    remove: Unknown
+    blacklist:
+    - ECI-2624
+    - ECI-2859
+    - ECI-2836
+    fasta_header: Fasta
+    label_header: Class
+    metadata: /home/rboothman/PHAC/kmer/Data/human_bovine.csv
+    one_vs_all: false
+    remove: false
+    train_header: Dataset
+    prefix: /home/rboothman/Data/ecoli/
+    suffix: .fasta
+  database: database
 scaler: scale_to_range
 scaler_args:
   low: -1
@@ -20,6 +26,5 @@ selection_args:
   k: 270
 augment: null
 augment_args: {}
-validate: yes
-reps: 20
-extract: yes
+validate: false
+reps: 1

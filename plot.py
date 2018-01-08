@@ -1,10 +1,17 @@
-import matplotlib.pyplot as plt
-import argparse
-import numpy as np
-import sys
+"""
+Plots graphs for data found in subdirectories
+"""
+
 import os
+import argparse
+import matplotlib.pyplot as plt
+import numpy as np
 
 def get_data(filename):
+    """
+    Converts the data contained in filename to the x,y format need to plot the
+    data
+    """
     try:
         with open(filename, 'r') as f:
             data = f.read()
@@ -19,16 +26,22 @@ def get_data(filename):
     except IndexError as E:
         print E
         return
-    return x,y
+    return x, y
 
-def main(filepath, title, xlabel, ylabel, x_range, enforce_x, y_range, enforce_y, keep, log, add_trends):
+def main(filepath, title, xlabel, ylabel, x_range, enforce_x, y_range,
+         enforce_y, keep, log, add_trends):
+    """
+    Plots the data in filepath using the title and labels provided.
+    Uses matplotlib.pyplot.
+    Returns nothing.
+    """
     plt.figure()
     if title:
         plt.title(' '.join(title))
     if x_range:
         plt.xticks(np.arange(x_range[0], x_range[1], x_range[2]))
         if enforce_x:
-            plt.xlim((x_range[0], x_rangep[1]))
+            plt.xlim((x_range[0], x_range[1]))
     if log:
         plt.xscale('log', basex=2)
     if y_range:
@@ -45,8 +58,8 @@ def main(filepath, title, xlabel, ylabel, x_range, enforce_x, y_range, enforce_y
         files = [filepath + x for x in valid]
     else:
         files = [filepath + x for x in os.listdir(filepath) if '.py' not in x]
-	files = sorted(files, key=lambda x: int(filter(str.isdigit, x)))
-	count = 1
+        # files = sorted(files, key=lambda x: int(filter(str.isdigit, x)))
+    count = 1
     for f in files:
         data = get_data(f)
         if data:
@@ -55,7 +68,8 @@ def main(filepath, title, xlabel, ylabel, x_range, enforce_x, y_range, enforce_y
             else:
                 line_style = '-'
             count += 1
-            p = plt.plot(data[0], data[1], label=f.replace('.txt', '').replace(filepath, ''), linestyle=line_style)
+            label = f.replace('.txt', '').replace(filepath, '')
+            p = plt.plot(data[0], data[1], label=label, linestyle=line_style)
             if add_trends:
                 colour = p[-1].get_color()
                 coefs = np.polyfit(np.asarray(data[0], dtype='float64'), data[1], add_trends)
@@ -98,8 +112,8 @@ if __name__ == "__main__":
     parser.add_argument('--keep', '-k',
                         help='A substring that must be included in the filenames for them to be plotted')
     parser.add_argument('--log', '-l',
-	                    help='If true the x axis is plotted in log space',
-	                    type=bool)
+                        help='If true the x axis is plotted in log space',
+                        type=bool)
     parser.add_argument('--add_trends', '-at',
                         help='Int, polynomial trendlines of degree given are plotted',
                         type=int)

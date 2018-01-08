@@ -1,9 +1,14 @@
+"""
+Contains methods that perform data augmentation on inputs of the form x_train,
+y_train, x_test, y_test. Data augmentation is the process of artificially
+creating new training data for a machine learning model.
+Returns x_train, y_train, x_test, y_test with additional samples and thier
+labels added to x_train and y_train
+"""
+
 from imblearn.over_sampling import SMOTE, ADASYN
-from feature_selection import flatten, make3D
 import numpy as np
-import random
 from utils import shuffle
-import inspect
 
 
 def __augment_data_naive_helper(data, desired_samples):
@@ -20,9 +25,10 @@ def __augment_data_naive_helper(data, desired_samples):
                         added.
     """
     indices = np.random.randint(data.shape[0], size=2*desired_samples)
-    temp = np.split(data[indices,:], desired_samples)
+    temp = np.split(data[indices, :], desired_samples)
     new_data = []
-    for elem in temp: new_data.append(elem.mean(axis=0))
+    for elem in temp:
+        new_data.append(elem.mean(axis=0))
     new_data = np.asarray(new_data)
     data = np.vstack((data, new_data))
     return data
@@ -50,7 +56,7 @@ def augment_data_naive(input_data, desired_samples=50):
     output = []
     labels = []
     for c in classes:
-        indices = np.where(y_train==c, True, False)
+        indices = np.where(y_train == c, True, False)
         samples = x_train[indices]
         new_samples = __augment_data_naive_helper(samples, desired_samples)
         output.append(new_samples)
@@ -84,8 +90,8 @@ def augment_data_smote(input_data, desired_samples=50):
 
     classes, counts = np.unique(y_train, return_counts=True)
     ratio = {}
-    for c in range(len(classes)):
-        ratio[classes[c]] = counts[c]+desired_samples
+    for index, item in enumerate(classes):
+        ratio[item] = counts[index]+desired_samples
     smote = SMOTE(ratio=ratio)
     x_train, y_train = smote.fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
@@ -116,8 +122,8 @@ def augment_data_adasyn(input_data, desired_samples=50):
 
     classes, counts = np.unique(y_train, return_counts=True)
     ratio = {}
-    for c in range(len(classes)):
-        ratio[classes[c]] = counts[c]+desired_samples
+    for index, item in enumerate(classes):
+        ratio[item] = counts[index]+desired_samples
     adasyn = ADASYN(ratio=ratio)
     x_train, y_train = adasyn.fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
@@ -144,9 +150,10 @@ def augment_data_noise(input_data, desired_samples=50):
     output = []
     labels = []
     for c in classes:
-        indices = np.where(y_train==c, True, False)
+        indices = np.where(y_train == c, True, False)
         samples = x_train[indices]
-        new_samples = samples[np.random.choice(samples.shape[0], desired_samples)]
+        rand_idx = np.random.choice(samples.shape[0], desired_samples)
+        new_samples = samples[rand_idx]
         new_samples = np.random.randn(new_samples.shape[1]) + new_samples
         samples = np.vstack((samples, new_samples))
         output.append(samples)
@@ -179,7 +186,7 @@ def balance_data_smote(input_data):
     classes = np.unique(y_train)
     ratio = {}
     for c in classes:
-        ratioi[c] = samples
+        ratio[c] = samples
     x_train, y_train = SMOTE(ratio=ratio).fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
@@ -209,7 +216,7 @@ def balance_data_adasyn(input_data):
     x_train, y_train = ADASYN(ratio=ratio).fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
-def balance_data_naive(input_data, choice=2):
+def balance_data_naive(input_data):
     """
     Balances data by adding samples to all minority classes until each class has
     the same number of samples. Creates new samples by grabbing x random samples
@@ -233,11 +240,11 @@ def balance_data_naive(input_data, choice=2):
     output = []
     labels = []
     for c in classes:
-        indices = np.where(y_train==c, True, False)
+        indices = np.where(y_train == c, True, False)
         samples = x_train[indices]
         desired_samples = largest_count - samples.shape[0]
         if desired_samples > 0:
-            samples = __augment_data_naive_helper(samples, desired_samples, choice)
+            samples = __augment_data_naive_helper(samples, desired_samples)
         output.append(samples)
         labels.append(c)
 
@@ -268,15 +275,16 @@ def balance_data_noise(input_data):
     output = []
     labels = []
     for c in classes:
-        indices = np.where(y_train==c, True, False)
+        indices = np.where(y_train == c, True, False)
         samples = x_train[indices]
         desired_samples = largest_count - samples.shape[0]
         if desired_samples > 0:
-            new_samples = samples[np.random.choice(samples.shape[0], desired_samples)]
+            rand_idx = np.random.choice(samples.shape[0], desired_samples)
+            new_samples = samples[rand_idx]
             new_samples = np.random.randn(samples.shape[1]) + new_samples
             samples = np.vstack((samples, new_samples))
         output.append(samples)
-        labels.appends(c)
+        labels.append(c)
 
     x_train, y_train = shuffle(samples, labels)
     return (x_train, y_train, x_test, y_test)

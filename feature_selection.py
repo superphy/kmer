@@ -69,7 +69,7 @@ def remove_constant_features(input_data, feature_names=None):
     x_test = pd.DataFrame(input_data[2])
     x_test = x_test[list(x_train)]
 
-    output_data=(np.asarray(x_train),input_data[1],np.asarray(x_test),input_data[3])
+    output_data = (np.asarray(x_train), input_data[1], np.asarray(x_test), input_data[3])
 
     if feature_names is not None:
         feature_names = feature_names[list(x_train)]
@@ -102,7 +102,7 @@ def select_k_best(input_data, score_func=f_classif, k=500, feature_names=None):
 
     if score_func == f_classif:
         if feature_names is not None:
-            input_data,feature_names = remove_constant_features(input_data, feature_names=feature_names)
+            input_data, feature_names = remove_constant_features(input_data, feature_names=feature_names)
         else:
             input_data = remove_constant_features(input_data)
 

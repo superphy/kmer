@@ -120,7 +120,7 @@ class ParseMetadata(unittest.TestCase):
         shutil.rmtree(self.dir)
 
     def test_default_x_train(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file)
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file)
         correct = [str(x) for x in range(self.length) if x%2 == 0]
         val = False
         if np.array_equal(np.unique(x_train, return_counts=True), np.unique(correct, return_counts=True)):
@@ -128,7 +128,7 @@ class ParseMetadata(unittest.TestCase):
         self.assertTrue(val)
 
     def test_default_x_test(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file)
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file)
         correct = [str(x) for x in range(self.length) if x%2 == 1]
         val = False
         if np.array_equal(np.unique(x_test, return_counts=True), np.unique(correct, return_counts=True)):
@@ -136,7 +136,7 @@ class ParseMetadata(unittest.TestCase):
         self.assertTrue(val)
 
     def test_default_y_train(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file)
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file)
         correct = [self.classifications[x%self.classes] for x in range(self.length) if x%2==0]
         val = False
         if np.array_equal(np.unique(y_train, return_counts=True),np.unique(correct, return_counts=True)):
@@ -144,7 +144,7 @@ class ParseMetadata(unittest.TestCase):
         self.assertTrue(val)
 
     def test_default_y_test(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file)
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file)
         correct = [self.classifications[x%self.classes] for x in range(self.length) if x%2==1]
         val = False
         if np.array_equal(np.unique(y_test, return_counts=True),np.unique(correct, return_counts=True)):
@@ -152,7 +152,7 @@ class ParseMetadata(unittest.TestCase):
         self.assertTrue(val)
 
     def test_default_train(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file)
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file)
         count1 = 0
         count2 = 0
         correct_x = [str(x) for x in range(self.length) if x%2 == 0]
@@ -165,7 +165,7 @@ class ParseMetadata(unittest.TestCase):
         self.assertEqual(count1, count2)
 
     def test_default_test(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file)
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file)
         count1 = 0
         count2 = 0
         correct_x = [str(x) for x in range(self.length) if x%2 == 1]
@@ -180,7 +180,7 @@ class ParseMetadata(unittest.TestCase):
     def test_removed_x_train(self):
         if self.classes <= 2:
             return unittest.skip('Too few classes')
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,remove='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,remove='a')
         correct = [str(x) for x in range(self.length) if x%2 == 0]
         correct = [x for x in correct if int(x)%self.classes != 0]
         val = False
@@ -191,9 +191,10 @@ class ParseMetadata(unittest.TestCase):
     def test_removed_y_train(self):
         if self.classes <= 2:
             return unittest.skip('Too few classes')
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,remove='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,remove='a')
         correct = [self.classifications[x%self.classes] for x in range(self.length) if x%2==0]
         correct = [x for x in correct if x != 'a']
+        val = False
         if np.array_equal(np.unique(y_train, return_counts=True),np.unique(correct, return_counts=True)):
             val = True
         self.assertTrue(val)
@@ -201,7 +202,7 @@ class ParseMetadata(unittest.TestCase):
     def test_removed_x_test(self):
         if self.classes <= 2:
             return unittest.skip('Too few classes')
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,remove='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,remove='a')
         correct = [str(x) for x in range(self.length) if x%2 == 1]
         correct = [x for x in correct if int(x)%self.classes != 0]
         val = False
@@ -212,7 +213,7 @@ class ParseMetadata(unittest.TestCase):
     def test_removed_y_test(self):
         if self.classes <= 2:
             return unittest.skip('Too few classes')
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,remove='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,remove='a')
         correct = [self.classifications[x%self.classes] for x in range(self.length) if x%2==1]
         correct = [x for x in correct if x != 'a']
         val = False
@@ -223,7 +224,7 @@ class ParseMetadata(unittest.TestCase):
     def test_removed_train(self):
         if self.classes <= 2:
             return unittest.skip('Too few classes')
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,remove='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,remove='a')
         correct_x = [str(x) for x in range(self.length) if x%2 == 0]
         correct_x = [x for x in correct_x if int(x)%self.classes != 0]
         correct_y = [self.classifications[x%self.classes] for x in range(self.length) if x%2==0]
@@ -240,7 +241,7 @@ class ParseMetadata(unittest.TestCase):
     def test_removed_test(self):
         if self.classes <= 2:
             return unittest.skip('Too few classes')
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,remove='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,remove='a')
         correct_x = [str(x) for x in range(self.length) if x%2 == 1]
         correct_x = [x for x in correct_x if int(x)%self.classes != 0]
         correct_y = [self.classifications[x%self.classes] for x in range(self.length) if x%2==1]
@@ -255,7 +256,7 @@ class ParseMetadata(unittest.TestCase):
         self.assertEqual(count1, count2)
 
     def test_ova_x_train(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,one_vs_all='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,one_vs_all='a')
         correct = [str(x) for x in range(self.length) if x%2 == 0]
         val = False
         if np.array_equal(np.unique(x_train, return_counts=True), np.unique(correct, return_counts=True)):
@@ -263,22 +264,24 @@ class ParseMetadata(unittest.TestCase):
         self.assertTrue(val, msg = '\n' + str(correct) + '\n' + str(x_train))
 
     def test_ova_y_train(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,one_vs_all='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,one_vs_all='a')
         correct = [self.classifications[x%self.classes] for x in range(self.length) if x%2==0]
         correct = [x if x =='a' else 'Other' for x in correct]
+        val = False
         if np.array_equal(np.unique(y_train, return_counts=True),np.unique(correct, return_counts=True)):
             val = True
         self.assertTrue(val)
 
     def test_ova_x_test(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,one_vs_all='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,one_vs_all='a')
         correct = [str(x) for x in range(self.length) if x%2 == 1]
+        val = False
         if np.array_equal(np.unique(x_test, return_counts=True), np.unique(correct, return_counts=True)):
             val = True
         self.assertTrue(val)
 
     def test_ova_y_test(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,one_vs_all='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,one_vs_all='a')
         correct = [self.classifications[x%self.classes] for x in range(self.length) if x%2==1]
         correct = [x if x == 'a' else 'Other' for x in correct]
         val = False
@@ -287,7 +290,7 @@ class ParseMetadata(unittest.TestCase):
         self.assertTrue(val)
 
     def test_ova_train(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,one_vs_all='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,one_vs_all='a')
         correct_x = [str(x) for x in range(self.length) if x%2 == 0]
         correct_y = [self.classifications[x%self.classes] for x in range(self.length) if x%2==0]
         correct_y = [x if x =='a' else 'Other' for x in correct_y]
@@ -301,7 +304,7 @@ class ParseMetadata(unittest.TestCase):
         self.assertEqual(count1, count2)
 
     def test_ova_test(self):
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,one_vs_all='a')
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,one_vs_all='a')
         correct_x = [str(x) for x in range(self.length) if x%2 == 1]
         correct_y = [self.classifications[x%self.classes] for x in range(self.length) if x%2==1]
         correct_y = [x if x == 'a' else 'Other' for x in correct_y]
@@ -316,7 +319,7 @@ class ParseMetadata(unittest.TestCase):
 
     def test_blacklist(self):
         bl = np.unique(np.random.randint(self.length, size=(int(0.1*self.length))))
-        x_train, y_train, x_test, y_test = parse_metadata(metadata=self.file,blacklist=bl)
+        (x_train, y_train, x_test, y_test) = parse_metadata(metadata=self.file,blacklist=bl)
         count1 = 0
         count2 = 0
         for elem in bl:

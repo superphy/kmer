@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import unittest
 import shutil
-from data import get_kmer, get_genome_regions, get_omnilog_data
+from get_data import get_kmer, get_genome_regions, get_omnilog_data
 import numpy as np
 import pandas as pd
 import tempfile
@@ -25,7 +25,7 @@ class GetKmer(unittest.TestCase):
         with open(self.dir + '/B1', 'w') as f:
             f.write('>\nAACCAACC')
         kwargs = {'metadata': self.metadata, 'prefix': self.dir + '/'}
-        self.data = get_kmer(kwargs, self.db, recount=True, k=2, l=1)
+        self.data, self.features, self.files, self.le = get_kmer(kwargs, self.db, recount=True, k=2, l=1)
         self.correct_x_train = np.array([[3,1,1,3],[2,2,1,2]])
         self.correct_y_train = np.array(['A', 'B'])
         self.correct_x_test = np.array([[2,1,1,3]])
@@ -52,9 +52,9 @@ class GetKmer(unittest.TestCase):
         count2 = 0
         for elem in self.correct_y_train:
             count2 += 1
-            if elem in self.data[1]:
+            if elem in self.le.inverse_transform(self.data[1]):
                 count1 += 1
-        for elem in self.data[1]:
+        for elem in self.le.inverse_transform(self.data[1]):
             count2 += 1
             if elem in self.correct_y_train:
                 count1 += 1
@@ -68,7 +68,7 @@ class GetKmer(unittest.TestCase):
 
     def test_y_test(self):
         val = False
-        if np.array_equal(self.data[3], self.correct_y_test):
+        if np.array_equal(self.le.inverse_transform(self.data[3]), self.correct_y_test):
             val = True
         self.assertTrue(val)
 
@@ -87,7 +87,7 @@ class GetGenomeRegion(unittest.TestCase):
         with open(self.table, 'w') as f:
             f.write('%s%s' %(table_header, table_contents))
         kwargs = {'metadata': self.metadata}
-        self.data = get_genome_regions(kwargs, table=self.table, sep=None)
+        self.data, self.features, self.files, self.le = get_genome_regions(kwargs, table=self.table, sep=None)
         self.correct_x_train = np.array([[1,1,0,1,0,1],[0,1,1,1,0,1]])
         self.correct_y_train = np.array(['A', 'B'])
         self.correct_x_test = np.array([[1,0,0,1,1,0]])
@@ -114,9 +114,9 @@ class GetGenomeRegion(unittest.TestCase):
         count2 = 0
         for elem in self.correct_y_train:
             count2 += 1
-            if elem in self.data[1]:
+            if elem in self.le.inverse_transform(self.data[1]):
                 count1 += 1
-        for elem in self.data[1]:
+        for elem in self.le.inverse_transform(self.data[1]):
             count2 += 1
             if elem in self.correct_y_train:
                 count1 += 1
@@ -130,7 +130,7 @@ class GetGenomeRegion(unittest.TestCase):
 
     def test_y_test(self):
         val = False
-        if np.array_equal(self.data[3], self.correct_y_test):
+        if np.array_equal(self.le.inverse_transform(self.data[3]), self.correct_y_test):
             val = True
         self.assertTrue(val)
 
@@ -225,7 +225,7 @@ class ExtractFeaturesKmer(unittest.TestCase):
         with open(self.fasta, 'w') as f:
             f.write('>label1\nAAAA\n>label2\nCCCC\n>label3\nATAT\n>label4\nACGT')
         kwargs = {'metadata':self.metadata, 'prefix':self.dir, 'validate':False}
-        self.data = get_kmer(kwargs,self.db,recount=True,k=4,l=0,extract=True)
+        self.data = get_kmer(kwargs,self.db,recount=True,k=4,l=0,validate=False)
         self.correct_features = np.array(['AAAA', 'ACGT', 'ATAT', 'CCCC'])
 
     def tearDown(self):
@@ -248,7 +248,7 @@ class ExtractFeaturesGenomeRegions(unittest.TestCase):
         with open(self.table, 'w') as f:
             f.write(',TEMP\nA,1\nB,1\nC,0\nD,1\n')
         kwargs = {'metadata': self.metadata, 'validate':False}
-        self.data=get_genome_regions(kwargs,table=self.table,sep=None,extract=True)
+        self.data=get_genome_regions(kwargs,table=self.table,sep=None,validate=False)
         self.correct_features = np.array(['A','B','C','D'])
 
     def tearDown(self):

@@ -44,9 +44,9 @@ class CommandLineVariation1(unittest.TestCase):
                     f.write('Train\n')
                 else:
                     f.write('Test\n')
-        self.config = {'model': 'support_vector_machine_validation',
-                       'model_args': {},
-                       'data': 'get_kmer',
+        self.config = {'model': 'support_vector_machine',
+                       'model_args': {'validate': True},
+                       'data_method': 'get_kmer',
                        'data_args': {'kwargs': {'metadata': self.metadata,
                                                 'prefix': self.fasta_dir,
                                                 'suffix': '.fasta'},
@@ -103,7 +103,7 @@ class CommandLineVariation2(unittest.TestCase):
         self.metadata = self.dir + 'metadata'
         self.results_file = self.dir + 'results.txt'
         self.samples = 25
-        self.classes = 3
+        self.classes = 2
         self.add_samples = 3
         self.train_size = 20
         a = ['A','C','G','T']
@@ -126,15 +126,19 @@ class CommandLineVariation2(unittest.TestCase):
                 else:
                     f.write(',Test\n')
         self.config = {'model': 'support_vector_machine',
-                       'data': 'get_kmer',
+                       'model_args': {'validate': False},
+                       'data_method': 'get_kmer',
                        'data_args': {'kwargs': {'metadata': self.metadata,
                                                 'prefix': self.fasta_dir,
                                                 'suffix': '.fasta',
-                                                'validate': False},
+                                                'validate': False,
+                                                'train_header': 'Dataset',
+                                                'train_label': 'Train',
+                                                'test_label': 'Test'},
                                      'database': self.db,
                                      'recount': True,
                                      'k': 4,
-                                     'l': 10},
+                                     'l': 2},
                         'selection': 'select_percentile',
                         'selection_args': {'score_func': 'chi2',
                                            'percentile': 0.5},
@@ -148,7 +152,7 @@ class CommandLineVariation2(unittest.TestCase):
             args=['python',command,'-i',self.config_file,'-o',self.results_file]
             self.output = subprocess.check_output(args)
         except subprocess.CalledProcessError:
-            self.output = None
+             self.output = None
 
     def tearDown(self):
         shutil.rmtree(self.dir)
@@ -160,9 +164,10 @@ class CommandLineVariation2(unittest.TestCase):
             data = yaml.load(f)
         A = lambda x,y: [x==y, x, y]
         v = {}
-        v['predictions_length']=A(len(data['output']['predictions']),self.samples-self.train_size)
-        v['test_sizes']=A(data['output']['test_size'],(self.samples-self.train_size))
-        v['train_sizes']=A(data['output']['train_size'],(self.train_size+(self.add_samples*self.classes)))
+        v['results_length']=A(len(data['output']['results']),self.samples-self.train_size)
+        v['results_type']=A(type(data['output']['results']),dict)
+        v['test_sizes']=A(data['output']['test_sizes'],(self.samples-self.train_size))
+        v['train_sizes']=A(data['output']['train_sizes'],(self.train_size+(self.add_samples*self.classes)))
         vals = [x[0] for x in v.values()]
         val = False if False in vals else True
         self.assertTrue(val, msg={k:v[1:] for k,v in v.items() if not v[0]})

@@ -1,3 +1,8 @@
+"""
+Contains methods that perform feature scaling, every method takes as input
+x_train, y_train, x_tyest, y_test and returns the same thing with the data in
+x_train and x_test scaled according the specifications of the method
+"""
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 

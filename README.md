@@ -42,7 +42,7 @@ Example with custom parameters:
 
 ```python
 from models import neural_network as nn
-from data import get_genome_region_us_uk_mixed as data
+from get_data import get_genome_region_us_uk_mixed as data
 from feature_selction import variance_threshold as sel
 from run import run
 
@@ -53,7 +53,7 @@ It is also possible to forget about run.py and do something like this:
 
 ```python
 from models import neural_network_validation
-from data import get_genome_region_us_uk_mixed as data
+from get_data import get_genome_region_us_uk_mixed as data
 from feature_selction import variance_threshold as sel
 
 d = data()
