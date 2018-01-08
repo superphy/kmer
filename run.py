@@ -28,9 +28,10 @@ def run(model=models.support_vector_machine, model_args=None,
 
     Args:
         model (function):       The machine learning model to be used, see
-                                best_models.py.
-        model_args (dict):      The arguments to be passed to the model method.
-        data_method (function): The method used to gather the data, see data.py
+                                models.py.
+        model_args (dict):      The arguments to be passed to the model.
+        data_method (function): The method used to gather the data, see
+                                get_data.py
         data_args (dict):       The arguments to be passed to the data method
         scaler (function):      The method used to scale the data see
                                 feature_scaling.py.
@@ -43,14 +44,11 @@ def run(model=models.support_vector_machine, model_args=None,
                                 see data_augmentation.py
         augment_args (dict):    The arguments to be passed to the augment
                                 method.
-        validate (bool):        If true "data" should return x_train, y_train,
-                                x_test, and y_test and "model" should accept the
-                                output of data and return an accuracy. If false
-                                "data" should return x_train, y_train, and
-                                x_test and "model" should accept the output of
-                                "data" and return predictions for x_test.
-        reps (int):             How many times to run the model, if doing
-                                validation
+        validate (bool):        If true the model will return an accuracy. If
+                                false the model will return a dictionary of
+                                inputs and their predictions.
+        reps (int):             How many times to run the model, used only when
+                                doing validation otherwise set to 1.
 
     Returns:
         (dict):   Contains all of the arguments and results from the run.
@@ -73,7 +71,7 @@ def run(model=models.support_vector_machine, model_args=None,
     train_sizes = np.zeros(reps)
     test_sizes = np.zeros(reps)
 
-    data_args['kwargs']['validate'] = validate
+    data_args['validate'] = validate
     model_args['validate'] = validate
 
     all_features = []
@@ -212,6 +210,7 @@ def convert_yaml(input_file):
     output = convert_methods(input_dictionary)
     return output
 
+
 def create_arg_parser():
     """
     Creates a namespace object for the command line arguments of run.
@@ -240,12 +239,16 @@ def create_arg_parser():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
-    cl_args = create_arg_parser()
-    args = convert_yaml(cl_args.input)
+def main(input_yaml, output_yaml, name):
+    args = convert_yaml(input_yaml)
     run_output = run(**args)
-    document = {'name':cl_args.name, 'output':run_output}
-    with open(cl_args.output, 'a') as output_file:
+    document = {'name':name, 'output':run_output}
+    with open(output_yaml, 'a') as output_file:
         yaml.dump(document, output_file, explicit_start=True, explicit_end=True,
                   default_flow_style=False, allow_unicode=True)
         output_file.write('\n\n\n')
+
+
+if __name__ == "__main__":
+    args = create_arg_parser()
+    main(args.input, args.output, args.name)

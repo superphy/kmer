@@ -9,7 +9,7 @@ data_args:
     - ECI-2836
     fasta_header: Fasta
     label_header: Class
-    metadata: /home/rboothman/PHAC/kmer/Data/human_bovine0.csv
+    metadata: /home/rboothman/PHAC/kmer/Data/human_bovine.csv
     one_vs_all: false
     remove: false
     train_header: Dataset

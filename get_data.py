@@ -13,7 +13,8 @@ import pandas as pd
 import constants
 
 
-def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13):
+def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13,
+             validate=True):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
     utils.parse_metadata
@@ -33,6 +34,7 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13):
     """
 
     kwargs = kwargs or {}
+    kwargs['validate'] = validate
 
     (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
 
@@ -53,7 +55,8 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13):
     all_labels = np.unique(np.concatenate((y_train, y_test)))
     le.fit(all_labels)
     y_train = le.transform(y_train)
-    y_test = le.transform(y_test)
+    if validate:
+        y_test = le.transform(y_test)
 
     output_data = (x_train, y_train, x_test, y_test)
 
@@ -61,7 +64,7 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13):
 
 
 def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
-                       sep=None):
+                       sep=None, validate=True):
     """
     Gets genome region presence absence data from a binary table output by
     Panseq for the genomes specified by kwargs. Uses utils.parse_metadata
@@ -76,6 +79,7 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
                 LabelEncoder
     """
     kwargs = kwargs or {}
+    kwargs['validate'] = validate
 
     (train_label, y_train, test_label, y_test) = parse_metadata(**kwargs)
 
@@ -100,7 +104,8 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
     le = LabelEncoder()
     le.fit(np.concatenate((y_train, y_test)))
     y_train = le.transform(y_train)
-    y_test = le.transform(y_test)
+    if validate:
+        y_test = le.transform(y_test)
 
     output_data = (x_train, y_train, x_test, y_test)
 
@@ -124,7 +129,7 @@ def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, l=13):
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
               'validate': True}
-    return get_kmer(kwargs, database, recount, k, l)
+    return get_kmer(kwargs, database, recount, k, l, validate=True)
 
 
 def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13):
@@ -145,7 +150,7 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, l=13):
               'suffix': '.fasta',
               'train_header': None,
               'validate': True}
-    return get_kmer(kwargs, database, recount, k, l)
+    return get_kmer(kwargs, database, recount, k, l, validate=True)
 
 
 def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
@@ -173,7 +178,7 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
               'prefix': constants.SALMONELLA,
               'suffix': '.fna',
               'validate': True}
-    return get_kmer(kwargs, database, recount, k, l)
+    return get_kmer(kwargs, database, recount, k, l, validate=True)
 
 
 def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,
@@ -193,7 +198,7 @@ def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,
               'suffix': '.fasta',
               'train_header': None,
               'validate': True}
-    return get_genome_regions(kwargs, table, sep)
+    return get_genome_regions(kwargs, table, sep, validate=True)
 
 
 def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,
@@ -212,7 +217,7 @@ def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
               'validate': True}
-    return get_genome_regions(kwargs, table, sep)
+    return get_genome_regions(kwargs, table, sep, validate=True)
 
 
 def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,

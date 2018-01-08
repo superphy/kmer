@@ -219,13 +219,13 @@ class ExtractFeaturesKmer(unittest.TestCase):
         self.metadata = self.dir + 'TEMPmetadata'
         self.fasta = self.dir + 'TEMP'
         file_header = 'Fasta,Class,Dataset\n'
-        file_contents = 'TEMP,1,Train\n'
+        file_contents = 'TEMP,A,Train\n'
         with open(self.metadata, 'w') as f:
             f.write('%s%s' % (file_header, file_contents))
         with open(self.fasta, 'w') as f:
             f.write('>label1\nAAAA\n>label2\nCCCC\n>label3\nATAT\n>label4\nACGT')
         kwargs = {'metadata':self.metadata, 'prefix':self.dir, 'validate':False}
-        self.data = get_kmer(kwargs,self.db,recount=True,k=4,l=0)
+        self.data = get_kmer(kwargs,self.db,recount=True,k=4,l=0,validate=False)
         self.correct_features = np.array(['AAAA', 'ACGT', 'ATAT', 'CCCC'])
 
     def tearDown(self):
@@ -244,11 +244,11 @@ class ExtractFeaturesGenomeRegions(unittest.TestCase):
         self.table = self.dir + 'TEMPTable'
         self.metadata = self.dir + 'TEMPMetadata'
         with open(self.metadata, 'w') as f:
-            f.write('Fasta,Class,Dataset\nTEMP,1,Train')
+            f.write('Fasta,Class,Dataset\nTEMP,A,Train')
         with open(self.table, 'w') as f:
             f.write(',TEMP\nA,1\nB,1\nC,0\nD,1\n')
         kwargs = {'metadata': self.metadata, 'validate':False}
-        self.data=get_genome_regions(kwargs,table=self.table,sep=None)
+        self.data=get_genome_regions(kwargs,table=self.table,sep=None,validate=False)
         self.correct_features = np.array(['A','B','C','D'])
 
     def tearDown(self):

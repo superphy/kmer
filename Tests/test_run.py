@@ -164,7 +164,8 @@ class CommandLineVariation2(unittest.TestCase):
             data = yaml.load(f)
         A = lambda x,y: [x==y, x, y]
         v = {}
-        v['predictions_length']=A(len(data['output']['results']),self.samples-self.train_size)
+        v['results_length']=A(len(data['output']['results']),self.samples-self.train_size)
+        v['results_type']=A(type(data['output']['results']),dict)
         v['test_sizes']=A(data['output']['test_sizes'],(self.samples-self.train_size))
         v['train_sizes']=A(data['output']['train_sizes'],(self.train_size+(self.add_samples*self.classes)))
         vals = [x[0] for x in v.values()]

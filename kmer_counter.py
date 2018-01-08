@@ -138,7 +138,7 @@ def secondpass(filename, k, env, txn):
     with txn.cursor(db=current) as cursor:
         for key, val in cursor:
             if not txn.get(key, default=False):
-                txn.delete(key, val, db = current)
+                txn.delete(key, val, db=current)
 
 
 def print_status(counter, total):
@@ -332,8 +332,8 @@ def get_counts(files, database):
 
 def get_kmer_names(database):
     """
-    Returns (as a numpy 1D array) every key in the databse, this should be an alphabetical
-    list of all the kmers in the database.
+    Returns (as a numpy 1D array) every key in the databse, this should be an
+    alphabetical list of all the kmers in the database.
 
     Args:
         database (str): The name of the database to get the keys from.

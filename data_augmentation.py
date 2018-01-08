@@ -92,9 +92,6 @@ def augment_data_smote(input_data, desired_samples=50):
     ratio = {}
     for index, item in enumerate(classes):
         ratio[item] = counts[index]+desired_samples
-    # TODO: Remove the comment below after testing passes.
-    # for c in range(len(classes)):
-    #     ratio[classes[c]] = counts[c]+desired_samples
     smote = SMOTE(ratio=ratio)
     x_train, y_train = smote.fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
@@ -127,9 +124,6 @@ def augment_data_adasyn(input_data, desired_samples=50):
     ratio = {}
     for index, item in enumerate(classes):
         ratio[item] = counts[index]+desired_samples
-    # TODO: Remove the comment below after this passes testing.
-    # for c in range(len(classes)):
-    #     ratio[classes[c]] = counts[c]+desired_samples
     adasyn = ADASYN(ratio=ratio)
     x_train, y_train = adasyn.fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)

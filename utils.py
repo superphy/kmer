@@ -9,7 +9,7 @@ import re
 import pandas as pd
 import numpy as np
 import constants
-from sklearn.preprocessing import LabelEncoder
+from Bio import SeqIO
 
 
 def setup_files(filepath):
@@ -39,8 +39,9 @@ def check_fasta(filename):
         bool: True if file is fasta|q otherwise False.
     """
     with open(filename, 'r') as f:
-        firstline = f.readline()
-        return bool(firstline[0] == '>' or firstline[0] == '@')
+        fasta = SeqIO.parse(f, "fasta")
+        fastq = SeqIO.parse(f, "fastq")
+        return bool(any(fasta) or any(fastq))
 
 
 def valid_file(test_files, *invalid_files):
@@ -121,7 +122,8 @@ def shuffle(data, labels):
 
 def flatten(data):
     """
-    Takes a 3D numpy ndarray and makes it 2D
+    Takes a 3D numpy ndarray and makes it 2D, assumes that the array was made 3D
+    using utils.make3D
 
     Args:
         data (ndarray): Numpy array to flatten.
@@ -226,7 +228,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         blacklist (list(str)):  A list of genome names to remove.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test; x_train and x_test contain
+        tuple: (x_train, y_train, x_test, y_test); x_train and x_test contain
                filenames, not the actual data to be passed to a machine learning
                model.
     """
@@ -248,7 +250,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         data[label_header] = data[label_header].where(data[label_header] == one_vs_all, 'Other')
 
     all_labels = np.unique(data[label_header])
-    all_labels = all_labels[~pd.isnull(all_labels)]
+    all_labels = all_labels[pd.notnull(all_labels)]
 
     if train_header:
         train_data = data[data[train_header] == train_label]
@@ -317,29 +319,6 @@ def parse_json(json_files, path=constants.MORIA, suffix='.fasta',
         output.append(fasta_names)
 
     return output
-
-
-def convert_to_numerical_classes(data):
-    """
-    Uses a scikitlearn LabelEncoder to convert y_train and y_test (if it exists)
-    to numerical labels, returns data as well as the label encoder to allow the
-    labels to be converted back.
-
-    Args:
-        tuple: x_train, y_train, x_test, y_test
-
-    Returns:
-        tuple: (x_train, y_train, x_test, y_test), LabelEncoder object
-    """
-    le = LabelEncoder()
-    if len(data) > 3:
-        labels = data[1]+data[3]
-        le.fit(labels)
-        output_data = (data[0], le.transform(data[1]), data[2], le.transform(data[3]))
-    else:
-        le.fit(data[1])
-        output_data = (data[0], le.transform(data[1]), data[2])
-    return output_data, le
 
 
 def convert_well_index(well_index):

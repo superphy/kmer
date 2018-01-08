@@ -10,7 +10,7 @@ from keras.layers import Dense, Flatten
 from keras.models import Sequential
 from keras.layers.convolutional import Conv1D
 from keras.utils import to_categorical
-from utils import flatten, make3D, convert_to_numerical_classes
+from utils import flatten, make3D
 
 
 def neural_network(input_data, validate=True):
@@ -22,15 +22,11 @@ def neural_network(input_data, validate=True):
     probability of the prediction being correct.
     If args is not provided, default values will be used.
     """
-    input_data = input_data[:-1]
-    # TODO: No longer invert label encodings in convert_to_numerical_classes
-    input_data, le = convert_to_numerical_classes(input_data)
-
 
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
-    y_test = inpout_data[3]
+    y_test = input_data[3]
 
     train_classes = np.unique(np.asarray(y_train))
     num_classes = len(list(train_classes))
