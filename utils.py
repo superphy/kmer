@@ -285,7 +285,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         x_test, y_test = shuffle(all_test_data, all_labels)
     else:
         x_test = [prefix+str(x)+suffix for x in all_test_data]
-        y_test = np.array([], dtype='S32')
+        y_test = np.array([], dtype='float64')
 
     return (x_train, y_train, x_test, y_test)
 

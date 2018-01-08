@@ -103,7 +103,7 @@ class CommandLineVariation2(unittest.TestCase):
         self.metadata = self.dir + 'metadata'
         self.results_file = self.dir + 'results.txt'
         self.samples = 25
-        self.classes = 3
+        self.classes = 2
         self.add_samples = 3
         self.train_size = 20
         a = ['A','C','G','T']
@@ -137,7 +137,7 @@ class CommandLineVariation2(unittest.TestCase):
                                      'database': self.db,
                                      'recount': True,
                                      'k': 4,
-                                     'l': 10},
+                                     'l': 2},
                         'selection': 'select_percentile',
                         'selection_args': {'score_func': 'chi2',
                                            'percentile': 0.5},
@@ -154,9 +154,8 @@ class CommandLineVariation2(unittest.TestCase):
              self.output = None
 
     def tearDown(self):
-        pass
-        # shutil.rmtree(self.dir)
-        # shutil.rmtree(self.fasta_dir)
+        shutil.rmtree(self.dir)
+        shutil.rmtree(self.fasta_dir)
 
     def test_output(self):
         self.assertIsNotNone(self.output)
@@ -164,9 +163,9 @@ class CommandLineVariation2(unittest.TestCase):
             data = yaml.load(f)
         A = lambda x,y: [x==y, x, y]
         v = {}
-        v['predictions_length']=A(len(data['output']['predictions']),self.samples-self.train_size)
-        v['test_sizes']=A(data['output']['test_size'],(self.samples-self.train_size))
-        v['train_sizes']=A(data['output']['train_size'],(self.train_size+(self.add_samples*self.classes)))
+        v['predictions_length']=A(len(data['output']['results']),self.samples-self.train_size)
+        v['test_sizes']=A(data['output']['test_sizes'],(self.samples-self.train_size))
+        v['train_sizes']=A(data['output']['train_sizes'],(self.train_size+(self.add_samples*self.classes)))
         vals = [x[0] for x in v.values()]
         val = False if False in vals else True
         self.assertTrue(val, msg={k:v[1:] for k,v in v.items() if not v[0]})

@@ -55,22 +55,10 @@ def run(model=models.support_vector_machine, model_args=None,
     Returns:
         (dict):   Contains all of the arguments and results from the run.
     """
-    # Ensure that all stages of the run are all doing or not doing validation
-    data_args['kwargs']['validate'] = validate
-
-    # Ensure that non validation runs are done only once
-    if not validate:
-        reps = 1
-
-    output = {}
-    output['datetime'] = datetime.datetime.now()
-
-    # convert optional methods to do_nothing if they are given as False or None
     scaler = scaler or do_nothing
     selection = selection or do_nothing
     augment = augment or do_nothing
 
-    # convert unentered arguments to empty dictionaries
     model_args = model_args or {}
     data_args = data_args or {}
     scaler_args = scaler_args or {}
@@ -79,16 +67,19 @@ def run(model=models.support_vector_machine, model_args=None,
 
     if validate:
         results = np.zeros(reps)
+    else:
+        reps = 1
     times = np.zeros(reps)
     train_sizes = np.zeros(reps)
     test_sizes = np.zeros(reps)
-    all_features = []
 
+    data_args['kwargs']['validate'] = validate
+
+    all_features = []
     for i in range(reps):
         start = time.time()
         # Get input data
         data, features, files, le = data_method(**data_args)
-        output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
 
         # Perform feature selection on input_data
         selection_args['feature_names'] = features
@@ -117,10 +108,12 @@ def run(model=models.support_vector_machine, model_args=None,
         all_features.append(features)
 
     # Store information about the run in a dictionary
+    output = {}
     output['train_sizes'] = train_sizes.mean().tolist()
     output['test_sizes'] = test_sizes.mean().tolist()
     output['avg_run_time'] = times.mean().tolist()
     output['std_dev_run_times'] = times.std().tolist()
+    output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
 
     if validate:
         # Compute the mean and std dev of all the runs
@@ -152,6 +145,7 @@ def run(model=models.support_vector_machine, model_args=None,
     output['selection_args'] = selection_args
     output['augment'] = augment
     output['augment_args'] = augment_args
+    output['datetime'] = datetime.datetime.now()
     return output
 
 
@@ -177,8 +171,7 @@ def get_methods():
 
 def convert_methods(input_dictionary):
     """
-    Converts any method names that are values in the input dictionary to actual
-    methods.
+    Converts any method names in the input dictionary to actual methods.
 
     Args:
         input_dictionary (dict): A dictionary of kwargs for run.

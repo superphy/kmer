@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import unittest
 import shutil
-from data import get_kmer, get_genome_regions, get_omnilog_data
+from get_data import get_kmer, get_genome_regions, get_omnilog_data
 import numpy as np
 import pandas as pd
 import tempfile
@@ -219,7 +219,7 @@ class ExtractFeaturesKmer(unittest.TestCase):
         self.metadata = self.dir + 'TEMPmetadata'
         self.fasta = self.dir + 'TEMP'
         file_header = 'Fasta,Class,Dataset\n'
-        file_contents = 'TEMP,A,Train\n'
+        file_contents = 'TEMP,1,Train\n'
         with open(self.metadata, 'w') as f:
             f.write('%s%s' % (file_header, file_contents))
         with open(self.fasta, 'w') as f:
@@ -244,7 +244,7 @@ class ExtractFeaturesGenomeRegions(unittest.TestCase):
         self.table = self.dir + 'TEMPTable'
         self.metadata = self.dir + 'TEMPMetadata'
         with open(self.metadata, 'w') as f:
-            f.write('Fasta,Class,Dataset\nTEMP,A,Train')
+            f.write('Fasta,Class,Dataset\nTEMP,1,Train')
         with open(self.table, 'w') as f:
             f.write(',TEMP\nA,1\nB,1\nC,0\nD,1\n')
         kwargs = {'metadata': self.metadata, 'validate':False}
