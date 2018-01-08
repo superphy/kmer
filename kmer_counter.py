@@ -97,7 +97,7 @@ def firstpass(filename, k, limit, env, txn):
                 txn.put(key, '-1')
 
 
-def secondstart(filename, k, env, txn, data):
+def secondstart(filename, env, txn, data):
     """
     Resets the master database so that it matches the database named filename.
 
@@ -119,7 +119,7 @@ def secondstart(filename, k, env, txn, data):
             txn.put(key, val)
 
 
-def secondpass(filename, k, env, txn):
+def secondpass(filename, env, txn):
     """
     Removes every kmer from the database named filename that is not present in
     the master database.
@@ -191,12 +191,12 @@ def setup_data(files, k, limit, env, txn, data):
     print_status(counter, total)
     print "\nSecond Pass"
     counter = 0
-    secondstart(files[-1], k, env, txn, data)
+    secondstart(files[-1], env, txn, data)
     counter += 1
     i = len(files)-2
     while i >= 0:
         print_status(counter, total)
-        secondpass(files[i], k, env, txn)
+        secondpass(files[i], env, txn)
         i -= 1
         counter += 1
 
