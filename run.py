@@ -126,14 +126,14 @@ def run(model=models.support_vector_machine, model_args=None,
         output['results'] = dict(zip(files, results.tolist()))
     output['repetitions'] = reps
 
-    all_features = list(np.concatenate(all_features, axis=0))
-    feature_counts = dict()
-    for f in all_features:
-        feature_counts[str(f)] = feature_counts.get(f, 0)+1
-    feature_counts = feature_counts.items()
-    feature_counts = {utils.convert_well_index(k):v for k, v in feature_counts}
+    # all_features = list(np.concatenate(all_features, axis=0))
+    # feature_counts = dict()
+    # for f in all_features:
+    #     feature_counts[str(f)] = feature_counts.get(f, 0)+1
+    # feature_counts = feature_counts.items()
+    # feature_counts = {utils.convert_well_index(k):v for k, v in feature_counts}
 
-    output['important_features'] = feature_counts
+    output['important_features'] = utils.combine_lists(all_features)
     output['model'] = model
     output['model_args'] = model_args
     output['data'] = data_method

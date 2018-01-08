@@ -12,7 +12,7 @@ import constants
 import json
 from utils import same_shuffle, shuffle, parse_metadata, setup_files
 from utils import check_fasta, valid_file, flatten, make3D
-from utils import sensitivity_specificity, parse_json
+from utils import sensitivity_specificity, parse_json, make_unique
 
 
 class SameShuffle(unittest.TestCase):
@@ -589,6 +589,28 @@ class EmptyDictionaries(unittest.TestCase):
             if elem in self.default[3]:
                 count1+=1
         self.assertEqual(count1, count2)
+
+
+class MakeUnique(unittest.TestCase):
+    def setUp(self):
+        self.simple = [[1,2,3,4,5],[2,3,4,5,6]]
+        self.simple_answer = [[2,3,4,5],[2,3,4,5]]
+        self.complex = [[1,2,3,4,5],[5,4,3,2,1],[6,7,2,5,4],[10,11,2,7,5],[1,2,5,4,7]]
+        self.complex_answer = [[2,5],[5,2],[2,5],[2,5],[2,5]]
+
+    def test_simple(self):
+        make_unique(self.simple)
+        val = False
+        if np.array_equal(self.simple, self.simple_answer):
+            val = True
+        self.assertTrue(val)
+
+    def test_complex(self):
+        make_unique(self.complex)
+        val = False
+        if np.array_equal(self.complex, self.complex_answer):
+            val = True
+        self.assertTrue(val)
 
 if __name__=="__main__":
     loader = unittest.TestLoader()

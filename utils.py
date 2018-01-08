@@ -366,3 +366,61 @@ def do_nothing(input_data, **kwargs):
     else:
         output = input_data
     return output
+
+def make_unique(input_array):
+    """
+    Transforms input array so that each row of the array has the same elements
+    as every other row, just in different orders. Removes any element that Does
+    not appear in every row of the input array.
+
+    Args:
+        input_array list(list): The array to transform.
+
+    Returns:
+        None
+    """
+    remove_from_row = lambda x,row:row.remove(x) if x in row else None
+    remove_from_array = lambda x,arr:map(lambda y:remove_from_row(x,y), arr)
+
+    check = lambda x,row:True if x in row else False
+    check_all_rows = lambda x,arr:True if np.asarray(map(lambda y:check(x,y),arr)).all() else False
+
+    remove_element = lambda x,arr: remove_from_array(x,arr) if not check_all_rows(x,arr) else None
+
+    remove_all = lambda arr: map(lambda x: remove_element(x,arr), [elem for subarr in arr for elem in subarr])
+
+    remove_all(input_array)
+
+
+def combine_lists(input_lists):
+    """
+    Performs a rank aggregation on a set of input lists. The ranking of element x
+    is determined by the sum (1/(l*i)) for each list where l is the number of
+    lists being aggregated and i is the position of x in the current list. The
+    position of the first element in a list is considered to be 1 for the
+    purpose of this method
+
+    Args:
+        input_lists (list(list)): A list of lists to be aggregated together.
+
+    Returns:
+        list: A ranked (from best to worst) list of all unique elements in
+              input_lists.
+    """
+
+    length_of_list = len(input_lists[0])
+    num_of_lists = len(input_lists)
+    weight = 1.0/(length_of_list*num_of_lists)
+
+    all_features = [elem for ranked_list in input_lists for elem in ranked_list]
+    unique_features = np.unique(np.asarray(all_features)).tolist()
+    feature_rankings = {k:0 for k in unique_features}
+
+    for ranked_list in input_lists:
+        ranked_list = list(ranked_list)
+        for elem in ranked_list:
+            val = weight*(length_of_list - ranked_list.index(elem))
+            feature_rankings[elem] += val
+    output = sorted(feature_rankings, key=lambda k: feature_rankings[k], reverse=True)
+    output = [(x,feature_rankings[x]) for x in output]
+    return output
