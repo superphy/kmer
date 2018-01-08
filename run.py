@@ -74,6 +74,7 @@ def run(model=models.support_vector_machine, model_args=None,
     test_sizes = np.zeros(reps)
 
     data_args['kwargs']['validate'] = validate
+    model_args['validate'] = validate
 
     all_features = []
     for i in range(reps):

@@ -13,48 +13,7 @@ from keras.utils import to_categorical
 from utils import flatten, make3D, convert_to_numerical_classes
 
 
-
-def neural_network_validation(input_data):
-    """
-    Constructs, compiles, trains, and tests a neural network.
-    Returns the accuracy of the model.
-    """
-    # TODO: No longer invert label encodings in convert_to_numerical_classes
-    input_data, le = convert_to_numerical_classes(input_data)
-
-    x_train = input_data[0]
-    y_train = input_data[1]
-    x_test = input_data[2]
-    y_test = input_data[3]
-
-    train_classes = np.unique(np.asarray(y_train))
-    test_classes = np.unique(np.asarray(y_test))
-    classes = np.unique(np.hstack((train_classes, test_classes)))
-    num_classes = classes.shape[0]
-
-    y_train = to_categorical(y_train, num_classes=num_classes)
-    y_test = to_categorical(y_test, num_classes=num_classes)
-
-    if len(x_train.shape) == 2:
-        x_train = make3D(x_train)
-        x_test = make3D(x_test)
-    model = Sequential()
-    model.add(Conv1D(filters=10,
-                     kernel_size=3,
-                     activation='relu',
-                     padding='same',
-                     input_shape=(x_train.shape[1], 1)))
-    model.add(Flatten())
-    model.add(Dense(num_classes, activation='softmax'))
-    model.compile(optimizer='adam',
-                  loss='binary_crossentropy',
-                  metrics=['accuracy'])
-    model.fit(x_train, y_train, epochs=50, batch_size=10, verbose=0)
-    evaluation = model.evaluate(x_test, y_test, batch_size=1, verbose=0)
-    return evaluation[1]
-
-
-def neural_network(input_data, binarize=True):
+def neural_network(input_data, validate=True):
     """
     Constructs, compiles, trains and makes predictions with a neural network.
     Returns the predicted values for "predict". If args[0] is true the
@@ -70,7 +29,8 @@ def neural_network(input_data, binarize=True):
 
     x_train = input_data[0]
     y_train = input_data[1]
-    predict = input_data[2]
+    x_test = input_data[2]
+    y_test = inpout_data[3]
 
     train_classes = np.unique(np.asarray(y_train))
     num_classes = len(list(train_classes))
@@ -79,7 +39,7 @@ def neural_network(input_data, binarize=True):
 
     if len(x_train.shape) == 2:
         x_train = make3D(x_train)
-        predict = make3D(predict)
+        x_test = make3D(x_test)
     model = Sequential()
     model.add(Conv1D(filters=10,
                      kernel_size=3,
@@ -91,57 +51,34 @@ def neural_network(input_data, binarize=True):
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
     model.fit(x_train, y_train, epochs=50, batch_size=10, verbose=0)
-    prediction = model.predict(predict)
-    if binarize:
-        prediction = np.where(prediction > 0.5, 1, 0)
-    return prediction
-
-
-def support_vector_machine_validation(input_data, kernel='linear', C=1,
-                                      feature_names=None, num_features=10):
-    """
-    Fits, trains, and tests a support vector machine.
-    Returns the accuracy of the model.
-    """
-    x_train = input_data[0]
-    y_train = input_data[1]
-    x_test = input_data[2]
-    y_test = input_data[3]
-    if len(x_train.shape) == 3:
-        x_train = flatten(x_train)
-        x_test = flatten(x_test)
-    model = svm.SVC(kernel=kernel, C=C)
-    model.fit(x_train, y_train)
-    output_data = model.score(x_test, y_test)
-
-    if feature_names is not None:
-        coefs = np.argsort(model.coef_.ravel())
-        top_pos_features = feature_names[coefs[-num_features:]]
-        top_neg_features = feature_names[coefs[:num_features]]
-        top_features = np.hstack((top_pos_features, top_neg_features))
-        output = (output_data, top_features)
+    if validate:
+        evaluation = model.evaluate(x_test, y_test, batch_size=1, verbose=0)
+        output = evaluation[1]
     else:
-        output = output_data
-
+        output = model.predict(x_test)
     return output
 
 
 def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
-                           num_features=10):
+                           num_features=10, validate=True):
     """
     Fits, trains, and makes predictions with a support vector machine.
     Returns the predicted values for "predict"
     """
     x_train = input_data[0]
     y_train = input_data[1]
-    predict = input_data[2]
+    x_test = input_data[2]
+    y_test = input_data[3]
 
     if len(x_train.shape) == 3:
         x_train = flatten(x_train)
-        predict = flatten(predict)
+        x_test = flatten(x_test)
     model = svm.SVC(kernel=kernel, C=C)
     model.fit(x_train, y_train)
-    output_data = model.predict(predict)
+    if validate:
+        output_data = model.score(x_test, y_test)
+    else:
+        output_data = model.predict(x_test)
 
     if feature_names is not None:
         coefs = np.argsort(model.coef_.ravel())
@@ -153,6 +90,7 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
         output = output_data
 
     return output
+
 
 #First Optimization
 # def random_forest_validation(input_data,n_estimators=5,criterion='gini',
