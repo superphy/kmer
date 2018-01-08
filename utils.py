@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import constants
 from Bio import SeqIO
+from sklearn.preprocessing import LabelEncoder
 
 
 def setup_files(filepath):
@@ -400,3 +401,24 @@ def combine_lists(input_lists):
     output = sorted(feature_rankings, key=lambda k: feature_rankings[k], reverse=True)
     output = [(x, feature_rankings[x]) for x in output]
     return output
+
+
+def encode_labels(y_train, y_test):
+    """
+    Converts non-numerical class labels to numerical class labels from 0 to n-1
+    where n is the number of classes. Uses Scikit learn's LabelEncoder
+
+    Args:
+        y_train (list):     Target labels for the training data.
+        y_test (list):      Target labels for the test data, can be None/empty.
+
+    Returns:
+        tuple: y_train, y_test, LabelEncoderObject
+    """
+    le = LabelEncoder()
+    le.fit(np.concatenate((y_train, y_test)))
+    y_train = le.transform(y_train)
+    if y_test is not None and len(list(y_test)) > 0:
+        y_test = le.transform(y_test)
+
+    return y_train, y_test, le

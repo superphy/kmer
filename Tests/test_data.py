@@ -149,7 +149,7 @@ class GetOmnilog(unittest.TestCase):
             f.write('A1,A,Train\nA2,A,Train\nA3,A,Train\nA4,A,Train\nA5,A,Test\n')
             f.write('B1,B,Train\nB2,B,Train\nB3,B,Train\nB4,B,Test\nB5,B,Test\n')
         kwargs = {'metadata':self.metadata}
-        self.data = get_omnilog_data(kwargs, omnilog_sheet=self.omnilog)
+        self.data, self.feature_names, self.test_files, self.le = get_omnilog_data(kwargs, omnilog_sheet=self.omnilog)
         self.correct_x_train = np.array([[3.1,1,0.01],[3.4,1,0.3],[2.43,1,0.1],
                                          [4.2,0,0.56],[3.3,0,0.2],[3.53,1,0.34],
                                          [2.7,1,0.50]])
@@ -178,9 +178,9 @@ class GetOmnilog(unittest.TestCase):
         count2 = 0
         for elem in self.correct_y_train:
             count2 += 1
-            if elem in self.data[1]:
+            if elem in self.le.inverse_transform(self.data[1]):
                 count1 += 1
-        for elem in self.data[1]:
+        for elem in self.le.inverse_transform(self.data[1]):
             count2 += 1
             if elem in self.correct_y_train:
                 count1 += 1
@@ -204,9 +204,9 @@ class GetOmnilog(unittest.TestCase):
         count2 = 0
         for elem in self.correct_y_test:
             count2 += 1
-            if elem in self.data[3]:
+            if elem in self.le.inverse_transform(self.data[3]):
                 count1 += 1
-        for elem in self.data[3]:
+        for elem in self.le.inverse_transform(self.data[3]):
             count2 += 1
             if elem in self.correct_y_test:
                 count1 += 1
@@ -271,7 +271,7 @@ class ExtractFeaturesOmnilog(unittest.TestCase):
         with open(self.metadata, 'w') as f:
             f.write('Fasta,Class,Dataset\nA1,A,Train\nA2,A,Test')
         kwargs = {'metadata': self.metadata, 'validate':True}
-        self.data = get_omnilog_data(kwargs,omnilog_sheet=self.omnilog,extract=True)
+        self.data = get_omnilog_data(kwargs,omnilog_sheet=self.omnilog)
         self.correct_features = np.array(['a','b','c'])
 
     def tearDown(self):

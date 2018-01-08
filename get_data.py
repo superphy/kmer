@@ -8,6 +8,7 @@ the labels for the testing data.
 from sklearn.preprocessing import MinMaxScaler, Imputer, LabelEncoder
 from kmer_counter import count_kmers, get_counts, get_kmer_names
 from utils import shuffle, setup_files, parse_metadata, parse_json
+from utils import encode_labels
 import numpy as np
 import pandas as pd
 import constants
@@ -51,12 +52,7 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, l=13,
 
     feature_names = get_kmer_names(database)
 
-    le = LabelEncoder()
-    all_labels = np.unique(np.concatenate((y_train, y_test)))
-    le.fit(all_labels)
-    y_train = le.transform(y_train)
-    if validate:
-        y_test = le.transform(y_test)
+    y_train, y_test, le = encode_labels(y_train, y_test)
 
     output_data = (x_train, y_train, x_test, y_test)
 
@@ -101,11 +97,7 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
 
     feature_names = np.asarray(data.index)
 
-    le = LabelEncoder()
-    le.fit(np.concatenate((y_train, y_test)))
-    y_train = le.transform(y_train)
-    if validate:
-        y_test = le.transform(y_test)
+    y_train, y_test, le = encode_labels(y_train, y_test)
 
     output_data = (x_train, y_train, x_test, y_test)
 
@@ -393,7 +385,8 @@ def get_kmer_from_json(database=constants.DB, recount=False, k=7, l=13,
 
     return (x_train, y_train, x_test, y_test)
 
-# TODO: Convert this to work with run i.e. needs to return x_train, y_train, x_test, y_test
+# TODO: Convert this to work with run
+# TODO: i.e. needs to return output_data, feature_names, test_files, labelencoder
 def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
                             *directories):
     """
@@ -428,17 +421,18 @@ def get_kmer_from_directory(database=constants.DB, recount=False, k=7, l=13,
 
     return output
 
-
+# TODO: Update docstring
 def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
-                     extract=False):
+                     validate=True):
     """
     Gets the omnilog data contained in omnilog_sheet for the genomes specified
     by kwargs. Uses utils.parse_metadata
 
     Args:
-        kwargs (dict): The arguments to pass to parse_metadata.
+        kwargs (dict):       The arguments to pass to parse_metadata.
         omnilog_sheet (str): File containing omnilog data.
-        extract (bool): If True a list of features is also returned.
+        validate (bool):     If True a list of the file names being predicted on
+                             is returned
 
     Returns:
         list: x_train, y_train, x_test, y_test
@@ -447,33 +441,42 @@ def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
 
     """
     kwargs = kwargs or {}
-    data = parse_metadata(**kwargs)
-    data = list(data)
+    kwargs['validate'] = validate
+
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
+
     omnilog_data = pd.read_csv(omnilog_sheet, index_col=0)
-    valid_cols = [data[0].index(x) for x in data[0] if x in list(omnilog_data)]
-    data[0] = [data[0][x] for x in valid_cols]
-    data[1] = [data[1][x] for x in valid_cols]
-    valid_cols = [data[2].index(x) for x in data[2] if x in list(omnilog_data)]
-    data[2] = [data[2][x] for x in valid_cols]
-    data[3] = [data[3][x] for x in valid_cols]
+    valid_cols = [x_train.index(x) for x in x_train if x in list(omnilog_data)]
+    x_train = [x_train[x] for x in valid_cols]
+    y_train = [y_train[x] for x in valid_cols]
+    print y_train
+
+    valid_cols = [x_test.index(x) for x in x_test if x in list(omnilog_data)]
+    x_test = [x_test[x] for x in valid_cols]
+    if validate:
+        y_test = [y_test[x] for x in valid_cols]
+
+    feature_names = omnilog_data.index
 
     output_data = []
-    output_data.append(omnilog_data[data[0]].T.values)
-    output_data.append(data[1])
-    output_data.append(omnilog_data[data[2]].T.values)
-    output_data.append(data[3])
+    x_train = omnilog_data[x_train].T.values
+    x_test = omnilog_data[x_test].T.values
 
     imputer = Imputer()
-    output_data[0] = imputer.fit_transform(output_data[0])
-    output_data[2] = imputer.transform(output_data[2])
-    if extract:
-        output = (output_data, np.asarray(omnilog_data.index))
-    else:
-        output = output_data
-    return output
+    x_train = imputer.fit_transform(x_train)
+    x_test = imputer.transform(x_test)
 
+    y_train, y_test, le = encode_labels(y_train, y_test)
+    print y_train
 
-def get_roary_data(kwargs=None, roary_sheet=constants.ROARY):
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return output_data, feature_names, test_files, le
+
+# TODO: Update docstring
+def get_roary_data(kwargs=None, roary_sheet=constants.ROARY, validate=True):
     """
     Get the Roary data from roary_sheet for the genomes specified by kwargs,
     uses utils.parse_metadata.
@@ -486,28 +489,36 @@ def get_roary_data(kwargs=None, roary_sheet=constants.ROARY):
         list: x_train, y_train, x_test, y_test
     """
     kwargs = kwargs or {}
+    kwargs['validate'] = validate
 
-    data = list(parse_metadata(**kwargs))
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
+
     roary_data = pd.read_csv(roary_sheet, index_col=0)
 
-    valid_cols = [data[0].index(x) for x in data[0] if x in list(roary_data)]
-    data[0] = [data[0][x] for x in valid_cols]
-    data[1] = [data[1][x] for x in valid_cols]
+    feature_names = roary_data.index
 
-    valid_cols = [data[2].index(x) for x in data[2] if x in list(roary_data)]
-    data[2] = [data[2][x] for x in valid_cols]
-    data[3] = [data[3][x] for x in valid_cols]
+    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
+    x_train = [x_train[x] for x in valid_cols]
+    y_train = [y_train[x] for x in valid_cols]
 
-    output_data = []
-    output_data.append(roary_data[data[0]].T.values)
-    output_data.append(data[1])
-    output_data.append(roary_data[data[2]].T.values)
-    output_data.append(data[3])
+    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
+    x_test = [x_test[x] for x in valid_cols]
+    y_test = [y_test[x] for x in valid_cols]
 
-    return output_data
+    x_train = roary_data[x_train].T.values
+    x_test = roary_data[x_test].T.values
 
+    y_train, y_test, le = encode_labels(y_train, y_test)
 
-def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10):
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_files, le)
+
+# TODO: Update docstring
+def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10,
+                            validate=True):
     """
     Gets the Roary data from roary_sheet for the genomes specified by kwargs,
     uses utils.parse_metadata. Does initial feature selection by removing
@@ -523,15 +534,18 @@ def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10):
         list: x_train, y_train, x_test, y_test
     """
     kwargs = kwargs or {}
+    kwargs['validate'] = validate
 
-    data = list(parse_metadata(**kwargs))
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
 
     roary_data = pd.read_csv(roary_sheet, index_col=0)
 
-    class_labels = np.unique(data[1])
+    class_labels = np.unique(y_train)
     classes = []
     for c in class_labels:
-        class_members = [x for x in data[0] if data[1][data[0].index(x)] == c]
+        class_members = [x for x in x_train if y_train[x_train.index(x)] == c]
         print roary_data[class_members].mean(axis=1)*100
         exit()
         classes.append(roary_data[class_members].mean(axis=1)*100)
@@ -545,23 +559,27 @@ def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10):
     invalid = list(avg_diff[avg_diff['Diff'] < limit].index)
     roary_data = roary_data.drop(invalid)
 
-    valid_cols = [data[0].index(x) for x in data[0] if x in list(roary_data)]
-    data[0] = [data[0][x] for x in valid_cols]
-    data[1] = [data[1][x] for x in valid_cols]
+    feature_names = roary_data.index
 
-    valid_cols = [data[2].index(x) for x in data[2] if x in list(roary_data)]
-    data[2] = [data[2][x] for x in valid_cols]
-    data[3] = [data[3][x] for x in valid_cols]
+    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
+    x_train = [x_train[x] for x in valid_cols]
+    y_train = [y_train[x] for x in valid_cols]
 
-    output_data = []
-    output_data.append(roary_data[data[0]].T.values)
-    output_data.append(data[1])
-    output_data.append(roary_data[data[2]].T.values)
-    output_data.append(data[3])
+    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
+    x_test = [x_test[x] for x in valid_cols]
+    if validate:
+        y_test = [y_test[x] for x in valid_cols]
 
-    return output_data
+    x_train = roary_data[x_train].T.values
+    x_test = roary_data[x_test].T.values
 
+    y_train, y_test, le = encode_labels(y_train, y_test)
 
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_files, le)
+
+# TODO: Update docstring
 def get_roary_from_list(kwargs=None, roary_sheet=constants.ROARY,
                         gene_header='Gene', valid_header='Valid',
                         valid_features_table=constants.ROARY_VALID):
@@ -585,25 +603,29 @@ def get_roary_from_list(kwargs=None, roary_sheet=constants.ROARY,
     """
     kwargs = kwargs or {}
 
-    data = list(parse_metadata(**kwargs))
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
 
     roary_data = pd.read_csv(roary_sheet)
     valid_features = pd.read_csv(valid_features_table)
     features = list(valid_features[valid_header])
     roary_data = roary_data[roary_data[gene_header].isin(features)]
 
-    valid_cols = [data[0].index(x) for x in data[0] if x in list(roary_data)]
-    data[0] = [data[0][x] for x in valid_cols]
-    data[1] = [data[1][x] for x in valid_cols]
+    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
+    x_train = [x_train[x] for x in valid_cols]
+    y_train = [y_train[x] for x in valid_cols]
 
-    valid_cols = [data[2].index(x) for x in data[2] if x in list(roary_data)]
-    data[2] = [data[2][x] for x in valid_cols]
-    data[3] = [data[3][x] for x in valid_cols]
+    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
+    x_test = [x_test[x] for x in valid_cols]
+    if validate:
+        y_test = [y_test[x] for x in valid_cols]
 
-    output_data = []
-    output_data.append(roary_data[data[0]].T.values)
-    output_data.append(data[1])
-    output_data.append(roary_data[data[2]].T.values)
-    output_data.append(data[3])
+    x_train = roary_data[x_train].T.values
+    x_test = roary_data[x_test].T.values
 
-    return output_data
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, features, test_files, le)
