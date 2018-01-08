@@ -124,15 +124,8 @@ def run(model=models.support_vector_machine, model_args=None,
         # Convert classes back to their original values
         results = le.inverse_transform(results)
         output['results'] = dict(zip(files, results.tolist()))
+
     output['repetitions'] = reps
-
-    # all_features = list(np.concatenate(all_features, axis=0))
-    # feature_counts = dict()
-    # for f in all_features:
-    #     feature_counts[str(f)] = feature_counts.get(f, 0)+1
-    # feature_counts = feature_counts.items()
-    # feature_counts = {utils.convert_well_index(k):v for k, v in feature_counts}
-
     output['important_features'] = utils.combine_lists(all_features)
     output['model'] = model
     output['model_args'] = model_args
@@ -240,6 +233,19 @@ def create_arg_parser():
 
 
 def main(input_yaml, output_yaml, name):
+    """
+    Reads config from a yaml file, performs the run, and saves the results and
+    configuration in another yaml file.
+
+    Args:
+        input_yaml (str):   Filepath to a yaml file containing the run config.
+        output_yaml (str):  Filepath to a yaml file where the results will be
+                            stored.
+        name (str):         What the yaml document will be named in output_yaml.
+
+    Returns:
+        None
+    """
     args = convert_yaml(input_yaml)
     run_output = run(**args)
     document = {'name':name, 'output':run_output}
@@ -250,5 +256,5 @@ def main(input_yaml, output_yaml, name):
 
 
 if __name__ == "__main__":
-    args = create_arg_parser()
-    main(args.input, args.output, args.name)
+    cl_args = create_arg_parser()
+    main(cl_args.input, cl_args.output, cl_args.name)
