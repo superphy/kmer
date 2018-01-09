@@ -94,7 +94,6 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
     if feature_names is not None:
         coefs = np.absolute(np.argsort(model.coef_.ravel()))
         top_features = feature_names[coefs[-num_features:]]
-        # top_features = [convert_well_index(x) for x in top_features[::-1]]
         output = (output_data, top_features)
     else:
         output = output_data
@@ -111,13 +110,12 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
 #                              bootstrap=True, n_jobs=-1):
 
 #Second Optimization
-def random_forest_validation(input_data, n_estimators=50, criterion='entropy',
-                             max_features='log2', max_depth=100,
-                             min_samples_split=2, min_samples_leaf=1,
-                             min_weight_fraction_leaf=0.01,
-                             max_leaf_nodes=25, min_impurity_decrease=0.001,
-                             bootstrap=False, n_jobs=-1, feature_names=None,
-                             num_features=10):
+def random_forest(input_data, n_estimators=50, criterion='entropy',
+                  max_features='log2', max_depth=100, min_samples_split=2,
+                  min_samples_leaf=1, min_weight_fraction_leaf=0.01,
+                  max_leaf_nodes=25, min_impurity_decrease=0.001, n_jobs=-1,
+                  bootstrap=False, feature_names=None, num_features=10,
+                  validate=True):
     """
     Fits, trains, and evaluates a random forest learning, returns an accuracy.
     """
@@ -125,9 +123,11 @@ def random_forest_validation(input_data, n_estimators=50, criterion='entropy',
     y_train = input_data[1]
     x_test = input_data[2]
     y_test = input_data[3]
+
     if len(x_train.shape) == 3:
         x_train = flatten(x_train)
         x_test = flatten(x_test)
+
     kwargs = {'n_estimators': n_estimators, 'criterion': criterion,
               'max_features': max_features, 'max_depth': max_depth,
               'min_samples_split': min_samples_split,
@@ -136,14 +136,17 @@ def random_forest_validation(input_data, n_estimators=50, criterion='entropy',
               'max_leaf_nodes':max_leaf_nodes,
               'min_impurity_decrease': min_impurity_decrease,
               'bootstrap': bootstrap, 'n_jobs': n_jobs}
+
     model = RandomForestClassifier(**kwargs)
     model.fit(x_train, y_train)
-    output_data = model.score(x_test, y_test)
+    if validate:
+        output_data = model.score(x_test, y_test)
+    else:
+        output_data = model.predict(x_test)
 
     if feature_names is not None:
         importances = np.argsort(model.feature_importances_.ravel())
         top_features = feature_names[importances[-num_features:]]
-        top_features = [convert_well_index(x) for x in top_features[::-1]]
         output = (output_data, top_features)
     else:
         output = output_data
