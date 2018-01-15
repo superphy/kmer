@@ -341,7 +341,8 @@ def convert_well_index(well_index):
     if first_result and second_result:
         df_index = first_result.group(0) + '-' + second_result.group(0)
         output = well_descriptions.loc[well_descriptions['Key'] == df_index]
-        output = output.Key.item() + output.Value.item()
+        output = output.Value.item().replace('(', '').replace(')', '')
+        type(output)
     else:
         output = well_index
     return output

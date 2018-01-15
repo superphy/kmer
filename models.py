@@ -10,7 +10,7 @@ from keras.layers import Dense, Flatten
 from keras.models import Sequential
 from keras.layers.convolutional import Conv1D
 from keras.utils import to_categorical
-from utils import flatten, make3D
+from utils import flatten, make3D, convert_well_index
 
 
 def neural_network(input_data, validate=True):
@@ -55,7 +55,7 @@ def neural_network(input_data, validate=True):
 
 
 def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
-                           num_features=10, validate=True):
+                           num_features=50, validate=True):
     """
     Fits, trains, and makes predictions with a support vector machine. Returns
     the predicted values.
@@ -92,9 +92,12 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
         output_data = model.predict(x_test)
 
     if feature_names is not None:
-        coefs = np.absolute(np.argsort(model.coef_.ravel()))
-        top_features = feature_names[coefs[-num_features:]]
-        output = (output_data, top_features)
+        coefs = model.coef_.ravel()
+        absolute_coefs = np.absolute(coefs)
+        absolute_coefs = [float(x) for x in absolute_coefs]
+        feature_names = [convert_well_index(x) for x in feature_names]
+        features_coefs = dict(zip(feature_names, absolute_coefs))
+        output = (output_data, features_coefs)
     else:
         output = output_data
 
@@ -114,7 +117,7 @@ def random_forest(input_data, n_estimators=50, criterion='entropy',
                   max_features='log2', max_depth=100, min_samples_split=2,
                   min_samples_leaf=1, min_weight_fraction_leaf=0.01,
                   max_leaf_nodes=25, min_impurity_decrease=0.001, n_jobs=-1,
-                  bootstrap=False, feature_names=None, num_features=10,
+                  bootstrap=False, feature_names=None, num_features=50,
                   validate=True):
     """
     Fits, trains, and evaluates a random forest learning, returns an accuracy.
@@ -145,9 +148,11 @@ def random_forest(input_data, n_estimators=50, criterion='entropy',
         output_data = model.predict(x_test)
 
     if feature_names is not None:
-        importances = np.argsort(model.feature_importances_.ravel())
-        top_features = feature_names[importances[-num_features:]]
-        output = (output_data, top_features)
+        importances = model.feature_importances_.ravel()
+        importances = [float(x) for x in importances]
+        feature_names = [convert_well_index(x) for x in feature_names]
+        features_importances = dict(zip(feature_names, importances))
+        output = (output_data, features_importances)
     else:
         output = output_data
     return output

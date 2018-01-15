@@ -451,7 +451,6 @@ def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
     valid_cols = [x_train.index(x) for x in x_train if x in list(omnilog_data)]
     x_train = [x_train[x] for x in valid_cols]
     y_train = [y_train[x] for x in valid_cols]
-    print y_train
 
     valid_cols = [x_test.index(x) for x in x_test if x in list(omnilog_data)]
     x_test = [x_test[x] for x in valid_cols]
@@ -469,7 +468,6 @@ def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
     x_test = imputer.transform(x_test)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
-    print y_train
 
     output_data = (x_train, y_train, x_test, y_test)
 
