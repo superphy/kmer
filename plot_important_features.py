@@ -171,7 +171,6 @@ if __name__ == "__main__":
     cl_args = parser.parse_args()
     otype = cl_args.otype
     rankaggr = cl_args.rankaggr
-    print otype, rankaggr
     if not otype and not rankaggr:
         multivote()
         singlevote()
