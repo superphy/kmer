@@ -3,7 +3,7 @@ import yaml
 import matplotlib.pyplot as plt
 import sys
 
-def plot(data1, data2, label1, label2, title, max_x):
+def plot(data1, data2, label1, label2, title, max_x, label3, label4):
     for key in data1.keys() + data2.keys():
         if key not in data1:
             data1[key] = 0
@@ -19,12 +19,8 @@ def plot(data1, data2, label1, label2, title, max_x):
 
     labels = [unicode(x, 'utf-8') for x in labels]
 
-    if len(labels) < 40:
-        height = 15
-        fig_width = 25
-    else:
-        height = 20
-        fig_width = 30
+    height = 15
+    fig_width = 35
 
     total_bars = len(labels)
     spacing = np.linspace(0,height,total_bars+1.0)[1:]
@@ -33,6 +29,7 @@ def plot(data1, data2, label1, label2, title, max_x):
     data2_y = [x-(width/2) for x in spacing]
 
     plt.figure(figsize=(fig_width,height))
+    plt.subplot(121)
     plt.title(title, fontsize=24)
     plt.barh(data1_y, data1_vals, width, zorder=3, label=label1)
     for i, v in enumerate(data1_vals):
@@ -54,11 +51,22 @@ def plot(data1, data2, label1, label2, title, max_x):
     plt.xticks(np.arange(0,max_x,max_x/20), fontsize=12)
     plt.xlabel('Score', fontsize=18)
     plt.ylabel('Features', fontsize=18)
-    plt.grid(zorder=2, axis='x')
+    plt.grid(zorder=2)
     plt.legend(fontsize=18)
     plt.ylim((0,max(spacing)+(3*width)))
     plt.xlim((0,max_x))
     plt.tight_layout()
+    plt.subplot(122)
+    for i in range(len(labels)):
+        if i > 0:
+            label3 = ''
+            label4 = ''
+        plt.plot(np.random.randn(25), np.zeros(25)+spacing[i], 'o', color='blue', label=label3, zorder=3)
+        plt.plot(np.random.randn(25), np.zeros(25)+spacing[i], 'o', color='red', label=label4, zorder=3)
+    plt.legend(fontsize=18)
+    plt.yticks(spacing, [])
+    plt.grid(zorder=2, axis='y')
+    plt.ylim((0, max(spacing)+(3*width)))
     plt.show()
 
 def plot_data(yaml_file, cutoff=15, max_x=100, subtitle='', o_type=None):
@@ -82,7 +90,7 @@ def plot_data(yaml_file, cutoff=15, max_x=100, subtitle='', o_type=None):
             title = 'Important Features for Predicting %s O-Type' % o_type
         else:
             title = 'Important Features for Predicting %s O-Type\nRank Aggregation Done by %s' % (o_type, subtitle)
-        plot(svm_data, rf_data, 'SVM', 'Random Forest', title, max_x)
+        plot(svm_data, rf_data, 'SVM', 'Random Forest', title, max_x, o_type, 'Non-%s'%o_type)
     else:
         for key, value in data.items():
             if 'random_forest' in key:
@@ -103,22 +111,22 @@ def plot_data(yaml_file, cutoff=15, max_x=100, subtitle='', o_type=None):
                 title = 'Important Features for Predicting %s O-Type' % o_type
             else:
                 title = 'Important Features for Predicting %s O-Type\nRank Aggregation Done by %s' % (o_type, subtitle)
-            plot(svm_data, rf_data, 'SVM', 'Random Forest', title, max_x)
+            plot(svm_data, rf_data, 'SVM', 'Random Forest', title, max_x, o_type, 'Non-%s'%o_type)
 
 def multivote(o_type=None):
-    plot_data('aggr_data/10_votes.yaml', cutoff=15, max_x=1.05, subtitle='Summing the Number of Times a Feature was Selected as Being in the Top 10 Most Important Features', o_type=o_type)
+    plot_data('aggr_data/10_votes.yaml', cutoff=15, max_x=1.05, subtitle='10 Equal Votes per Run', o_type=o_type)
 
 def singlevote(o_type=None):
-    plot_data('aggr_data/single_vote.yaml', cutoff=15, max_x=1.05, subtitle='Summing the Number of Times a Feature was Selected as Being the Most Important Feature', o_type=o_type)
+    plot_data('aggr_data/single_vote.yaml', cutoff=15, max_x=1.05, subtitle='Single Vote per Run', o_type=o_type)
 
 def lineardecay(o_type=None):
-    plot_data('aggr_data/linear_decay.yaml', cutoff=15, max_x=1.05, subtitle='Applying Linear Decay to Each Ranking and Then Summing Values', o_type=o_type)
+    plot_data('aggr_data/linear_decay.yaml', cutoff=15, max_x=1.05, subtitle='Applying Linear Decay to Each Ranking', o_type=o_type)
 
 def exponentialdecay(o_type=None):
-    plot_data('aggr_data/exponential_decay.yaml', cutoff=15, max_x=1.05, subtitle='Applying Exponential Decay to Each Ranking and Then Summing Values', o_type=o_type)
+    plot_data('aggr_data/exponential_decay.yaml', cutoff=15, max_x=1.05, subtitle='Applying Exponential Decay to Each Ranking', o_type=o_type)
 
 def logarithmicdecay(o_type=None):
-    plot_data('aggr_data/log2_decay.yaml', cutoff=15, max_x=1.05, subtitle='Applying Logarithmic Decay to Each Ranking and Then Summing Values', o_type=o_type)
+    plot_data('aggr_data/log2_decay.yaml', cutoff=15, max_x=1.05, subtitle='Applying Logarithmic Decay to Each Ranking', o_type=o_type)
 
 def modelresults(o_type=None):
     plot_data('aggr_data/model_values.yaml', cutoff=15, max_x=75, subtitle='Summing Importance Values From Models', o_type=o_type)
