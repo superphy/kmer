@@ -348,6 +348,28 @@ def convert_well_index(well_index):
     return output
 
 
+def convert_feature_name(feature_name):
+    """
+    Converts the feature name to the onmilog well coordiantes. Converts the
+    output of convert_well_index back to it's input, sort of this doesn't gather
+    the middle portion i.e returns the tuple ('PM1', 'A01') rather than the
+    string 'PM1{description="Carbon utilization assays"}A01'
+
+    Args:
+        Feature_name (str): The name of the omnilog feature.
+
+    Returns:
+        tuple(str, str): plate number, well index
+    """
+    feature_name = feature_name.encode('utf-8')
+    df = pd.read_csv(constants.OMNILOG_WELLS)
+    index = '(' + feature_name + ')'
+    coordinates = df.loc[df['Value']==index, 'Key'].iloc[0]
+    coordinates = coordinates.split('-')
+    return (coordinates[0], coordinates[1])
+
+
+
 def do_nothing(input_data, **kwargs):
     """
     A method that does nothing. Takes an input and returns it, also returns
