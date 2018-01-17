@@ -1,8 +1,32 @@
-## run.py
+# Installation
 
-Wrapper to gather data, preprocess the data, perform feature selection, build the model, train the model, and test/use the model.
+1. Clone repository
+1. Install dependecies": run `conda create --name <env> --file conda-specs.txt`
+1. Start conda environment: run `source activate <env>`
+1. [Install jellyfish](https://github.com/gmarcais/Jellyfish "Jellyfish GitHub") __*You do not need to install the python binding for jellyfish, just the command line tool*__
+1. Verify that everything is working: run `nose2 -B` this will run all of the tests, they should all pass.
 
-### Command Line Usage
+#### Some Common Errors:
+
+* File/filepath does not exist
+  * Update the filepaths in constants.py to point to the correct locations on your machine
+* Import error stating that python can't find the module lmdb
+  * run `pip install lmdb` with the conda environment activated.
+* Error like:
+    ```
+    File "/home/user/miniconda3/envs/kmer/lib/python2.7/site-packages/hyperopt/pyll/base.py", line 715, in toposort
+       assert order[-1] == expr
+    TypeError: 'generator' object has no attribute '__getitem__'
+    ```
+  * Downgrade networkx from version 2.0 to version 1.1.
+
+
+# run.py
+This is essentially the main method.
+
+Provides a wrapper to gather data, preprocess the data, perform feature selection, build the model, train the model, and test/use the model. Chains together methods from get_data.py, feature_selection.py, feature_scaling, data_augmentation.py, and models.py.
+
+#### To Use From the Command Line:
 
 ```
 python run.py -i [config file] -o [output file] -n [name of run to use in outputfile]
@@ -21,103 +45,111 @@ optional arguments:
                         If not provided Data/run_results.yml is used.
   -n NAME, --name NAME  What the yaml document will be named in the output
                         file. If not provided the current Datetime is used. If
-                        using spaces, surround with quotes.
+                        using spaces surround with quotes.
 ```
 
 
 The input file should be a yaml file specifying all of the arguments to use during the run. An example can be found in Data/config.yaml
 
-The output file will also be a yaml file containing the complete results from the run as well as all the parameters used in the run.
+Running the script multiple times with the same output file will not overwrite the previous results. Each time a run is performed a new yaml document is created and appended to the bottom of the output file. Each yaml document will be a dictionary with two keys 'name' and 'output' where 'name' contains either the datatime of the run or the name provided by the user and 'output' contains a dictionary that holds the results from the run and all of the parameters specified in the input file.
 
-### To use in another script
+#### To Use in Another Script:
 
-To run with the default parameters:
+```python
+from run import main
+main('config_file.yml', 'output_file.yml', 'name of run')
+```
+
+Or to get a results dictionary with the default parameters:
 
 ```python
 from run import run
 output = run()
 ```
 
-Example with custom parameters:
+Or to get a results dictionary with custom parameters:
 
 ```python
 from models import neural_network as nn
-from get_data import get_genome_region_us_uk_mixed as data
-from feature_selction import variance_threshold as sel
+from get_data import get_genome_region_us_uk_split as data
+from feature_selection import variance_threshold as sel
 from run import run
 
-output = run(model=nn, data=data, selction=sel, scaler=None, reps=1, validate=True)
+output = run(model=nn, data_method=data, selection=sel,
+             selection_args={'threshold': 0.01}, scaler=None, reps=1,
+             validate=True)
 ```
 
-It is also possible to forget about run.py and do something like this:
+It is also possible to skip run.py altogether and do something like:
 
 ```python
-from models import neural_network_validation
+from models import neural_network
 from get_data import get_genome_region_us_uk_mixed as data
-from feature_selction import variance_threshold as sel
+from feature_selection import variance_threshold as sel
 
 d = data()
-d = sel(*d)
-score = neural_network_validation(*d)
+d = sel(d[0], threshold=0.01)
+score = neural_network(d)
 ```
 
-The above is necessary if you want to change the order in which things occurr, for instance performing data augmentation before performing feature scaling.
+*The above is necessary if you want to change the order in which things occur, for instance performing data augmentation before performing feature scaling.*
 
 
-## data.py
+## get_data.py
 
-A collection of methods that prepare data to be input into machine learning models. Most return x_train, y_train, x_test, and y_test. Where x_train is the training data, y_train is the corresponding labels, x_test is the testing data, and y_test is the corresponding labels.
+A collection of methods that gather and prepare data to be input into a machine learning model.
 
-To recreate the results of the the Lupolova et. al paper (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5056084/) with kmer counts as inputs use the method: get_kmer_us_uk_split. To recreate the results of the paper using genome region presence absence data use the method get_genome_region_us_uk_split.
+Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files, LabelEncoder) where:
+* x_train is a 2D array with shape (number of samples, number of features) containing the training data.
+* y_train is a 1D array with shape (number of samples,) containing the classification labels for the training data.
+* x_test is a 2D array of the shape (number of test samples, number of features) containing the test data_args.
+* y_test is either a 1D array of the shape (number of test samples,) containing the classification labels for the test data or in the case where you are not validating the model is an empty array.
+* feature_names is a list of all the features present in each sample.
+* test_files is a list of the names of each input being used to test the model.
+* LabelEncoder is a scikit-learn LabelEncoder object that will allow you to convert the predicted classifications back into a human readable format.
 
-See the individual methods for their necessary parameters and usage.
+Some of the methods simply return: (x_train, y_train, x_test, y_test)
 
-You will need to update the global human_path and bovine_path variables at the top of the file.
+To recreate the results of the the [Lupolova et. al](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5056084/ "NCBI article") paper with kmer counts as inputs use the method: get_kmer_us_uk_split. To recreate the results of the paper using genome region presence absence data use the method get_genome_region_us_uk_split.
 
-
-## models.py
-
-A collection of ready to use machine learning models. Some take x_train, y_train, x_test, y_test as input and return an accuracy score after training and testing on those inputs. Some take x_train, y_train, and x_test and return predictions on x_test.
-
-See the individual methods for their necessary parameters and usage.
-
-
-## data_augmentaion.py
-
-A collection of methods to augment data. All of them take x_train, y_train, x_test, and y_test and return x_train, y_train, x_test, y_test with additonal, (artificially generated) samples added to x_train and y_train.
-
-See the individual methods for their necessary parameters and usage.
+The methods that prepare kmer data use kmer_counter.py
 
 
 ## feature_selection.py
 
-A collection of methods that perform feature selection on the training data. All of them take x_train, y_train, x_test, y_test, the (training data and labels, and the test data and labels) as well as some method specific parameters. If you do not have labels for the test data simply pass None in place of y_test.
-All of the methods return x_train, y_train, x_test, and y_test with some features removed from x_trian and x_test.
+A collection of methods that perform feature selection on the training and testing data.
 
-See the individual methods for their necessary parameters and usage.
+Each method has a positional argument (input_data) and a named argument (feature_names). input_data should be a tuple containing (x_train, y_train, x_test, y_test) as defined under get_data.py. feature_names should be a list containing the names of all the features in each sample. If feature_names is given the features that are removed from input_data by the feature selection will also be removed from feature_names.
+
+All of the methods return input_data with some features removed from x_train and x_test based on the conditions specified by the method and by the parameters passed to the method. If feature_names is specified an updated version of itself is also returned.
 
 
 ## feature_scaling.py
 
-A collection of methods that perform feature scaling on input data. All of them take x_train, y_train, x_test, y_test and return x_train, y_train, x_test, y_test with the data in x_train and x_test scaled according to the method.
+A collection of methods that perform feature scaling.
 
-See the individual methods for their necessary parameters and usage.
+Each of the methods has a positional argument (input_data) as defined under feature_selection.py and returns input_data with the values in x_train and x_test scaled according to the specifications of the method and it's given parameters.
 
 
-## Extending the above files
+## data_augmentation.py
 
-If you wish to add methods to any of the above files and would like the methods to work with run.py the methods should follow these guidelines:
+A collection of methods that perform data augmentation, the process of artificially generating new samples based on the samples you already have.
 
-- A Data method should return x_train, y_train, x_test, y_test
-- Any method that will manipulate the output of a data method should have as parameters x_train, y_train, x_test, y_test and then args, where args is a list of method specific positional arguments.
-- Any method whose output could be passed to a model should return x_train, y_train, x_test, y_test
-- The methods that contain the models should perform all of the building, compiling, and training necessary for the model.
-- Once a method is added to a file, the dictionary inside the get_methods() function for that file should be updated to contain the new method.
+Each method has a positional argument input_data as defined under feature_selection.py and returns input_data with additonal samples added to x_train and y_train. x_test and y_test are not changed. Some of the methods take additional parameters that define how the new samples are created.
+
+
+## models.py
+
+A collection of methods containing machine learning models.
+
+Each method has a positional argument (input_data) as defined under feature_selection.py and a named argument (validate). Some of the methods also take additional arguments that allow further customization of how they work.
+
+Validate should be a bool. If validate is True, the method will return an accuracy score representing the percentage of samples in x_test that were corretly classified and y_test must be given. If validate is False, the method will return a list containing the predicted classification for each sample in x_test and y_test is ignored.
 
 
 ## kmer_counter.py
 
-Methods to count kmers, store the counts in a database, and then retrieve the counts later. The jellyfish program, https://github.com/gmarcais/Jellyfish, is used to count the kmers.
+Methods to count kmers, store the counts in a database, and then retrieve the counts later. The [jellyfish](https://github.com/gmarcais/Jellyfish "Jellyfish GitHub") program is used to count the kmers.
 
 In order to be meaningful the inputs to machine learning models must all be of the same length and the features of each input must match up, therefore the output of jellyfish can not be directly input into a machine learning model, instead only kmers that appear at least "limit" times in each input genome will be kept.
 
@@ -128,7 +160,7 @@ get_counts: Returns a list of the kmer counts stored in the database for each in
 add_counts: Adds new files to the database, does not affect kmer counts already in the database. Useful for when you train a model on a dataset and then later get more data. Since the kmer counts of the new data must match up with the kmer counts of the old data.
 
 
-### To use in another script
+#### To use in another script:
 
 ```python
 from kmer_counter import count_kmers, add_kmers, get_counts
@@ -141,29 +173,4 @@ data = get_counts(files+new_files, database)
 - limit: Minimum count required for a kmer to be output.
 - files/new_files: Lists of paths to fasta files.
 - database: Name of the lmdb database you would like to use.
-
 - data: A list of lists of kmer counts, can be used as the input to a machine learning model.
-
-
-### To use from the command line
-
-Not supported
-
-
-## Dependencies
-
-To install the dependecies run `conda create --name <env> --file conda-specs.txt`
-
-You will need to install jellyfish separately. See https://github.com/gmarcais/Jellyfish for installation instructions. *You do not need to install the python binding for jellyfish, just the command line tool*
-
-If you receive an import error stating that python can't find the module lmdb, run `pip install lmdb` with the conda environment activated.
-
-If, when running a script that involves hyperas, you receive an error like:
-
-```sh
-File "/home/user/miniconda3/envs/kmer/lib/python2.7/site-packages/hyperopt/pyll/base.py", line 715, in toposort
-   assert order[-1] == expr
-TypeError: 'generator' object has no attribute '__getitem__'
-```
-
-Try downgrading networkx from version 2.0 to version 1.1 and rerunning the script.

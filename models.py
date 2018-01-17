@@ -1,11 +1,27 @@
 """
-Contains defintions for machine learning models.
+A collection of methods containing machine learning models.
+
+Each method has a positional argument (input_data) and a named argument
+(validate).
+
+Input data should be a tuple containing (x_train, y_train, x_test, y_test)
+where x_train is a 2D array of the shape (number of samples, number of
+features) containing the training data, y_train is 1D array of the shape
+(number of samples,) containing the classification labels for the training
+data, x_test is 2D array of the shape (number of test samples, number of
+features) containing the test data, and y_test is either a 1D array of the
+shape (number of test samples,) containing the classification labels for the
+test data or is an empty array in the case where you are not validating the
+model. Validate should be a bool. If validate is True, the method will return
+an accuracy score representing the percentage of samples in x_test that were
+corretly classified and y_test must be given. If validate is False, the method
+will return a list containing the predicted classification for each sample in
+x_test and y_test is ignored.
 """
 
 import numpy as np
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import SGDClassifier as SGDC
 from keras.layers import Dense, Flatten
 from keras.models import Sequential
 from keras.layers.convolutional import Conv1D
@@ -13,14 +29,23 @@ from keras.utils import to_categorical
 from utils import flatten, make3D, convert_well_index
 
 
-def neural_network(input_data, validate=True):
+def neural_network(input_data, feature_names=None, validate=True):
     """
-    Constructs, compiles, trains and makes predictions with a neural network.
-    Returns the predicted values for "predict". If args[0] is true the
-    predictions will be 0's and 1's if not the predictions will be floats
-    between 0.0 and 1.0 with values closer to 0.0 and 1.0 indicating a higher
-    probability of the prediction being correct.
+    Constructs, compiles, trains and tests/makes predictions with a neural
+    network.
+
+    Args:
+        input_data (tuple):     x_train, y_train, x_test, y_test
+        feature_names (list):   Ignored, here for compatability.
+        validate (bool):        If True, an accuracy is returned, if False a
+                                list of predictions for x_test is returned.
+
+    Returns:
+        float: model accuracy
+        or
+        list: predicted classifications for x_test.
     """
+    feature_names = None
 
     x_train = input_data[0]
     y_train = input_data[1]
@@ -31,6 +56,8 @@ def neural_network(input_data, validate=True):
     num_classes = len(list(train_classes))
 
     y_train = to_categorical(y_train)
+    if validate:
+        y_test = to_categorical(y_test)
 
     if len(x_train.shape) == 2:
         x_train = make3D(x_train)
@@ -51,28 +78,32 @@ def neural_network(input_data, validate=True):
         output = evaluation[1]
     else:
         output = model.predict(x_test)
-    return output
+    return (output, feature_names)
 
 
 def support_vector_machine(input_data, kernel='linear', C=1,
                            feature_names=None, validate=True):
     """
-    Fits, trains, and makes predictions with a support vector machine. Returns
-    the predicted values.
+    Fits, trains, and tests/makes predictions with a support vector machine.
 
     Args:
         input_data (tuple):     x_train, y_train, x_test
         kernel (str):           The kernel to be used by the SVM
         C (int or float):       The regularization parameter for the SVM
         feature_names (list):   The names of every feature in input_data, if
-                                give, a sorted [high to low] list of the most
+                                given, a sorted [high to low] list of the most
                                 important features used to make predictions is
                                 also returned.
+        validate (bool):        If True a model accuracy is returned, if False
+                                a list of predicted classifications for x_test
+                                is returned.
 
     Returns:
-        list: The predicted classes for each sample in x_test
+        list: Predicted classifications for each x_test
         or
-        tuple: prdicted classes, top features
+        float: Model accuracy
+        or
+        tuple: accuracy/predictions, features ranked by importance
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -102,22 +133,29 @@ def support_vector_machine(input_data, kernel='linear', C=1,
     return output
 
 
-# First Optimization
-# def random_forest_validation(input_data,n_estimators=5,criterion='gini',
-#                              max_features=None,max_depth=None,
-#                              min_samples_split=5,min_samples_leaf=1,
-#                              min_weight_fraction_leaf=0.1,
-#                              max_leaf_nodes=10,min_impurity_decrease=0,
-#                              bootstrap=True, n_jobs=-1):
-
-# Second Optimization
-def random_forest(input_data, n_estimators=50, criterion='entropy',
-                  max_features='log2', max_depth=100, min_samples_split=2,
-                  min_samples_leaf=1, min_weight_fraction_leaf=0.01,
-                  max_leaf_nodes=25, min_impurity_decrease=0.001, n_jobs=-1,
-                  bootstrap=False, feature_names=None, validate=True):
+def random_forest(input_data, n_estimators=50, feature_names=None,
+                  validate=True):
     """
-    Fits, trains, and evaluates a random forest learning, returns an accuracy.
+    Fits, trains, and tests/makes predictions with s a random forest
+    classifier.
+
+    Args:
+        input_data (tuple):     x_train, y_train, x_test, y_test
+        n_estimators (int):     How many trees to use in the forest.
+        feature_names (list):   The names of every feature in input_data, if
+                                given, a sorted [high to low] list of the most
+                                important features used to make predictions is
+                                also returned.
+        validate (bool):        If True a model accuracy is returned, if False
+                                a list of predicted classifications for x_test
+                                is returned.
+
+    Returns:
+        list: Predicted classifications for each x_test
+        or
+        float: Model accuracy
+        or
+        tuple: accuracy/predictions, features ranked by importance
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -128,14 +166,11 @@ def random_forest(input_data, n_estimators=50, criterion='entropy',
         x_train = flatten(x_train)
         x_test = flatten(x_test)
 
-    kwargs = {'n_estimators': n_estimators, 'criterion': criterion,
-              'max_features': max_features, 'max_depth': max_depth,
-              'min_samples_split': min_samples_split,
-              'min_samples_leaf': min_samples_leaf,
-              'min_weight_fraction_leaf': min_weight_fraction_leaf,
-              'max_leaf_nodes': max_leaf_nodes,
-              'min_impurity_decrease': min_impurity_decrease,
-              'bootstrap': bootstrap, 'n_jobs': n_jobs}
+    kwargs = {'n_estimators': n_estimators, 'criterion': 'entropy',
+              'max_features': 'log2', 'max_depth': 100, 'min_samples_split': 2,
+              'min_samples_leaf': 1, 'min_weight_fraction_leaf': 0.01,
+              'max_leaf_nodes': 25, 'min_impurity_decrease': 0.001,
+              'bootstrap': False, 'n_jobs': -1}
 
     model = RandomForestClassifier(**kwargs)
     model.fit(x_train, y_train)
@@ -153,52 +188,3 @@ def random_forest(input_data, n_estimators=50, criterion='entropy',
     else:
         output = output_data
     return output
-
-
-# The parameters in the below functions were found by performing a grid search.
-# The results from the grid search are in ~/Data/sgdc_parameters/
-def kmer_split_sgd(input_data):
-    """
-    Stochastic gradient descent model with params optimized for kmer data on
-    the lupolova et al split dataset
-    """
-    model = SGDC(loss='log', n_jobs=-1, eta0=1.0,
-                 learning_rate='invscaling', penalty='none', tol=0.001,
-                 alpha=100000000.0)
-    model.fit(input_data[0], input_data[1])
-    return model.score(input_data[2], input_data[3])
-
-
-def kmer_mixed_sgd(input_data):
-    """
-    Stochastic gradient descent model with params optimized for kmer data on
-    the lupolova et al mixed dataset
-    """
-    model = SGDC(loss='squared_hinge', n_jobs=-1, penalty='none',
-                 tol=0.001, alpha=10000000.0)
-    model.fit(input_data[0], input_data[1])
-    return model.score(input_data[2], input_data[3])
-
-
-def genome_split_sgd(input_data):
-    """
-    Stochastic gradient descent model with params optimized for genome region
-    data on the lupolova split data set.
-    """
-    model = SGDC(loss='hinge', n_jobs=-1, eta0=0.1,
-                 learning_rate='invscaling', penalty='l1', tol=0.001,
-                 alpha=0.01)
-    model.fit(input_data[0], input_data[1])
-    return model.score(input_data[2], input_data[3])
-
-
-def genome_mixed_sgd(input_data):
-    """
-    Stochastic gradient descent model with params optimized for genome region
-    data on the lupolova mixed dataset.
-    """
-    model = SGDC(loss='log', n_jobs=-1, eta0=0.1,
-                 learning_rate='invscaling', penalty='l1', tol=0.001,
-                 alpha=0.001)
-    model.fit(input_data[0], input_data[1])
-    return model.score(input_data[2], input_data[3])

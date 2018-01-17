@@ -152,9 +152,9 @@ def print_status(counter, total):
     Returns:
         None
     """
-    percent = (counter*100)/total
+    percent = (counter * 100) / total
     sys.stdout.write('\r')
-    sys.stdout.write("[%-44s] %d%%" % ('='*((percent*44)/100), percent))
+    sys.stdout.write("[%-44s] %d%%" % ('=' * ((percent * 44) / 100), percent))
     sys.stdout.flush()
 
 
@@ -193,7 +193,7 @@ def setup_data(files, k, limit, env, txn, data):
     counter = 0
     secondstart(files[-1], env, txn, data)
     counter += 1
-    i = len(files)-2
+    i = len(files) - 2
     while i >= 0:
         print_status(counter, total)
         secondpass(files[i], env, txn)

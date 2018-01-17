@@ -1,6 +1,4 @@
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import unittest
 import shutil
 import random
@@ -589,7 +587,7 @@ class EmptyDictionaries(unittest.TestCase):
             if elem in self.default[3]:
                 count1+=1
         self.assertEqual(count1, count2)
-        
+
 
 if __name__=="__main__":
     loader = unittest.TestLoader()

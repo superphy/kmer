@@ -1,8 +1,24 @@
 """
-Contains methods for gathering data and returning it in the form
-x_train, y_train, x_test, y_test. Where x_train is the training data, y_train
-is the labels for the training data, x_test is the testing data, and y_test is
-the labels for the testing data.
+A collection of methods that gather and prepare data to be input into a machine
+learning model.
+
+Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
+              LabelEncoder) where:
+* x_train is a 2D array with shape (number of samples, number of features)
+  containing the training data.
+* y_train is a 1D array with shape (number of samples,) containing the
+  classification labels for the training data.
+* x_test is a 2D array of the shape (number of test samples, number of
+  features) containing the test data_args.
+* y_test is either a 1D array of the shape (number of test samples,) containing
+  the classification labels for the test data or in the case where you are not
+  validating the model is an empty array.
+* feature_names is a list of all the features present in each sample.
+* test_files is a list of the names of each input being used to test the model.
+* LabelEncoder is a scikit-learn LabelEncoder object that will allow you to
+  convert the predicted classifications back into a human readable format.
+
+Some of the methods simply return: (x_train, y_train, x_test, y_test)
 """
 
 from sklearn.preprocessing import MinMaxScaler, Imputer
@@ -27,8 +43,8 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
         k (int):         Size of kmer to be counted. Ignored if recount is
                          false
         L (int):         kmer cutoff value. Ignored if recount is false
-        validate (bool): If True a list of the file names being predicted on is
-                         returned
+        validate (bool): If True y_test is created, if False y_test is
+                         an empty ndarray.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -70,6 +86,8 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
         kwargs (dict):      The arguments to pass to parse_metadata.
         table (str):        binary_table.txt output from panseq.
         sep (str or None):  The separator used in table.
+        validate (bool):    If True y_test is created, if False y_test is
+                            an empty ndarray.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -105,19 +123,23 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
     return (output_data, feature_names, test_label, le)
 
 
-def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13):
+def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13,
+                         validate=True):
     """
     Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et
     al paper with kmer input data.
 
     Args:
-        database (str): lmdb database to store kmer counts.
-        recount (bool): If True the kmers are recounted.
-        k (int):        Size of kmer to be counted. Ignored if recount is false
-        L (int):        kmer cutoff value. Ignored if recount is false.
+        database (str):  lmdb database to store kmer counts.
+        recount (bool):  If True the kmers are recounted.
+        k (int):         Size of kmer to be counted. Ignored if recount is
+                         False.
+        L (int):         kmer cutoff value. Ignored if recount is false.
+        validate (bool): Ignored, here for compatability.
 
     Returns:
-        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
@@ -125,19 +147,23 @@ def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13):
     return get_kmer(kwargs, database, recount, k, L, validate=True)
 
 
-def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13):
+def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13,
+                         validate=True):
     """
     Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et
     al paper with kmer input data.
 
     Args:
         database (str): lmdb database to store kmer counts.
-        recount (bool): If True the kmers are recounted.
-        k (int):        Size of kmer to be counted. Ignored if recount is false
-        L (int):        kmer cutoff value. Ignored if recount is false.
+        recount (bool):  If True the kmers are recounted.
+        k (int):         Size of kmer to be counted. Ignored if recount is
+                         False.
+        L (int):         kmer cutoff value. Ignored if recount is false.
+        validate (bool): Ignored, here for compatability.
 
     Returns:
-        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
@@ -147,7 +173,7 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13):
 
 
 def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
-                        recount=False, k=7, L=13):
+                        recount=False, k=7, L=13, validate=True):
     """
     Wraps get_kmer to get salmonella amr data.
 
@@ -158,9 +184,11 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
         k (int):          Size of kmer to be counted. Ignored if recount is
                           false.
         L (int):          kmer cutoff value. Ignored if recount is false.
+        validate (bool):  Ignored, here for compatability.
 
     Returns:
-        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
     kwargs = {'metadata': constants.SALMONELLA_METADATA,
               'fasta_header': 'Fasta',
@@ -175,7 +203,7 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
 
 
 def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,
-                                  sep=None):
+                                  sep=None, validate=True):
     """
     Wraps get_genome_regions to get the US/UK mixed datasets genome region data
     to recreate the Lupolova et al paper.
@@ -183,19 +211,19 @@ def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,
     Args:
         table (str):        binary_table.txt output from panseq.
         sep (str or None):  The separator used in table.
+        validate (bool):    Ignored, here for compatability.
 
     Returns:
-        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
-    kwargs = {'prefix': constants.ECOLI,
-              'suffix': '.fasta',
-              'train_header': None,
+    kwargs = {'train_header': None,
               'validate': True}
     return get_genome_regions(kwargs, table, sep, validate=True)
 
 
 def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,
-                                  sep=None):
+                                  sep=None, validate=True):
     """
     Wraps get_genome_regions to get the US/UK split dataset genome region data
     to recreate the Lupolova et al paper.
@@ -203,16 +231,229 @@ def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,
     Args:
         table (str):        binary_table.txt output from panseq.
         sep (str or None):  The separator used in table.
+        validate (bool):    Ignored, here for compatability.
 
     Returns:
-        tuple:  (x_train, y_train, x_test, y_test), feature_names, LabelEncoder
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
-    kwargs = {'prefix': constants.ECOLI,
-              'suffix': '.fasta',
-              'validate': True}
+    kwargs = {'validate': True}
     return get_genome_regions(kwargs, table, sep, validate=True)
 
 
+def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
+                     validate=True):
+    """
+    Gets the omnilog data contained in omnilog_sheet for the genomes specified
+    by kwargs. Uses utils.parse_metadata
+
+    Args:
+        kwargs (dict):       The arguments to pass to parse_metadata.
+        omnilog_sheet (str): File containing omnilog data.
+        validate (bool):     If True y_test is created, if False y_test is an
+                             empty ndarray.
+
+    Returns:
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
+
+    """
+    kwargs = kwargs or {}
+    kwargs['validate'] = validate
+
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
+
+    omnilog_data = pd.read_csv(omnilog_sheet, index_col=0)
+    valid_cols = [x_train.index(x) for x in x_train if x in list(omnilog_data)]
+    x_train = [x_train[x] for x in valid_cols]
+    y_train = [y_train[x] for x in valid_cols]
+
+    valid_cols = [x_test.index(x) for x in x_test if x in list(omnilog_data)]
+    x_test = [x_test[x] for x in valid_cols]
+    if validate:
+        y_test = [y_test[x] for x in valid_cols]
+
+    feature_names = omnilog_data.index
+
+    output_data = []
+    x_train = omnilog_data[x_train].T.values
+    x_test = omnilog_data[x_test].T.values
+
+    imputer = Imputer()
+    x_train = imputer.fit_transform(x_train)
+    x_test = imputer.transform(x_test)
+
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return output_data, feature_names, test_files, le
+
+
+def get_roary_data(kwargs=None, roary_sheet=constants.ROARY, validate=True):
+    """
+    Get the Roary data from roary_sheet for the genomes specified by kwargs,
+    uses utils.parse_metadata.
+
+    Args:
+        kwargs (dict):      The arguments to pass to parse_metadata.
+        roary_sheet (str):  File containing Roary data.
+        validate (bool):    If True y_test is created, if False y_test is an
+                            empty ndarray.
+
+    Returns:
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
+    """
+    kwargs = kwargs or {}
+    kwargs['validate'] = validate
+
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
+
+    roary_data = pd.read_csv(roary_sheet, index_col=0)
+
+    feature_names = roary_data.index
+
+    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
+    x_train = [x_train[x] for x in valid_cols]
+    y_train = [y_train[x] for x in valid_cols]
+
+    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
+    x_test = [x_test[x] for x in valid_cols]
+    y_test = [y_test[x] for x in valid_cols]
+
+    x_train = roary_data[x_train].T.values
+    x_test = roary_data[x_test].T.values
+
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_files, le)
+
+
+def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10,
+                            validate=True):
+    """
+    Gets the Roary data from roary_sheet for the genomes specified by kwargs,
+    uses utils.parse_metadata. Does initial feature selection by removing
+    features whose in proportion between classes is less than limit, based on
+    the feature selection done by Lupolova et. al.
+
+    Args:
+        kwargs (dict):      The arguments to pass to parse_metadata.
+        roary_sheet (str):  File containing Roary data.
+        limit (int):        Value used to determine which features are removed
+        validate (bool):    If True y_test is created, if False y_test is an
+                            empty ndarray.
+
+    Returns:
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
+    """
+    kwargs = kwargs or {}
+    kwargs['validate'] = validate
+
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
+
+    roary_data = pd.read_csv(roary_sheet, index_col=0)
+
+    class_labels = np.unique(y_train)
+    classes = []
+    for c in class_labels:
+        class_members = [x for x in x_train if y_train[x_train.index(x)] == c]
+        classes.append(roary_data[class_members].mean(axis=1) * 100)
+
+    proportions = pd.concat(classes, axis=1)
+    diffs = np.diff(proportions.values, axis=1)
+    diffs = np.absolute(diffs.mean(axis=1))
+    idx = list(proportions.index)
+    col = ['Diff']
+    avg_diff = pd.DataFrame(diffs, index=idx, columns=col)
+    invalid = list(avg_diff[avg_diff['Diff'] < limit].index)
+    roary_data = roary_data.drop(invalid)
+
+    feature_names = roary_data.index
+
+    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
+    x_train = [x_train[x] for x in valid_cols]
+    y_train = [y_train[x] for x in valid_cols]
+
+    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
+    x_test = [x_test[x] for x in valid_cols]
+    if validate:
+        y_test = [y_test[x] for x in valid_cols]
+
+    x_train = roary_data[x_train].T.values
+    x_test = roary_data[x_test].T.values
+
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_files, le)
+
+
+def get_roary_from_list(kwargs=None, roary_sheet=constants.ROARY,
+                        gene_header='Gene', valid_header='Valid',
+                        valid_features_table=constants.ROARY_VALID):
+    """
+    Gets the Roary data from roary_sheet for the genomes specified by kwargs,
+    uses utils.parse_metadata. Does initial feature selection by removing
+    features who are not labeled as valid in valid_features_table.
+
+    Args:
+        kwargs (dict):              The arguments to pass to parse_metadata.
+        roary_sheet (str):          File containing Roary data.
+        gene_header (str):          Header for the column that contains the
+                                    gene names.
+        valid_header (str):         Header for the column that contains T/F
+                                    values determining if a gene is valid.
+        valid_features_table (str): csv table containing a list of valid and
+                                    invalid genes.
+
+    Returns:
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
+    """
+    kwargs = kwargs or {}
+
+    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+
+    test_files = [str(x) for x in x_test]
+
+    roary_data = pd.read_csv(roary_sheet)
+    valid_features = pd.read_csv(valid_features_table)
+    features = list(valid_features[valid_header])
+    roary_data = roary_data[roary_data[gene_header].isin(features)]
+
+    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
+    x_train = [x_train[x] for x in valid_cols]
+    y_train = [y_train[x] for x in valid_cols]
+
+    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
+    x_test = [x_test[x] for x in valid_cols]
+    if list(y_test):
+        y_test = [y_test[x] for x in valid_cols]
+
+    x_train = roary_data[x_train].T.values
+    x_test = roary_data[x_test].T.values
+
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, features, test_files, le)
+
+
+# TODO: Convert get_genome_custom_filtered to work with run or remove it.
+# TODO: i.e. needs to return output_data,feature_names,test_files,labelencoder
 def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
                                filter_table=constants.PREDICTIVE_RESULTS,
                                sep=None, col='Ratio', cutoff=0.25,
@@ -276,6 +517,8 @@ def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
     return (x_train, y_train, x_test, y_test)
 
 
+# TODO: Convert get_genome_prefiltered to work with run or remove it.
+# TODO: i.e. needs to return output_data,feature_names,test_files,labelencoder
 def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
                            filter_table=constants.PREDICTIVE_RESULTS,
                            sep=None, count=50, kwargs=None):
@@ -330,8 +573,8 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
     return (x_train, y_train, x_test, y_test)
 
 
-# TODO: convert *json to (*train_json, *test_json) where each json file
-# TODO: contains genomes from only one class.
+# TODO: Convert get_kmer_from_json to work with run or remove it.
+# TODO: i.e. needs to return output_data,feature_names,test_files,labelencoder
 def get_kmer_from_json(database=constants.DB, recount=False, k=7, L=13,
                        prefix=constants.MORIA, suffix='.fasta',
                        key='assembly_barcode', *json):
@@ -349,6 +592,8 @@ def get_kmer_from_json(database=constants.DB, recount=False, k=7, L=13,
                         in the json, for example the correct path to the file.
         suffix (str):   Suffix to be added to the end of every fasta file in
                         the json, for example .fasta
+        key (str):      Label within the json files to identify the genome
+                        names.
         *json (str):    Two or four json files, If two the first should contain
                         only positive genomes and the second should contain
                         only negative genomes. If four the first json file
@@ -367,7 +612,7 @@ def get_kmer_from_json(database=constants.DB, recount=False, k=7, L=13,
         x_test, y_test = shuffle(files[2] + files[3], [1, 0])
     elif len(files) == 2:
         x_train, y_train = shuffle(files[0] + files[1], [1, 0])
-        cutoff = int(0.8*len(x_train))
+        cutoff = int(0.8 * len(x_train))
         x_test = x_train[cutoff:]
         y_test = y_train[cutoff:]
         x_train = x_train[:cutoff]
@@ -390,7 +635,7 @@ def get_kmer_from_json(database=constants.DB, recount=False, k=7, L=13,
     return (x_train, y_train, x_test, y_test)
 
 
-# TODO: Convert this to work with run
+# TODO: Convert get_kmer_from_directory to work with run or remove it.
 # TODO: i.e. needs to return output_data,feature_names,test_files,labelencoder
 def get_kmer_from_directory(database=constants.DB, recount=False, k=7, L=13,
                             *directories):
@@ -425,214 +670,3 @@ def get_kmer_from_directory(database=constants.DB, recount=False, k=7, L=13,
         output.append(temp)
 
     return output
-
-
-# TODO: Update docstring
-def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
-                     validate=True):
-    """
-    Gets the omnilog data contained in omnilog_sheet for the genomes specified
-    by kwargs. Uses utils.parse_metadata
-
-    Args:
-        kwargs (dict):       The arguments to pass to parse_metadata.
-        omnilog_sheet (str): File containing omnilog data.
-        validate (bool):     If True a list of the file names being predicted
-                             on is returned
-
-    Returns:
-        list: x_train, y_train, x_test, y_test
-        or
-        tuple: ([x_train, y_train, x_test, y_test], feature_names)
-
-    """
-    kwargs = kwargs or {}
-    kwargs['validate'] = validate
-
-    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
-
-    test_files = [str(x) for x in x_test]
-
-    omnilog_data = pd.read_csv(omnilog_sheet, index_col=0)
-    valid_cols = [x_train.index(x) for x in x_train if x in list(omnilog_data)]
-    x_train = [x_train[x] for x in valid_cols]
-    y_train = [y_train[x] for x in valid_cols]
-
-    valid_cols = [x_test.index(x) for x in x_test if x in list(omnilog_data)]
-    x_test = [x_test[x] for x in valid_cols]
-    if validate:
-        y_test = [y_test[x] for x in valid_cols]
-
-    feature_names = omnilog_data.index
-
-    output_data = []
-    x_train = omnilog_data[x_train].T.values
-    x_test = omnilog_data[x_test].T.values
-
-    imputer = Imputer()
-    x_train = imputer.fit_transform(x_train)
-    x_test = imputer.transform(x_test)
-
-    y_train, y_test, le = encode_labels(y_train, y_test)
-
-    output_data = (x_train, y_train, x_test, y_test)
-
-    return output_data, feature_names, test_files, le
-
-
-# TODO: Update docstring
-def get_roary_data(kwargs=None, roary_sheet=constants.ROARY, validate=True):
-    """
-    Get the Roary data from roary_sheet for the genomes specified by kwargs,
-    uses utils.parse_metadata.
-
-    Args:
-        kwargs (dict):      The arguments to pass to parse_metadata.
-        roary_sheet (str):  File containing Roary data.
-
-    Returns:
-        list: x_train, y_train, x_test, y_test
-    """
-    kwargs = kwargs or {}
-    kwargs['validate'] = validate
-
-    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
-
-    test_files = [str(x) for x in x_test]
-
-    roary_data = pd.read_csv(roary_sheet, index_col=0)
-
-    feature_names = roary_data.index
-
-    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
-    x_train = [x_train[x] for x in valid_cols]
-    y_train = [y_train[x] for x in valid_cols]
-
-    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
-    x_test = [x_test[x] for x in valid_cols]
-    y_test = [y_test[x] for x in valid_cols]
-
-    x_train = roary_data[x_train].T.values
-    x_test = roary_data[x_test].T.values
-
-    y_train, y_test, le = encode_labels(y_train, y_test)
-
-    output_data = (x_train, y_train, x_test, y_test)
-
-    return (output_data, feature_names, test_files, le)
-
-
-# TODO: Update docstring
-def get_filtered_roary_data(kwargs=None, roary_sheet=constants.ROARY, limit=10,
-                            validate=True):
-    """
-    Gets the Roary data from roary_sheet for the genomes specified by kwargs,
-    uses utils.parse_metadata. Does initial feature selection by removing
-    features whose in proportion between classes is less than limit, based on
-    the feature selection done by Lupolova et. al.
-
-    Args:
-        kwargs (dict):      The arguments to pass to parse_metadata.
-        roary_sheet (str):  File containing Roary data.
-        limit (int):        Value used to determine which features are removed
-
-    Returns:
-        list: x_train, y_train, x_test, y_test
-    """
-    kwargs = kwargs or {}
-    kwargs['validate'] = validate
-
-    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
-
-    test_files = [str(x) for x in x_test]
-
-    roary_data = pd.read_csv(roary_sheet, index_col=0)
-
-    class_labels = np.unique(y_train)
-    classes = []
-    for c in class_labels:
-        class_members = [x for x in x_train if y_train[x_train.index(x)] == c]
-        print roary_data[class_members].mean(axis=1)*100
-        exit()
-        classes.append(roary_data[class_members].mean(axis=1)*100)
-
-    proportions = pd.concat(classes, axis=1)
-    diffs = np.diff(proportions.values, axis=1)
-    diffs = np.absolute(diffs.mean(axis=1))
-    idx = list(proportions.index)
-    col = ['Diff']
-    avg_diff = pd.DataFrame(diffs, index=idx, columns=col)
-    invalid = list(avg_diff[avg_diff['Diff'] < limit].index)
-    roary_data = roary_data.drop(invalid)
-
-    feature_names = roary_data.index
-
-    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
-    x_train = [x_train[x] for x in valid_cols]
-    y_train = [y_train[x] for x in valid_cols]
-
-    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
-    x_test = [x_test[x] for x in valid_cols]
-    if validate:
-        y_test = [y_test[x] for x in valid_cols]
-
-    x_train = roary_data[x_train].T.values
-    x_test = roary_data[x_test].T.values
-
-    y_train, y_test, le = encode_labels(y_train, y_test)
-
-    output_data = (x_train, y_train, x_test, y_test)
-
-    return (output_data, feature_names, test_files, le)
-
-
-# TODO: Update docstring
-def get_roary_from_list(kwargs=None, roary_sheet=constants.ROARY,
-                        gene_header='Gene', valid_header='Valid',
-                        valid_features_table=constants.ROARY_VALID):
-    """
-    Gets the Roary data from roary_sheet for the genomes specified by kwargs,
-    uses utils.parse_metadata. Does initial feature selection by removing
-    features who are not labeled as valid in valid_features_table.
-
-    Args:
-        kwargs (dict):              The arguments to pass to parse_metadata.
-        roary_sheet (str):          File containing Roary data.
-        gene_header (str):          Header for the column that contains the
-                                    gene names.
-        valid_header (str):         Header for the column that contains T/F
-                                    values determining if a gene is valid.
-        valid_features_table (str): csv table containing a list of valid and
-                                    invalid genes.
-
-    Returns:
-        list: x_train, y_train, x_test, y_test
-    """
-    kwargs = kwargs or {}
-
-    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
-
-    test_files = [str(x) for x in x_test]
-
-    roary_data = pd.read_csv(roary_sheet)
-    valid_features = pd.read_csv(valid_features_table)
-    features = list(valid_features[valid_header])
-    roary_data = roary_data[roary_data[gene_header].isin(features)]
-
-    valid_cols = [x_train.index(x) for x in x_train if x in list(roary_data)]
-    x_train = [x_train[x] for x in valid_cols]
-    y_train = [y_train[x] for x in valid_cols]
-
-    valid_cols = [x_test.index(x) for x in x_test if x in list(roary_data)]
-    x_test = [x_test[x] for x in valid_cols]
-    if list(y_test):
-        y_test = [y_test[x] for x in valid_cols]
-
-    x_train = roary_data[x_train].T.values
-    x_test = roary_data[x_test].T.values
-
-    y_train, y_test, le = encode_labels(y_train, y_test)
-
-    output_data = (x_train, y_train, x_test, y_test)
-
-    return (output_data, features, test_files, le)

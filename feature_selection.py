@@ -1,5 +1,18 @@
 """
-Collection of methods that perform feature selection on machine learning data.
+A collection of methods that perform feature selection on the training and
+testing data.
+
+Each method has a positional argument (input_data) and a named argument
+(feature_names). input_data should be a tuple containing (x_train, y_train,
+x_test, y_test). feature_names should be a list containing the names of all the
+features in each sample. If feature_names is given the features that are
+removed from input_data by the feature selection will also be removed from
+feature_names.
+
+All of the methods return input_data with some features removed from x_train
+and x_test based on the conditions specified by the method and by the
+parameters passed to the method. If feature_names is specified an updated
+version of itself is also returned.
 """
 
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, chi2
@@ -10,7 +23,7 @@ import pandas as pd
 import numpy as np
 
 
-def variance_threshold(input_data, threshold=0.16, feature_names=None):
+def variance_threshold(input_data, feature_names, threshold=0.16):
     """
     Removes all features from x_train and x_test whose variances in x_train is
     less than threshold. Uses scikit-learn's VarianceThreshold If feature_names
@@ -19,13 +32,12 @@ def variance_threshold(input_data, threshold=0.16, feature_names=None):
 
     Args:
         input_data (tuple):     x_train, y_train, x_test, y_test
+        feature_names (list):   The names of all features before selection or
+                                None.
         threshold (float):      Lower limit of variance for a feature to be
                                 kept.
-        feature_names (list):   The names of all features before selection.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
         tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train = input_data[0]
@@ -48,14 +60,12 @@ def variance_threshold(input_data, threshold=0.16, feature_names=None):
 
     if feature_names is not None:
         mask = feature_selector.get_support()
-        selected_feature_names = feature_names[mask]
-        output = (output_data, selected_feature_names)
-    else:
-        output = output_data
-    return output
+        feature_names = feature_names[mask]
+
+    return output_data, feature_names
 
 
-def remove_constant_features(input_data, feature_names=None):
+def remove_constant(input_data, feature_names):
     """
     Removes all features from x_train and x_test that are completely constant
     in x_train. If feature_names is given it is also returned with any
@@ -63,11 +73,10 @@ def remove_constant_features(input_data, feature_names=None):
 
     Args:
         input_data (tuple):     x_train, y_train, x_test, y_test
-        feature_names (list):   The names of all features before selection.
+        feature_names (list):   The names of all features before selection or
+                                None
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
         tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train = pd.DataFrame(input_data[0])
@@ -80,16 +89,13 @@ def remove_constant_features(input_data, feature_names=None):
 
     if feature_names is not None:
         feature_names = feature_names[list(x_train)]
-        output = (output_data, np.asarray(feature_names))
-    else:
-        output = output_data
 
-    return output
+    return output_data, feature_names
 
 
 # TODO: Make sure when f_classif is used that feature names is passed through
-# TODO: remove_constant_features properly
-def select_k_best(input_data, score_func=f_classif, k=500, feature_names=None):
+# TODO: remove constant features properly
+def select_k_best(input_data, feature_names, score_func=f_classif, k=500):
     """
     Selects the k best features in x_train, removes all others from x_train and
     x_test. Selects the best features by using the score function score_func
@@ -99,22 +105,17 @@ def select_k_best(input_data, score_func=f_classif, k=500, feature_names=None):
 
     Args:
         input_data (tuple):     x_train, y_train, x_test, y_test
+        feature_names (list):   The names of all features before selection or
+                                None.
         score_func (function):  The score function to be passed to SelectKBest
         k (int):                How many features to keep.
-        feature_names (list):   The names of all features before selection.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
         tuple: (x_train, y_train, x_test, y_test), feature_names
     """
 
     if score_func == f_classif:
-        if feature_names is not None:
-            input_data, feature_names = remove_constant_features(input_data,
-                                                                 feature_names)
-        else:
-            input_data = remove_constant_features(input_data)
+        input_data, feature_names = remove_constant(input_data, feature_names)
 
     x_train = input_data[0]
     y_train = input_data[1]
@@ -135,17 +136,15 @@ def select_k_best(input_data, score_func=f_classif, k=500, feature_names=None):
     output_data = (x_train, y_train, x_test, y_test)
     if feature_names is not None:
         mask = feature_selector.get_support()
-        selected_feature_names = feature_names[mask]
-        output = (output_data, selected_feature_names)
-    else:
-        output = output_data
-    return output
+        feature_names = feature_names[mask]
+
+    return output_data, feature_names
 
 
 # TODO: Make sure when f_classif is used that feature names is passed through
-# TODO: remove_constant_features properly
-def select_percentile(input_data, score_func=chi2, percentile=5,
-                      feature_names=None):
+# TODO: remove constant features properly
+def select_percentile(input_data, feature_names, score_func=chi2,
+                      percentile=5):
     """
     Selects the percentile best features in x_train, removes the rest of the
     features from x_train and x_test. Selects the best features by using the
@@ -155,22 +154,21 @@ def select_percentile(input_data, score_func=chi2, percentile=5,
 
     Args:
         input_data (tuple):     x_train, y_train, x_test, y_test
+        feature_names (list):   The names of all features before selection or
+                                None.
         score_func (function):  The score function to be passed to SelectKBest
         percentile (int):       Percentile of features to keep.
-        feature_names (list):   The names of all features before selection.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
         tuple: (x_train, y_train, x_test, y_test), feature_names
     """
+    if score_func == f_classif:
+        input_data, feature_names = remove_constant(input_data, feature_names)
+
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
     y_test = input_data[3]
-
-    if score_func == f_classif:
-        x_train, x_test = remove_constant_features(x_train, x_test)
 
     dims = len(x_train.shape)
     if dims == 3:
@@ -185,18 +183,17 @@ def select_percentile(input_data, score_func=chi2, percentile=5,
         x_test = make3D(x_test)
 
     output_data = (x_train, y_train, x_test, y_test)
+
     if feature_names is not None:
         mask = feature_selector.get_support()
-        selected_feature_names = feature_names[mask]
-        output = (output_data, selected_feature_names)
-    else:
-        output = output_data
-    return output
+        feature_names = feature_names[mask]
+
+    return output_data, feature_names
 
 
-def recursive_feature_elimination(input_data, estimator=SVC(kernel='linear'),
-                                  n_features_to_select=None, step=0.1,
-                                  feature_names=None):
+def recursive_feature_elimination(input_data, feature_names,
+                                  estimator=SVC(kernel='linear'),
+                                  n_features_to_select=None, step=0.1):
     """
     Recursively eliminates features from x_train and x_test using
     scikit-learn's RFE, see documentation:
@@ -206,15 +203,13 @@ def recursive_feature_elimination(input_data, estimator=SVC(kernel='linear'),
 
     Args:
         input_data (tuple):                   x_train, y_train, x_test, y_test
+        feature_names (list):                 The names of all features before
+                                              feature selection or None.
         estimator (object):                   Passed to RFE, see documentation
         n_features_to_select (int or None):   Passed to RFE, see documentation
         step (int or float):                  Passed to RFE, see documentation
-        feature_names:                        The names of all features before
-                                              feature selection.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
         tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train = input_data[0]
@@ -234,18 +229,16 @@ def recursive_feature_elimination(input_data, estimator=SVC(kernel='linear'),
         x_test = make3D(x_test)
 
     output_data = (x_train, y_train, x_test, y_test)
+
     if feature_names is not None:
         mask = feature_selector.get_support()
-        selected_feature_names = feature_names[mask]
-        output = (output_data, selected_feature_names)
-    else:
-        output = output_data
-    return output
+        feature_names = feature_names[mask]
+
+    return output_data, feature_names
 
 
-def recursive_feature_elimination_cv(input_data, step=0.1, cv=3,
-                                     estimator=SVC(kernel='linear'),
-                                     feature_names=None):
+def recursive_feature_elimination_cv(input_data, feature_names, step=0.1, cv=3,
+                                     estimator=SVC(kernel='linear')):
     """
     Recursively elinates features from x_train and x_test with cross
     validation, uses scikit-learn's RFECV see documentation:
@@ -255,15 +248,13 @@ def recursive_feature_elimination_cv(input_data, step=0.1, cv=3,
 
     Args:
         input_data (tuple):     x_train, y_train, x_test, y_test
+        feature_names:          The names of all features before feature
+                                selection or None.
         estimator (object):     Passed to RFECV, see documentation
         step (int or float):    Passed to RFECV, see documentation
         cv (int):               Passed to RFECV, see documentation
-        feature_names:          The names of all features before feature
-                                selection.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
-        or
         tuple: (x_train, y_train, x_test, y_test), feature_names
     """
     x_train = input_data[0]
@@ -283,10 +274,9 @@ def recursive_feature_elimination_cv(input_data, step=0.1, cv=3,
         x_test = make3D(x_test)
 
     output_data = (x_train, y_train, x_test, y_test)
+
     if feature_names is not None:
         mask = feature_selector.get_support()
-        selected_feature_names = feature_names[mask]
-        output = (output_data, selected_feature_names)
-    else:
-        output = output_data
-    return output
+        feature_names = feature_names[mask]
+
+    return output_data, feature_names
