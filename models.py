@@ -54,8 +54,8 @@ def neural_network(input_data, validate=True):
     return output
 
 
-def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
-                           num_features=50, validate=True):
+def support_vector_machine(input_data, kernel='linear', C=1,
+                           feature_names=None, validate=True):
     """
     Fits, trains, and makes predictions with a support vector machine. Returns
     the predicted values.
@@ -68,8 +68,6 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
                                 give, a sorted [high to low] list of the most
                                 important features used to make predictions is
                                 also returned.
-        num_features (int):     How many of the important features to return, if
-                                zero all of the features are returned.
 
     Returns:
         list: The predicted classes for each sample in x_test
@@ -104,7 +102,7 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
     return output
 
 
-#First Optimization
+# First Optimization
 # def random_forest_validation(input_data,n_estimators=5,criterion='gini',
 #                              max_features=None,max_depth=None,
 #                              min_samples_split=5,min_samples_leaf=1,
@@ -112,13 +110,12 @@ def support_vector_machine(input_data, kernel='linear', C=1, feature_names=None,
 #                              max_leaf_nodes=10,min_impurity_decrease=0,
 #                              bootstrap=True, n_jobs=-1):
 
-#Second Optimization
+# Second Optimization
 def random_forest(input_data, n_estimators=50, criterion='entropy',
                   max_features='log2', max_depth=100, min_samples_split=2,
                   min_samples_leaf=1, min_weight_fraction_leaf=0.01,
                   max_leaf_nodes=25, min_impurity_decrease=0.001, n_jobs=-1,
-                  bootstrap=False, feature_names=None, num_features=50,
-                  validate=True):
+                  bootstrap=False, feature_names=None, validate=True):
     """
     Fits, trains, and evaluates a random forest learning, returns an accuracy.
     """
@@ -134,9 +131,9 @@ def random_forest(input_data, n_estimators=50, criterion='entropy',
     kwargs = {'n_estimators': n_estimators, 'criterion': criterion,
               'max_features': max_features, 'max_depth': max_depth,
               'min_samples_split': min_samples_split,
-              'min_samples_leaf':min_samples_leaf,
+              'min_samples_leaf': min_samples_leaf,
               'min_weight_fraction_leaf': min_weight_fraction_leaf,
-              'max_leaf_nodes':max_leaf_nodes,
+              'max_leaf_nodes': max_leaf_nodes,
               'min_impurity_decrease': min_impurity_decrease,
               'bootstrap': bootstrap, 'n_jobs': n_jobs}
 
@@ -162,8 +159,8 @@ def random_forest(input_data, n_estimators=50, criterion='entropy',
 # The results from the grid search are in ~/Data/sgdc_parameters/
 def kmer_split_sgd(input_data):
     """
-    Stochastic gradient descent model with params optimized for kmer data on the
-    lupolova et al split dataset
+    Stochastic gradient descent model with params optimized for kmer data on
+    the lupolova et al split dataset
     """
     model = SGDC(loss='log', n_jobs=-1, eta0=1.0,
                  learning_rate='invscaling', penalty='none', tol=0.001,
@@ -171,15 +168,17 @@ def kmer_split_sgd(input_data):
     model.fit(input_data[0], input_data[1])
     return model.score(input_data[2], input_data[3])
 
+
 def kmer_mixed_sgd(input_data):
     """
-    Stochastic gradient descent model with params optimized for kmer data on the
-    lupolova et al mixed dataset
+    Stochastic gradient descent model with params optimized for kmer data on
+    the lupolova et al mixed dataset
     """
     model = SGDC(loss='squared_hinge', n_jobs=-1, penalty='none',
                  tol=0.001, alpha=10000000.0)
     model.fit(input_data[0], input_data[1])
     return model.score(input_data[2], input_data[3])
+
 
 def genome_split_sgd(input_data):
     """
@@ -191,6 +190,7 @@ def genome_split_sgd(input_data):
                  alpha=0.01)
     model.fit(input_data[0], input_data[1])
     return model.score(input_data[2], input_data[3])
+
 
 def genome_mixed_sgd(input_data):
     """

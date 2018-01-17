@@ -7,6 +7,7 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def get_data(filename):
     """
     Converts the data contained in filename to the x,y format need to plot the
@@ -27,6 +28,7 @@ def get_data(filename):
         print E
         return
     return x, y
+
 
 def main(filepath, title, xlabel, ylabel, x_range, enforce_x, y_range,
          enforce_y, keep, log, add_trends):
@@ -72,14 +74,15 @@ def main(filepath, title, xlabel, ylabel, x_range, enforce_x, y_range,
             p = plt.plot(data[0], data[1], label=label, linestyle=line_style)
             if add_trends:
                 colour = p[-1].get_color()
-                coefs = np.polyfit(np.asarray(data[0], dtype='float64'), data[1], add_trends)
+                coefs = np.polyfit(np.asarray(data[0], dtype='float64'),
+                                   data[1], add_trends)
                 func = np.poly1d(coefs)
                 y = func(data[0])
                 plt.plot(data[0], y, '--', color=colour)
 
-
     plt.legend()
     plt.show()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -96,26 +99,32 @@ if __name__ == "__main__":
                         help='The label for the y axis',
                         nargs='*')
     parser.add_argument('--x_range', '-xr',
-                        help='start,stop,step for the location of x tick marks',
+                        help='start,stop,step for the location of x tick' +
+                        'marks',
                         nargs=3,
                         type=float)
     parser.add_argument('--enforce_x', '-ex',
-                        help='Treated as a bool. Force the max/min value of x axis to match given x_range',
+                        help='Treated as a bool. Force the max/min value of' +
+                        'x axis to match given x_range',
                         type=bool)
     parser.add_argument('--y_range', '-yr',
-                        help='start,stop,step for the location of y tick marks',
+                        help='start,stop,step for the location of y tick' +
+                        'marks',
                         nargs=3,
                         type=float)
     parser.add_argument('--enforce_y', '-ey',
-                        help='Treated as a bool. Force the max/min value of y axis to match given y_range',
+                        help='Treated as a bool. Force the max/min value of' +
+                        'y axis to match given y_range',
                         type=bool)
     parser.add_argument('--keep', '-k',
-                        help='A substring that must be included in the filenames for them to be plotted')
+                        help='A substring that must be included in the' +
+                        'filenames for them to be plotted')
     parser.add_argument('--log', '-l',
                         help='If true the x axis is plotted in log space',
                         type=bool)
     parser.add_argument('--add_trends', '-at',
-                        help='Int, polynomial trendlines of degree given are plotted',
+                        help='Int, polynomial trendlines of degree given' +
+                        'are plotted',
                         type=int)
 
     args = parser.parse_args()

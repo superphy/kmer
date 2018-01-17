@@ -21,7 +21,8 @@ def start(filename, k, limit, env, txn, data):
     Args:
         filename (str):             Fasta file to perform a kmer count on
         k (int):                    The length of kmer to count
-        limit (int):                Minimum frequency of kmer count to be output
+        limit (int):                Minimum frequency of kmer count to be
+                                    output
         env (lmdb.Environment):
         txn (lmdb.Transaction):
         data (Environment handle):
@@ -29,19 +30,19 @@ def start(filename, k, limit, env, txn, data):
     Returns:
         None
     """
-    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
-            '%s' % filename, '-o', 'counts.jf', '-L', '%d' % limit]
+    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
+            '-C', str(filename), '-o', 'counts.jf', '-L', '%d' % limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
     # Get results from kmer count
     args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
-    out, err = p.communicate()
+    out = p.communicate()
     # Transform results into usable format
-    arr = [x.split(' ') for x in out.split('\n') if x]
+    arr = [x.split(' ') for x in out[0].split('\n') if x]
 
     txn.drop(data, delete=False)
-    string = '%s'%filename
+    string = str(filename)
     current = env.open_db(string, txn=txn)
 
     for line in arr:
@@ -68,19 +69,18 @@ def firstpass(filename, k, limit, env, txn):
     Returns:
         None
     """
-    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
-            '%s' % filename, '-o', 'counts.jf', '-L', '%d' % limit]
+    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
+            '-C', str(filename), '-o', 'counts.jf', '-L', '%d' % limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
 
     # Get results from kmer count
     args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
-    out, err = p.communicate()
+    out = p.communicate()
     # Transform results into usable format
-    arr = [x.split(' ') for x in out.split('\n') if x]
-
-    string = '%s'%filename
+    arr = [x.split(' ') for x in out[0].split('\n') if x]
+    string = str(filename)
     current = env.open_db(string, txn=txn)
     txn.drop(current, delete=False)
 
@@ -111,7 +111,7 @@ def secondstart(filename, env, txn, data):
     Returns:
         None
     """
-    string = '%s'%filename
+    string = str(filename)
     current = env.open_db(string, txn=txn)
     txn.drop(data, delete=False)
     with txn.cursor(db=current) as cursor:
@@ -133,7 +133,7 @@ def secondpass(filename, env, txn):
     Returns:
         None
     """
-    string = '%s'%filename
+    string = str(filename)
     current = env.open_db(string, txn=txn)
     with txn.cursor(db=current) as cursor:
         for key, val in cursor:
@@ -218,30 +218,30 @@ def add(filename, k, env, txn):
     Returns:
         None
     """
-    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30', '-C',
-            '%s' % filename, '-o', 'counts.jf']
+    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
+            '-C', str(filename), '-o', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
 
     # Get results from kmer count
     args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE)
-    out, err = p.communicate()
+    out = p.communicate()
     # Transform results into usable format
-    arr = [x.split(' ') for x in out.split('\n') if x]
-
-    string = '%s'%filename
+    arr = [x.split(' ') for x in out[0].split('\n') if x]
+    string = str(filename)
     current = env.open_db(string, txn=txn)
     txn.drop(current, delete=False)
 
     for line in arr:
         if txn.get(line[0], default=False):
-            txn.put(line[0], line[1], overwrite=True, dupdata=False, db=current)
+            txn.put(line[0], line[1], overwrite=True, dupdata=False,
+                    db=current)
 
     with txn.cursor() as cursor:
-        for key, val in cursor:
-            if not txn.get(key, default=False, db=current):
-                txn.put(key, '0', overwrite=True, db=current)
+        for item in cursor:
+            if not txn.get(item[0], default=False, db=current):
+                txn.put(item[0], '0', overwrite=True, db=current)
 
 
 def add_to_database(files, k, env, txn):
@@ -271,9 +271,9 @@ def add_to_database(files, k, env, txn):
 
 def count_kmers(k, limit, files, database):
     """
-    Counts all kmers of length "k" in the fasta files "files", removing any that
-    appear fewer than "limit" times. Stores the output in a lmdb database named
-    "database".
+    Counts all kmers of length "k" in the fasta files "files", removing any
+    that appear fewer than "limit" times. Stores the output in a lmdb database
+    named "database".
 
     Args:
         k (int):            The length of kmer to count.
@@ -284,7 +284,7 @@ def count_kmers(k, limit, files, database):
     Returns:
         None
     """
-    env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=4000)
+    env = lmdb.open(str(database), map_size=int(160e9), max_dbs=4000)
     data = env.open_db('master', dupsort=False)
 
     with env.begin(write=True, db=data) as txn:
@@ -310,7 +310,7 @@ def get_counts(files, database):
     Returns:
         list(list): The kmer counts for each genome in files.
     """
-    env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=4000)
+    env = lmdb.open(str(database), map_size=int(160e9), max_dbs=4000)
     data = env.open_db('master', dupsort=False)
 
     with env.begin(write=False, db=data) as txn:
@@ -319,10 +319,11 @@ def get_counts(files, database):
 
         for f in files:
             array = []
-            current = env.open_db('%s'%f, txn=txn)
+
+            current = env.open_db(str(f), txn=txn)
             cursor = txn.cursor(db=current)
-            for key, val in cursor:
-                array.append(int(val))
+            for item in cursor:
+                array.append(int(item[1]))
 
             arrays.append(array)
 
@@ -341,7 +342,7 @@ def get_kmer_names(database):
     Returns:
         list(str): Every kmer in the database sorted alphabetically.
     """
-    env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=4000)
+    env = lmdb.open(str(database), map_size=int(160e9), max_dbs=4000)
     data = env.open_db('master', dupsort=False)
 
     with env.begin(write=False, db=data) as txn:
@@ -349,8 +350,8 @@ def get_kmer_names(database):
         kmer_list = []
         cursor = txn.cursor()
 
-        for key, val in cursor:
-            kmer_list.append(key)
+        for item in cursor:
+            kmer_list.append(item[0])
 
     env.close()
     return np.asarray(kmer_list)
@@ -374,14 +375,14 @@ def add_counts(files, database):
     Returns:
         None
     """
-    env = lmdb.open('%s'%database, map_size=int(160e9), max_dbs=100000)
+    env = lmdb.open(str(database), map_size=int(160e9), max_dbs=100000)
     master = env.open_db('master', dupsort=False)
 
     with env.begin(write=True, db=master) as txn:
         with txn.cursor() as cursor:
             cursor.first()
-            key, val = cursor.item()
-            k = len(key)
+            item = cursor.item()
+            k = len(item[0])
 
         add_to_database(files, k, env, txn)
 

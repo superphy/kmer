@@ -123,8 +123,8 @@ def shuffle(data, labels):
 
 def flatten(data):
     """
-    Takes a 3D numpy ndarray and makes it 2D, assumes that the array was made 3D
-    using utils.make3D
+    Takes a 3D numpy ndarray and makes it 2D, assumes that the array was made
+    3D using utils.make3D
 
     Args:
         data (ndarray): Numpy array to flatten.
@@ -138,7 +138,7 @@ def flatten(data):
 
 def make3D(data):
     """
-    Takes a 2D numpy ndarray and makes it 3D to be used in a Conv1D keras layer.
+    Takes a 2D numpy ndarray and makes it 3D to be used in a Conv1D keras layer
 
     Args:
         data (ndarray): Numpy array to make 3D
@@ -182,7 +182,7 @@ def sensitivity_specificity(predicted_values, true_values):
         sensitivity = (1.0*TP)/(TP+FN)
         specificity = (1.0*TN)/(TN+FP)
 
-        results[c] = {'sensitivity':sensitivity, 'specificity':specificity}
+        results[c] = {'sensitivity': sensitivity, 'specificity': specificity}
 
     return results
 
@@ -191,7 +191,8 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                    label_header='Class', train_header='Dataset',
                    extra_header=None, extra_label=None, train_label='Train',
                    test_label='Test', suffix='', prefix='', sep=None,
-                   one_vs_all=None, remove=None, validate=True, blacklist=None):
+                   one_vs_all=None, remove=None, validate=True,
+                   blacklist=None):
     """
     Gets filenames, classifications, and train/test splits from a metadata
     sheet. Does not alter the metadata sheet in any way. Provides options to
@@ -224,14 +225,14 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                                 to form one class.
         remove (str):           If given, any samples whose classification
                                 matches the given value will be removed.
-        validate (bool):        If True y_test is created, if False y_test is an
-                                empty ndarray.
+        validate (bool):        If True y_test is created, if False y_test is
+                                an empty ndarray.
         blacklist (list(str)):  A list of genome names to remove.
 
     Returns:
         tuple: (x_train, y_train, x_test, y_test); x_train and x_test contain
-               filenames, not the actual data to be passed to a machine learning
-               model.
+               filenames, not the actual data to be passed to a machine
+               learning model.
     """
     if sep is None:
         data = pd.read_csv(metadata, sep=sep, engine='python')
@@ -248,7 +249,8 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         data = data.drop(data[data[fasta_header].isin(blacklist)].index)
 
     if one_vs_all:
-        data[label_header] = data[label_header].where(data[label_header] == one_vs_all, 'Other')
+        data[label_header] = data[label_header].where(
+            data[label_header] == one_vs_all, 'Other')
 
     all_labels = np.unique(data[label_header])
     all_labels = all_labels[pd.notnull(all_labels)]
@@ -259,9 +261,11 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         all_train_data = []
         all_test_data = []
         for label in all_labels:
-            all_train_data.append(train_data[train_data[label_header] == label])
+            all_train_data.append(train_data[
+                train_data[label_header] == label])
             if validate:
-                all_test_data.append(test_data[test_data[label_header] == label])
+                all_test_data.append(test_data[
+                    test_data[label_header] == label])
         all_train_data = [x[fasta_header].values for x in all_train_data]
         if validate:
             all_test_data = [x[fasta_header].values for x in all_test_data]
@@ -281,10 +285,12 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                 cutoff = int(0.8*label_data.shape[0])
                 all_train_data.append(label_data[:cutoff])
                 all_test_data.append(label_data[cutoff:])
-    all_train_data = [[prefix+str(x)+suffix for x in array] for array in all_train_data]
+    all_train_data = [[prefix+str(x)+suffix for x in array] for array in
+                      all_train_data]
     x_train, y_train = shuffle(all_train_data, all_labels)
     if validate:
-        all_test_data = [[prefix+str(x)+suffix for x in array] for array in all_test_data]
+        all_test_data = [[prefix+str(x)+suffix for x in array] for array in
+                         all_test_data]
         x_test, y_test = shuffle(all_test_data, all_labels)
     else:
         x_test = [prefix+str(x)+suffix for x in all_test_data]
@@ -297,11 +303,11 @@ def parse_json(json_files, path=constants.MORIA, suffix='.fasta',
                key='assembly_barcode'):
     """
     Args:
-        path:       File path to be appended to the beginning of each fasta file
+        path:       File path to append to the beginning of each fasta file
         suffix:     String to be appended to the end of each fasta file eg
                     ".fasta"
         key:        The fasta filename identifier used in the json files.
-        json_files: One or more json files to create a list of fasta files from.
+        json_files: One or more json files to create a list of fasta files from
     Returns:
         A list with as many elements as json files were input. Each element in
         the list is a list of the complete file paths to each valid genome
@@ -351,9 +357,9 @@ def convert_well_index(well_index):
 def convert_feature_name(feature_name):
     """
     Converts the feature name to the onmilog well coordiantes. Converts the
-    output of convert_well_index back to it's input, sort of this doesn't gather
-    the middle portion i.e returns the tuple ('PM1', 'A01') rather than the
-    string 'PM1{description="Carbon utilization assays"}A01'
+    output of convert_well_index back to it's input, sort of this doesn't
+    gather the middle portion i.e returns the tuple ('PM1', 'A01') rather than
+    the string 'PM1{description="Carbon utilization assays"}A01'
 
     Args:
         Feature_name (str): The name of the omnilog feature.
@@ -364,10 +370,9 @@ def convert_feature_name(feature_name):
     feature_name = feature_name.encode('utf-8')
     df = pd.read_csv(constants.OMNILOG_WELLS)
     index = '(' + feature_name + ')'
-    coordinates = df.loc[df['Value']==index, 'Key'].iloc[0]
+    coordinates = df.loc[df['Value'] == index, 'Key'].iloc[0]
     coordinates = coordinates.split('-')
     return (coordinates[0], coordinates[1])
-
 
 
 def do_nothing(input_data, **kwargs):
@@ -412,16 +417,18 @@ def combine_lists(input_lists):
     num_of_lists = len(input_lists)
     weight = 1.0/(length_of_list*num_of_lists)
 
-    all_features = [elem for ranked_list in input_lists for elem in ranked_list]
+    all_features = [elem for ranked_list in input_lists for elem in
+                    ranked_list]
     unique_features = np.unique(np.asarray(all_features)).tolist()
-    feature_rankings = {k:0 for k in unique_features}
+    feature_rankings = {k: 0 for k in unique_features}
 
     for ranked_list in input_lists:
         ranked_list = list(ranked_list)
         for elem in ranked_list:
             val = weight*(length_of_list - ranked_list.index(elem))
             feature_rankings[elem] += val
-    output = sorted(feature_rankings, key=lambda k: feature_rankings[k], reverse=True)
+    output = sorted(feature_rankings, key=lambda k: feature_rankings[k],
+                    reverse=True)
     output = [(x, feature_rankings[x]) for x in output]
     return output
 
@@ -441,7 +448,7 @@ def encode_labels(y_train, y_test):
     le = LabelEncoder()
     le.fit(np.concatenate((y_train, y_test)))
     y_train = le.transform(y_train)
-    if y_test is not None and len(list(y_test)) > 0:
+    if list(y_test):
         y_test = le.transform(y_test)
 
     return y_train, y_test, le

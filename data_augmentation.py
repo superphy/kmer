@@ -21,8 +21,8 @@ def __augment_data_naive_helper(data, desired_samples):
                                class.
 
     Returns:
-        data (ndarray): The input data with additional samples of the same class
-                        added.
+        data (ndarray): The input data with additional samples of the same
+                        class added.
     """
     indices = np.random.randint(data.shape[0], size=2*desired_samples)
     temp = np.split(data[indices, :], desired_samples)
@@ -68,7 +68,7 @@ def augment_data_naive(input_data, desired_samples=50):
 def augment_data_smote(input_data, desired_samples=50):
     """
     Augments data using the SMOTE algorithm. For more information see the
-    documentation:  http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.SMOTE.html
+    documentation: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.SMOTE.html # noqa
 
     Will probably give a user warning stating: "The number of smaples in
     class x will be larger than the number of samples in the majority class"
@@ -100,7 +100,7 @@ def augment_data_smote(input_data, desired_samples=50):
 def augment_data_adasyn(input_data, desired_samples=50):
     """
     Augments data using the ADASYN algorithm. For more information see the
-    documentation:  http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.ADASYN.html
+    documentation:  http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.ADASYN.html # noqa
 
     Will probably give a user warning stating: "The number of smaples in
     class x will be larger than the number of samples in the majority class"
@@ -168,7 +168,7 @@ def balance_data_smote(input_data):
     """
     Uses the SMOTE algorithm to balance data by adding samples to all minority
     classes until each class has the same number of samples.
-    See: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.SMOTE.html
+    See: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.SMOTE.html # noqa
 
     Args:
         input_data (tuple): x_train, y_train, x_test, y_test
@@ -190,11 +190,12 @@ def balance_data_smote(input_data):
     x_train, y_train = SMOTE(ratio=ratio).fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
+
 def balance_data_adasyn(input_data):
     """
     Uses the ADASYN algorithm to balance data by adding samples to all minority
     classes until each class has the same number of samples.
-    See: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.ADASYN.html
+    See: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.ADASYN.html # noqa
 
     Args:
         input_data (tuple): x_train, y_train, x_test, y_test
@@ -216,11 +217,12 @@ def balance_data_adasyn(input_data):
     x_train, y_train = ADASYN(ratio=ratio).fit_sample(x_train, y_train)
     return (x_train, y_train, x_test, y_test)
 
+
 def balance_data_naive(input_data):
     """
-    Balances data by adding samples to all minority classes until each class has
-    the same number of samples. Creates new samples by grabbing x random samples
-    from the same class and averaging their values.
+    Balances data by adding samples to all minority classes until each class
+    has the same number of samples. Creates new samples by grabbing x random
+    samples from the same class and averaging their values.
 
     Args:
         input_data (tuple): x_train, y_train, x_test, y_test
@@ -251,11 +253,12 @@ def balance_data_naive(input_data):
     x_train, y_train = shuffle(output, labels)
     return (x_train, y_train, x_test, y_test)
 
+
 def balance_data_noise(input_data):
     """
-    Balances data by adding samples to all minority classes until each class has
-    the same number of samples. Creates new samples by grabbing adding random
-    noise to samples.
+    Balances data by adding samples to all minority classes until each class
+    has the same number of samples. Creates new samples by grabbing adding
+    random noise to samples.
 
     Args:
         input_data (tuple): x_train, y_train, x_test, y_test

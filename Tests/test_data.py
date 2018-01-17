@@ -25,7 +25,7 @@ class GetKmer(unittest.TestCase):
         with open(self.dir + '/B1', 'w') as f:
             f.write('>\nAACCAACC')
         kwargs = {'metadata': self.metadata, 'prefix': self.dir + '/'}
-        self.data, self.features, self.files, self.le = get_kmer(kwargs, self.db, recount=True, k=2, l=1)
+        self.data, self.features, self.files, self.le = get_kmer(kwargs, self.db, recount=True, k=2, L=1)
         self.correct_x_train = np.array([[3,1,1,3],[2,2,1,2]])
         self.correct_y_train = np.array(['A', 'B'])
         self.correct_x_test = np.array([[2,1,1,3]])
@@ -225,7 +225,7 @@ class ExtractFeaturesKmer(unittest.TestCase):
         with open(self.fasta, 'w') as f:
             f.write('>label1\nAAAA\n>label2\nCCCC\n>label3\nATAT\n>label4\nACGT')
         kwargs = {'metadata':self.metadata, 'prefix':self.dir, 'validate':False}
-        self.data = get_kmer(kwargs,self.db,recount=True,k=4,l=0,validate=False)
+        self.data = get_kmer(kwargs,self.db,recount=True,k=4,L=0,validate=False)
         self.correct_features = np.array(['AAAA', 'ACGT', 'ATAT', 'CCCC'])
 
     def tearDown(self):

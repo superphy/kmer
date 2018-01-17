@@ -12,10 +12,7 @@ import feature_selection
 import data_augmentation
 import numpy as np
 import yaml
-import utils
-from utils import do_nothing, convert_well_index
-from rankaggr_brute import combine_lists
-from rankaggr_vote import vote
+from utils import do_nothing
 
 
 def run(model=models.support_vector_machine, model_args=None,
@@ -37,7 +34,7 @@ def run(model=models.support_vector_machine, model_args=None,
         data_args (dict):       The arguments to be passed to the data method
         scaler (function):      The method used to scale the data see
                                 feature_scaling.py.
-        scaler_args (dict):     The arguments to be passed to the scaler method.
+        scaler_args (dict):     The arguments to be passed to the scaler method
         selection (function):   The method used to perform feature selection,
                                 see feature_selection.py.
         selection_args (dict):  The arguments to be passed to the selection
@@ -110,39 +107,36 @@ def run(model=models.support_vector_machine, model_args=None,
 
     # Store information about the run in a dictionary
     output = {}
-    # output['train_sizes'] = train_sizes.mean().tolist()
-    # output['test_sizes'] = test_sizes.mean().tolist()
-    # output['avg_run_time'] = times.mean().tolist()
-    # output['std_dev_run_times'] = times.std().tolist()
-    # output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
+    output['train_sizes'] = train_sizes.mean().tolist()
+    output['test_sizes'] = test_sizes.mean().tolist()
+    output['avg_run_time'] = times.mean().tolist()
+    output['std_dev_run_times'] = times.std().tolist()
+    output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
 
-    # if validate:
-    #     # Compute the mean and std dev of all the runs
-    #     output['avg_result'] = results.mean().tolist()
-    #     output['std_dev_results'] = results.std().tolist()
-    #     output['results'] = results.tolist()
-    # else:
-    #     # Create dictionary with test files as keys and predictions as values
-    #     # Convert classes back to their original values
-    #     results = le.inverse_transform(results)
-    #     output['results'] = dict(zip(files, results.tolist()))
-    # all_features = [x for l in all_features for x in l]
-    # important_features = vote(all_features)
-    # important_features = [(convert_well_index(x), int(y)) for (x,y) in important_features]
+    if validate:
+        # Compute the mean and std dev of all the runs
+        output['avg_result'] = results.mean().tolist()
+        output['std_dev_results'] = results.std().tolist()
+        output['results'] = results.tolist()
+    else:
+        # Create dictionary with test files as keys and predictions as values
+        # Convert classes back to their original values
+        results = le.inverse_transform(results)
+        output['results'] = dict(zip(files, results.tolist()))
 
-    # output['repetitions'] = reps
+    output['repetitions'] = reps
     output['important_features'] = all_features
-    # output['model'] = model
-    # output['model_args'] = model_args
-    # output['data'] = data_method
-    # output['data_args'] = data_args
-    # output['scaler'] = scaler
-    # output['scaler_args'] = scaler_args
-    # output['selection'] = selection
-    # output['selection_args'] = selection_args
-    # output['augment'] = augment
-    # output['augment_args'] = augment_args
-    # output['datetime'] = datetime.datetime.now()
+    output['model'] = model
+    output['model_args'] = model_args
+    output['data'] = data_method
+    output['data_args'] = data_args
+    output['scaler'] = scaler
+    output['scaler_args'] = scaler_args
+    output['selection'] = selection
+    output['selection_args'] = selection_args
+    output['augment'] = augment
+    output['augment_args'] = augment_args
+    output['datetime'] = datetime.datetime.now()
     return output
 
 
@@ -246,7 +240,7 @@ def main(input_yaml, output_yaml, name):
         input_yaml (str):   Filepath to a yaml file containing the run config.
         output_yaml (str):  Filepath to a yaml file where the results will be
                             stored.
-        name (str):         What the yaml document will be named in output_yaml.
+        name (str):         What the yaml document will be named in output_yaml
 
     Returns:
         None
@@ -255,8 +249,9 @@ def main(input_yaml, output_yaml, name):
     run_output = run(**args)
     document = {'name': name, 'output': run_output}
     with open(output_yaml, 'a') as output_file:
-        yaml.dump(document, output_file, explicit_start=True, explicit_end=True,
-                  default_flow_style=False, allow_unicode=True)
+        yaml.dump(document, output_file, explicit_start=True,
+                  explicit_end=True, default_flow_style=False,
+                  allow_unicode=True)
         output_file.write('\n\n\n')
 
 
