@@ -1,7 +1,7 @@
 # Installation
 
 1. Clone repository
-1. Install dependecies": run `conda create --name <env> --file conda-specs.txt`
+1. Install dependecies: run `conda create --name <env> --file conda-specs.txt`
 1. Start conda environment: run `source activate <env>`
 1. [Install jellyfish](https://github.com/gmarcais/Jellyfish "Jellyfish GitHub") __*You do not need to install the python binding for jellyfish, just the command line tool*__
 1. Verify that everything is working: run `nose2 -B` this will run all of the tests, they should all pass.
@@ -55,6 +55,8 @@ Running the script multiple times with the same output file will not overwrite t
 
 #### To Use in Another Script:
 
+To get the same behaviour as from the command line:
+
 ```python
 from run import main
 main('config_file.yml', 'output_file.yml', 'name of run')
@@ -100,64 +102,61 @@ score = neural_network(d)
 A collection of methods that gather and prepare data to be input into a machine learning model.
 
 Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files, LabelEncoder) where:
-* x_train is a 2D array with shape (number of samples, number of features) containing the training data.
-* y_train is a 1D array with shape (number of samples,) containing the classification labels for the training data.
-* x_test is a 2D array of the shape (number of test samples, number of features) containing the test data_args.
-* y_test is either a 1D array of the shape (number of test samples,) containing the classification labels for the test data or in the case where you are not validating the model is an empty array.
-* feature_names is a list of all the features present in each sample.
-* test_files is a list of the names of each input being used to test the model.
-* LabelEncoder is a scikit-learn LabelEncoder object that will allow you to convert the predicted classifications back into a human readable format.
+* **x_train**: 2D array with shape (number of samples, number of features) containing the training data.
+* **y_train**: 1D array with shape (number of samples,) containing the classification labels for the training data.
+* **x_test**: 2D array of the shape (number of test samples, number of features) containing the test data.
+* **y_test**: Either a 1D array of the shape (number of test samples,) containing the classification labels for the test data or in the case where you are not validating the model is an empty array.
+* **feature_names**: List of all the features present in each sample.
+* **test_files**: List of the names of each input being used to test the model.
+* **LabelEncoder**: Scikit-learn LabelEncoder object that will allow you to convert the predicted classifications back into a human readable format.
 
 Some of the methods simply return: (x_train, y_train, x_test, y_test)
 
 To recreate the results of the the [Lupolova et. al](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5056084/ "NCBI article") paper with kmer counts as inputs use the method: get_kmer_us_uk_split. To recreate the results of the paper using genome region presence absence data use the method get_genome_region_us_uk_split.
 
-The methods that prepare kmer data use kmer_counter.py
+The methods that prepare kmer data use kmer_counter.py to count the kmers.
 
 
 ## feature_selection.py
 
 A collection of methods that perform feature selection on the training and testing data.
 
-Each method has a positional argument (input_data) and a named argument (feature_names). input_data should be a tuple containing (x_train, y_train, x_test, y_test) as defined under get_data.py. feature_names should be a list containing the names of all the features in each sample. If feature_names is given the features that are removed from input_data by the feature selection will also be removed from feature_names.
+Each method has two positional arguments input_data and feature_names. input_data should be a tuple containing (x_train, y_train, x_test, y_test) as defined under get_data.py. feature_names should be a list containing the names of all the features in each sample or None. If feature_names is given the features that are removed from input_data by the feature selection will also be removed from feature_names.
 
-All of the methods return input_data with some features removed from x_train and x_test based on the conditions specified by the method and by the parameters passed to the method. If feature_names is specified an updated version of itself is also returned.
+All of the methods return input_data and feature_names with features removed from x_train, x_test and feature_names based on the conditions specified by the method and by the parameters passed to the method.
 
 
 ## feature_scaling.py
 
 A collection of methods that perform feature scaling.
 
-Each of the methods has a positional argument (input_data) as defined under feature_selection.py and returns input_data with the values in x_train and x_test scaled according to the specifications of the method and it's given parameters.
+Each of the methods has a positional argument, input_data, as defined under feature_selection.py and returns input_data with the values in x_train and x_test scaled according to the specifications of the method and it's given parameters.
 
 
 ## data_augmentation.py
 
 A collection of methods that perform data augmentation, the process of artificially generating new samples based on the samples you already have.
 
-Each method has a positional argument input_data as defined under feature_selection.py and returns input_data with additonal samples added to x_train and y_train. x_test and y_test are not changed. Some of the methods take additional parameters that define how the new samples are created.
+Each method has a positional argument, input_data, as defined under feature_selection.py and returns input_data with additonal samples added to x_train and y_train. x_test and y_test are not changed.
 
 
 ## models.py
 
 A collection of methods containing machine learning models.
 
-Each method has a positional argument (input_data) as defined under feature_selection.py and a named argument (validate). Some of the methods also take additional arguments that allow further customization of how they work.
-
-Validate should be a bool. If validate is True, the method will return an accuracy score representing the percentage of samples in x_test that were corretly classified and y_test must be given. If validate is False, the method will return a list containing the predicted classification for each sample in x_test and y_test is ignored.
+Each method has a positional argument, input_data, as defined under feature_selection.py and a named argument, validate. Validate should be a bool. If validate is True, the method will return an accuracy score representing the percentage of samples in x_test that were corretly classified and y_test must be given. If validate is False, the method will return a list containing the predicted classification for each sample in x_test and y_test is ignored.
 
 
 ## kmer_counter.py
 
 Methods to count kmers, store the counts in a database, and then retrieve the counts later. The [jellyfish](https://github.com/gmarcais/Jellyfish "Jellyfish GitHub") program is used to count the kmers.
 
-In order to be meaningful the inputs to machine learning models must all be of the same length and the features of each input must match up, therefore the output of jellyfish can not be directly input into a machine learning model, instead only kmers that appear at least "limit" times in each input genome will be kept.
+Since each data sample input to a machine learning model must have the same features as every other sample passed to the model the output of jellyfish can not be directly input into a machine learning model as it is possible that a kmer will appear in some, but not all of the samples. Therefore kmer_counter.py removes all kmers that do not appear at least "limit" times in each input genome.
 
-count kmers: Counts all kmers of length k that appear at least limit times in each given fasta file. Stores the output in a database
-
-get_counts: Returns a list of the kmer counts stored in the database for each input fasta file.
-
-add_counts: Adds new files to the database, does not affect kmer counts already in the database. Useful for when you train a model on a dataset and then later get more data. Since the kmer counts of the new data must match up with the kmer counts of the old data.
+The three methods useful to a user in kmer_counter.py are:
+* **count kmers**: Counts all kmers of length k that appear at least limit times in each given fasta file. Stores the output in a database.
+* **get_counts**: Returns a list of the kmer counts stored in the database for each input fasta file.
+* **add_counts**: Adds new files to the database, does not affect kmer counts already in the database. Useful for when you train a model on a dataset and then later get more data. Since the kmers present in the new data must match the kmers present in the old data.
 
 
 #### To use in another script:
