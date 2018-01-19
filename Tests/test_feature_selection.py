@@ -14,7 +14,7 @@ class VarianceThreshold(unittest.TestCase):
         x_test = np.random.randint(15, size=(12, 6))
         y_test = np.random.randint(self.classes, size=(12))
         self.data = [x_train, y_train, x_test, y_test]
-        self.threshold = 0.75*x_train[0][0].var()
+        self.threshold = 0.75 * x_train[0][0].var()
         train_df = pd.DataFrame(x_train)
         test_df = pd.DataFrame(x_test)
         train_df = train_df.drop(train_df.var()[train_df.var() <
@@ -91,21 +91,21 @@ class SelectKBest(unittest.TestCase):
         self.score_func = chi2
         self.classes = 3
         self.features = 1000
-        best = np.zeros((self.features*self.classes, 1))
+        best = np.zeros((self.features * self.classes, 1))
         for x in range(self.classes):
-            best[x*self.features:(x+1)*self.features] = x
-        c = np.random.randint(2, size=(self.features*self.classes,
-                              self.features-2))
+            best[x * self.features: (x + 1) * self.features] = x
+        c = np.random.randint(2, size=(self.features * self.classes,
+                              self.features - 2))
         x_train = np.hstack((best, c, best))
-        y_train = best.reshape(self.features*self.classes)
+        y_train = best.reshape(self.features * self.classes)
         x_test = np.random.randint(15, size=(10, self.features))
         y_test = np.random.randint(self.classes, size=(10))
         self.data = [x_train, y_train, x_test, y_test]
         self.new_data, self.fn = select_k_best(self.data, None,
                                                score_func=self.score_func, k=2)
-        correct_x_train = np.delete(x_train, np.arange(1, self.features-1),
+        correct_x_train = np.delete(x_train, np.arange(1, self.features - 1),
                                     axis=1)
-        correct_x_test = np.delete(x_test, np.arange(1, self.features-1),
+        correct_x_test = np.delete(x_test, np.arange(1, self.features - 1),
                                    axis=1)
         self.correct_data = [correct_x_train, y_train, correct_x_test, y_test]
 
@@ -135,19 +135,20 @@ class SelectPercentile(unittest.TestCase):
         self.score_func = chi2
         self.classes = 3
         self.features = 5
-        best = np.zeros((self.features*self.classes, 1))
+        best = np.zeros((self.features * self.classes, 1))
         for x in range(self.classes):
-            best[x*self.features:(x+1)*self.features] = x
-        c = np.random.randint(2, size=(self.features*self.classes,
-                              self.features-2))
+            best[x * self.features: (x + 1) * self.features] = x
+        c = np.random.randint(2, size=(self.features * self.classes,
+                              self.features - 2))
         x_train = np.hstack((best, c, best))
-        y_train = best.reshape(self.features*self.classes)
+        y_train = best.reshape(self.features * self.classes)
         x_test = np.random.randint(15, size=(10, self.features))
         y_test = np.random.randint(self.classes, size=(10))
         self.data = [x_train, y_train, x_test, y_test]
+        p = 200 / self.features
         self.new_data, self.f = select_percentile(self.data, None,
                                                   score_func=self.score_func,
-                                                  percentile=200/self.features)
+                                                  percentile=p)
         correct_x_train = np.delete(x_train, np.arange(1, self.features - 1),
                                     axis=1)
         correct_x_test = np.delete(x_test, np.arange(1, self.features - 1),
@@ -168,7 +169,7 @@ class SelectPercentile(unittest.TestCase):
         features_before = np.random.randint(self.features,
                                             size=(self.features))
         features_after = features_before[[0, -1]]
-        p = 200/self.features
+        p = 200 / self.features
         sf = self.score_func
         fn = features_before
         data, features = select_percentile(self.data, fn, score_func=sf,

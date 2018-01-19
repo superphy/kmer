@@ -22,7 +22,7 @@ class ScaleToRange(unittest.TestCase):
     def test_range(self):
         func = np.vectorize(lambda x: True if x <= self.H and x >= self.L else False)
         a = func(self.new_data[0])
-        self.assertTrue(a.all(), msg=str(a)+'\n'+str(self.new_data[0]) +
+        self.assertTrue(a.all(), msg=str(a) + '\n' + str(self.new_data[0]) +
                         '\nShould all be <= %d and >= %d' % (self.H, self.L))
 
 
