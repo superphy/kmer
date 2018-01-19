@@ -4,6 +4,7 @@ the results can be passed to a machine learning model i.e. if multiple genomes
 are passed to jellyfish only the kmers that appear in all the genoms will be
 returned this ensures that the data is "rectangular".
 """
+
 import subprocess
 import sys
 import lmdb
@@ -141,24 +142,30 @@ def secondpass(filename, env, txn):
                 txn.delete(key, val, db=current)
 
 
-def print_status(counter, total):
+def print_status(counter, total, verbose):
     """
     Outputs a progress bar.
 
     Args:
         counter (int):  Numer of steps completed.
         total (int):    Total number of steps.
+        verbose (bool): If False the status bar is not displayed.
 
     Returns:
         None
     """
-    percent = (counter * 100) / total
-    sys.stdout.write('\r')
-    sys.stdout.write("[%-44s] %d%%" % ('=' * ((percent * 44) / 100), percent))
-    sys.stdout.flush()
+    if verbose:
+        p = (counter * 100) / total
+        sys.stdout.write('\r')
+        sys.stdout.write("[%-44s] %d%%" % ('=' * ((p * 44) / 100), p))
+        sys.stdout.flush()
+        if p == 100:
+            print("\n")
+    else:
+        pass
 
 
-def setup_data(files, k, limit, env, txn, data):
+def setup_data(files, k, limit, env, txn, data, verbose):
     """
     Takes a list of paths to fasta files, a kmer length, a lower limit on how
     many times a kmer needs to occur in order for it to be output, and an lmdb
@@ -171,37 +178,36 @@ def setup_data(files, k, limit, env, txn, data):
         env (lmdb.Environment):
         txn (lmdb.Transaction):
         data (environment handle):
+        verbose (bool):             If True display a status bar.
 
     Returns:
         None
     """
     counter = 0
     total = len(files)
-    print "First Pass"
+
     start(files[0], k, limit, env, txn, data)
     temp = files.pop(0)
     counter += 1
     for filename in files:
-        print_status(counter, total)
+        print_status(counter, total, verbose)
         firstpass(filename, k, limit, env, txn)
         counter += 1
 
     files.insert(0, temp)
 
-    print_status(counter, total)
-    print "\nSecond Pass"
+    print_status(counter, total, verbose)
     counter = 0
     secondstart(files[-1], env, txn, data)
     counter += 1
     i = len(files) - 2
     while i >= 0:
-        print_status(counter, total)
+        print_status(counter, total, verbose)
         secondpass(files[i], env, txn)
         i -= 1
         counter += 1
 
-    print_status(counter, total)
-    print "\n"
+    print_status(counter, total, verbose)
 
 
 def add(filename, k, env, txn):
@@ -244,7 +250,7 @@ def add(filename, k, env, txn):
                 txn.put(item[0], '0', overwrite=True, db=current)
 
 
-def add_to_database(files, k, env, txn):
+def add_to_database(files, k, env, txn, verbose):
     """
     Adds the kmer counts in files to an already created database, does not
     remove any kmer counts from the data base.
@@ -254,22 +260,21 @@ def add_to_database(files, k, env, txn):
         k (int):                The length of kmer to count.
         env (lmdb.Environment):
         txn (lmdb.Transaction):
+        verbose (bool):         If True display a status bar.
 
     Returns:
         None
     """
     counter = 0
     total = len(files)
-    print "Begin"
     for f in files:
-        print_status(counter, total)
+        print_status(counter, total, verbose)
         add(f, k, env, txn)
         counter += 1
-    print_status(counter, total)
-    print "\n"
+    print_status(counter, total, verbose)
 
 
-def count_kmers(k, limit, files, database):
+def count_kmers(k, limit, files, database, verbose):
     """
     Counts all kmers of length "k" in the fasta files "files", removing any
     that appear fewer than "limit" times. Stores the output in a lmdb database
@@ -280,6 +285,7 @@ def count_kmers(k, limit, files, database):
         limit (int):        Minimum frequency for a kmer to be output.
         files (list(str)):  The fasta files to count kmers from.
         database (str):     Name of database where the counts will be stored.
+        verbose (bool):     If True display a status bar.
 
     Returns:
         None
@@ -289,7 +295,7 @@ def count_kmers(k, limit, files, database):
 
     with env.begin(write=True, db=data) as txn:
 
-        setup_data(files, k, limit, env, txn, data)
+        setup_data(files, k, limit, env, txn, data, verbose)
 
     env.close()
 
@@ -357,7 +363,7 @@ def get_kmer_names(database):
     return np.asarray(kmer_list)
 
 
-def add_counts(files, database):
+def add_counts(files, database, verbose):
     """
     Counts kmers in the fasta files "files" removing any that do not already
     appear in "database". If a kmer in "files" has a count less than "limit",
@@ -371,6 +377,7 @@ def add_counts(files, database):
         files (list(str)): The fasta files containing the genomes whose kmer
                            counts you want added to the database.
         database (str):    The name of the database to add the kmer counts to.
+        verbose (bool):    If True display a status bar.
 
     Returns:
         None
@@ -384,6 +391,6 @@ def add_counts(files, database):
             item = cursor.item()
             k = len(item[0])
 
-        add_to_database(files, k, env, txn)
+        add_to_database(files, k, env, txn, verbose)
 
     env.close()
