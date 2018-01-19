@@ -128,7 +128,7 @@ def support_vector_machine(input_data, kernel='linear', C=1,
         features_coefs = dict(zip(feature_names, absolute_coefs))
         output = (output_data, features_coefs)
     else:
-        output = output_data
+        output = (output_data, None)
 
     return output
 
@@ -186,5 +186,5 @@ def random_forest(input_data, n_estimators=50, feature_names=None,
         features_importances = dict(zip(feature_names, importances))
         output = (output_data, features_importances)
     else:
-        output = output_data
+        output = (output_data, None)
     return output
