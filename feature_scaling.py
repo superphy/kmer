@@ -3,9 +3,10 @@ A collection of methods that perform feature scaling.
 
 Each of the methods has a positional argument (input_data) which should contain
 (x_train, y_train, x_test, y_test) and returns input_data with the values in
-x_train and x_test scaled according to the specifications of the method and
-it's given parameters.
+x_train and x_test scaled according to the specifications of the method and it's
+given parameters.
 """
+
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 

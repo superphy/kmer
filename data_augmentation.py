@@ -24,8 +24,8 @@ def augment_data_naive_helper(data, desired_samples):
                                class.
 
     Returns:
-        data (ndarray): The input data with additional samples of the same
-                        class added.
+        data (ndarray): The input data with additional samples of the same class
+                        added.
     """
     indices = np.random.randint(data.shape[0], size=(2 * desired_samples))
     temp = np.split(data[indices, :], desired_samples)
@@ -73,10 +73,10 @@ def augment_data_smote(input_data, desired_samples=50):
     Augments data using the SMOTE algorithm. For more information see the
     documentation: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.SMOTE.html # noqa
 
-    Will probably give a user warning stating: "The number of smaples in
-    class x will be larger than the number of samples in the majority class"
-    but we can ignore this since we are using SMOTE to augment data, not to
-    correct for imbalanced data.
+    Will probably give a user warning stating: "The number of smaples in class x
+    will be larger than the number of samples in the majority class", but we can
+    ignore this since we are using SMOTE to augment data, not to correct for
+    imbalanced data.
 
     Args:
         input_data (tuple): x_train, y_train, x_test, y_test
@@ -105,10 +105,10 @@ def augment_data_adasyn(input_data, desired_samples=50):
     Augments data using the ADASYN algorithm. For more information see the
     documentation:  http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.ADASYN.html # noqa
 
-    Will probably give a user warning stating: "The number of smaples in
-    class x will be larger than the number of samples in the majority class"
-    but we can ignore this since we are using ADASYN to augment data, not to
-    correct for imbalanced data.
+    Will probably give a user warning stating: "The number of smaples in class x
+    will be larger than the number of samples in the majority class", but we can
+    ignore this since we are using ADASYN to augment data, not to correct for
+    imbalanced data.
 
     Args:
         input_data (tuple): x_train, y_train, x_test, y_test
@@ -223,9 +223,9 @@ def balance_data_adasyn(input_data):
 
 def balance_data_naive(input_data):
     """
-    Balances data by adding samples to all minority classes until each class
-    has the same number of samples. Creates new samples by grabbing x random
-    samples from the same class and averaging their values.
+    Balances data by adding samples to all minority classes until each class has
+    the same number of samples. Creates new samples by grabbing x random samples
+    from the same class and averaging their values.
 
     Args:
         input_data (tuple): x_train, y_train, x_test, y_test

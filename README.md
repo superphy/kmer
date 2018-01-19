@@ -4,7 +4,7 @@
 1. Install dependecies: run `conda create --name <env> --file conda-specs.txt`
 1. Start conda environment: run `source activate <env>`
 1. [Install jellyfish](https://github.com/gmarcais/Jellyfish "Jellyfish GitHub") __*You do not need to install the python binding for jellyfish, just the command line tool*__
-1. Verify that everything is working: run `nose2 -B` this will run all of the tests, they should all pass.
+1. Verify that everything is working: run `nose2` this will run all of the tests, they should all pass.
 
 #### Some Common Errors:
 

@@ -5,14 +5,13 @@ testing data.
 Each method has a positional argument (input_data) and a named argument
 (feature_names). input_data should be a tuple containing (x_train, y_train,
 x_test, y_test). feature_names should be a list containing the names of all the
-features in each sample. If feature_names is given the features that are
-removed from input_data by the feature selection will also be removed from
-feature_names.
+features in each sample. If feature_names is given the features that are removed
+from input_data by the feature selection will also be removed from feature_names
 
-All of the methods return input_data with some features removed from x_train
-and x_test based on the conditions specified by the method and by the
-parameters passed to the method. If feature_names is specified an updated
-version of itself is also returned.
+All of the methods return input_data with some features removed from x_train and
+x_test based on the conditions specified by the method and by the parameters
+passed to the method. If feature_names is specified an updated version of itself
+is also returned.
 """
 
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, chi2
@@ -34,8 +33,7 @@ def variance_threshold(input_data, feature_names, threshold=0.16):
         input_data (tuple):     x_train, y_train, x_test, y_test
         feature_names (list):   The names of all features before selection or
                                 None.
-        threshold (float):      Lower limit of variance for a feature to be
-                                kept.
+        threshold (float):      Lower limit of variance for a feature to be kept
 
     Returns:
         tuple: (x_train, y_train, x_test, y_test), feature_names
@@ -67,8 +65,8 @@ def variance_threshold(input_data, feature_names, threshold=0.16):
 
 def remove_constant(input_data, feature_names):
     """
-    Removes all features from x_train and x_test that are completely constant
-    in x_train. If feature_names is given it is also returned with any
+    Removes all features from x_train and x_test that are completely constant in
+    x_train. If feature_names is given it is also returned with any
     features removed from x_train and x_test also removed from feature_names.
 
     Args:
@@ -93,15 +91,13 @@ def remove_constant(input_data, feature_names):
     return output_data, feature_names
 
 
-# TODO: Make sure when f_classif is used that feature names is passed through
-# TODO: remove constant features properly
 def select_k_best(input_data, feature_names, score_func=f_classif, k=500):
     """
     Selects the k best features in x_train, removes all others from x_train and
     x_test. Selects the best features by using the score function score_func
     and scikit-learn's SelectKBest. If feature_names is given it is also
-    returned with any features removed from x_train and x_test also removed
-    from feature_names.
+    returned with any features removed from x_train and x_test also removed from
+    feature_names.
 
     Args:
         input_data (tuple):     x_train, y_train, x_test, y_test
@@ -141,10 +137,7 @@ def select_k_best(input_data, feature_names, score_func=f_classif, k=500):
     return output_data, feature_names
 
 
-# TODO: Make sure when f_classif is used that feature names is passed through
-# TODO: remove constant features properly
-def select_percentile(input_data, feature_names, score_func=chi2,
-                      percentile=5):
+def select_percentile(input_data, feature_names, score_func=chi2, percentile=5):
     """
     Selects the percentile best features in x_train, removes the rest of the
     features from x_train and x_test. Selects the best features by using the
