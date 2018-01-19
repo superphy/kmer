@@ -96,7 +96,7 @@ def shuffle(data, labels):
         assert len(data) == len(labels)
         assert isinstance(data[0], (list, np.ndarray))
     except AssertionError as E:
-        print E
+        print(E)
     if isinstance(data[0], list):
         all_data = []
         for x in data:
@@ -179,8 +179,8 @@ def sensitivity_specificity(predicted_values, true_values):
         FP = sum(true_neg & predicted_pos)
         FN = sum(true_pos & predicted_neg)
 
-        sensitivity = (1.0*TP)/(TP+FN)
-        specificity = (1.0*TN)/(TN+FP)
+        sensitivity = (1.0 * TP) / (TP + FN)
+        specificity = (1.0 * TN) / (TN + FP)
 
         results[c] = {'sensitivity': sensitivity, 'specificity': specificity}
 
@@ -249,8 +249,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         data = data.drop(data[data[fasta_header].isin(blacklist)].index)
 
     if one_vs_all:
-        data[label_header] = data[label_header].where(
-            data[label_header] == one_vs_all, 'Other')
+        data[label_header] = data[label_header].where(data[label_header] == one_vs_all, 'Other')
 
     all_labels = np.unique(data[label_header])
     all_labels = all_labels[pd.notnull(all_labels)]
@@ -261,11 +260,9 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         all_train_data = []
         all_test_data = []
         for label in all_labels:
-            all_train_data.append(train_data[
-                train_data[label_header] == label])
+            all_train_data.append(train_data[train_data[label_header] == label])
             if validate:
-                all_test_data.append(test_data[
-                    test_data[label_header] == label])
+                all_test_data.append(test_data[test_data[label_header] == label])
         all_train_data = [x[fasta_header].values for x in all_train_data]
         if validate:
             all_test_data = [x[fasta_header].values for x in all_test_data]
@@ -282,50 +279,107 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
                 all_train_data.append(label_data[0:])
                 all_test_data.append(label_data[:0])
             else:
-                cutoff = int(0.8*label_data.shape[0])
+                cutoff = int(0.8 * label_data.shape[0])
                 all_train_data.append(label_data[:cutoff])
                 all_test_data.append(label_data[cutoff:])
-    all_train_data = [[prefix+str(x)+suffix for x in array] for array in
-                      all_train_data]
+    all_train_data = [[prefix + str(x) + suffix for x in array] for array in all_train_data]
     x_train, y_train = shuffle(all_train_data, all_labels)
     if validate:
-        all_test_data = [[prefix+str(x)+suffix for x in array] for array in
-                         all_test_data]
+        all_test_data = [[prefix + str(x) + suffix for x in array] for array in all_test_data]
         x_test, y_test = shuffle(all_test_data, all_labels)
     else:
-        x_test = [prefix+str(x)+suffix for x in all_test_data]
+        x_test = [prefix + str(x) + suffix for x in all_test_data]
         y_test = np.array([], dtype='float64')
 
     return (x_train, y_train, x_test, y_test)
 
 
-def parse_json(json_files, path=constants.MORIA, suffix='.fasta',
-               key='assembly_barcode'):
+def parse_json_helper(json_file, fasta_key, label_key, prefix, suffix,
+                      validate):
     """
+    Helper for parse_json.
+
     Args:
-        path:       File path to append to the beginning of each fasta file
-        suffix:     String to be appended to the end of each fasta file eg
-                    ".fasta"
-        key:        The fasta filename identifier used in the json files.
-        json_files: One or more json files to create a list of fasta files from
+        json_file (str):    Filepath to the json file containing the genome
+                            information.
+        fasta_key (str):    The fasta filename identifier used in the json files
+        label_key (str):    The identifier for the genome classifications used
+                            in the genome file.
+        prefix (str):       String to append to the beginning of each fasta file
+        suffix (str):       String to appended to the end of each fasta file eg
+                            ".fasta"
+        validate (bool):    If True y_test is created if False y_test is an
+                            empty ndarray.
+
     Returns:
-        A list with as many elements as json files were input. Each element in
-        the list is a list of the complete file paths to each valid genome
-        contained in the corresponding json file.
+        tuple: (fasta, labels); equivalent to (x_train, y_train) or
+               (x_test, y_test) returned by parse_json.
+    """
+    with open(json_file, 'r') as f:
+        data = json.load(f)
+    fasta = [str(x[fasta_key]) for x in data]
+
+    if label_key:
+        labels = [str(x[label_key]) for x in data]
+
+    keep = [fasta.index(x) for x in fasta if valid_file(x)]
+    fasta = [fasta[x] for x in keep]
+    if label_key:
+        labels = [labels[x] for x in keep]
+
+    fasta = [prefix + x + suffix for x in fasta]
+
+    keep = [fasta.index(x) for x in fasta if check_fasta(x)]
+    fasta = [fasta[x] for x in keep]
+    if label_key:
+        labels = [labels[x] for x in keep]
+    else:
+        labels = np.array([], dtype='float64')
+
+    all_fasta = []
+    all_labels = []
+    temp = zip(fasta, labels)
+    for L in np.unique(labels):
+        out = []
+        for elem in temp:
+            if elem[1] == L:
+                out.append(elem[0])
+        all_fasta.append(out)
+        all_labels.append(L)
+
+    if label_key:
+        fasta, labels = shuffle(all_fasta, all_labels)
+
+    return (fasta, labels)
+
+
+def parse_json(train_json, test_json, prefix=constants.MORIA, suffix='.fasta',
+               fasta_key='assembly_barcode', label_key='serotype',
+               validate=True):
+    """
+    Gathers fasta filenames form json files.
     See Superphy/MoreSerotype/module/DownloadMetadata.py on Github for a script
     that can generate the json files.
-    """
-    output = []
-    for f in json_files:
-        with open(f, 'r') as f:
-            data = json.load(f)
-            fasta_names = [str(x[key]) for x in data]
-            fasta_names = [x for x in fasta_names if valid_file(x)]
-            fasta_names = [path + x + suffix for x in fasta_names]
-            fasta_names = [x for x in fasta_names if check_fasta(x)]
-        output.append(fasta_names)
 
-    return output
+    Args:
+        train_json (str):   Filepath to json file containing training genome
+                            information.
+        test_json (str):    Filepath to json file containing testing genome
+                            information.
+
+
+    Returns:
+        tuple: (x_train, y_train, x_test, y_test); x_train and x_test contain
+               filenames, not the actual data to be passed to a machine
+               learning model.
+    """
+    x_train, y_train = parse_json_helper(train_json, fasta_key, label_key,
+                                         prefix, suffix, validate)
+    if not validate:
+        label_key = None
+    x_test, y_test = parse_json_helper(test_json, fasta_key, label_key, prefix,
+                                       suffix, validate)
+    return (x_train, y_train, x_test, y_test)
 
 
 def convert_well_index(well_index):
@@ -415,17 +469,16 @@ def combine_lists(input_lists):
 
     length_of_list = len(input_lists[0])
     num_of_lists = len(input_lists)
-    weight = 1.0/(length_of_list*num_of_lists)
+    weight = 1.0 / (length_of_list * num_of_lists)
 
-    all_features = [elem for ranked_list in input_lists for elem in
-                    ranked_list]
+    all_features = [elem for ranked_list in input_lists for elem in ranked_list]
     unique_features = np.unique(np.asarray(all_features)).tolist()
     feature_rankings = {k: 0 for k in unique_features}
 
     for ranked_list in input_lists:
         ranked_list = list(ranked_list)
         for elem in ranked_list:
-            val = weight*(length_of_list - ranked_list.index(elem))
+            val = weight * (length_of_list - ranked_list.index(elem))
             feature_rankings[elem] += val
     output = sorted(feature_rankings, key=lambda k: feature_rankings[k],
                     reverse=True)

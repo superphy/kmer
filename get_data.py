@@ -17,11 +17,10 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 * test_files is a list of the names of each input being used to test the model.
 * LabelEncoder is a scikit-learn LabelEncoder object that will allow you to
   convert the predicted classifications back into a human readable format.
-
-Some of the methods simply return: (x_train, y_train, x_test, y_test)
 """
 
-from sklearn.preprocessing import MinMaxScaler, Imputer
+import os
+from sklearn.preprocessing import Imputer
 from kmer_counter import count_kmers, get_counts, get_kmer_names
 from utils import shuffle, setup_files, parse_metadata, parse_json
 from utils import encode_labels
@@ -31,7 +30,7 @@ import constants
 
 
 def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
-             validate=True):
+             validate=True, verbose=True):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
     utils.parse_metadata
@@ -45,6 +44,8 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
         L (int):         kmer cutoff value. Ignored if recount is false
         validate (bool): If True y_test is created, if False y_test is
                          an empty ndarray.
+        verbose (bool):  If True and recount is also True a status bar is
+                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -59,7 +60,7 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
     test_files = [str(x) for x in x_test]
 
     if recount:
-        count_kmers(k, L, x_train + x_test, database)
+        count_kmers(k, L, x_train + x_test, database, verbose)
 
     x_train = get_counts(x_train, database)
     x_train = np.asarray(x_train, dtype='float64')
@@ -124,7 +125,7 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
 
 
 def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13,
-                         validate=True):
+                         validate=True, verbose=True):
     """
     Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -136,6 +137,8 @@ def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13,
                          False.
         L (int):         kmer cutoff value. Ignored if recount is false.
         validate (bool): Ignored, here for compatability.
+        verbose (bool):  If True and recount is also True a status bar is
+                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -144,11 +147,12 @@ def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13,
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
               'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True)
+    return get_kmer(kwargs, database, recount, k, L, validate=True,
+                    verbose=verbose)
 
 
 def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13,
-                         validate=True):
+                         validate=True, verbose=True):
     """
     Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -160,6 +164,8 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13,
                          False.
         L (int):         kmer cutoff value. Ignored if recount is false.
         validate (bool): Ignored, here for compatability.
+        verbose (bool):  If True and recount is also True a status bar is
+                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -169,11 +175,12 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13,
               'suffix': '.fasta',
               'train_header': None,
               'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True)
+    return get_kmer(kwargs, database, recount, k, L, validate=True,
+                    verbose=verbose)
 
 
 def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
-                        recount=False, k=7, L=13, validate=True):
+                        recount=False, k=7, L=13, validate=True, verbose=True):
     """
     Wraps get_kmer to get salmonella amr data.
 
@@ -185,6 +192,8 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
                           false.
         L (int):          kmer cutoff value. Ignored if recount is false.
         validate (bool):  Ignored, here for compatability.
+        verbose (bool):  If True and recount is also True a status bar is
+                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -199,11 +208,12 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
               'prefix': constants.SALMONELLA,
               'suffix': '.fna',
               'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True)
+    return get_kmer(kwargs, database, recount, k, L, validate=True,
+                    verbose=verbose)
 
 
-def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,
-                                  sep=None, validate=True):
+def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE, sep=None,
+                                  validate=True):
     """
     Wraps get_genome_regions to get the US/UK mixed datasets genome region data
     to recreate the Lupolova et al paper.
@@ -222,8 +232,8 @@ def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE,
     return get_genome_regions(kwargs, table, sep, validate=True)
 
 
-def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE,
-                                  sep=None, validate=True):
+def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE, sep=None,
+                                  validate=True):
     """
     Wraps get_genome_regions to get the US/UK split dataset genome region data
     to recreate the Lupolova et al paper.
@@ -452,8 +462,6 @@ def get_roary_from_list(kwargs=None, roary_sheet=constants.ROARY,
     return (output_data, features, test_files, le)
 
 
-# TODO: Convert get_genome_custom_filtered to work with run or remove it.
-# TODO: i.e. needs to return output_data,feature_names,test_files,labelencoder
 def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
                                filter_table=constants.PREDICTIVE_RESULTS,
                                sep=None, col='Ratio', cutoff=0.25,
@@ -474,14 +482,15 @@ def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
         kwargs (dict):      Arguments to be passed to parse_metadata.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
     kwargs = kwargs or {}
 
     labels = parse_metadata(**kwargs)
-    x_train_labels = labels[0]
+    train_label = labels[0]
     y_train = labels[1]
-    x_test_labels = labels[2]
+    test_label = labels[2]
     y_test = labels[3]
 
     if sep is None:
@@ -494,31 +503,35 @@ def get_genome_custom_filtered(input_table=constants.GENOME_REGION_TABLE,
         filter_data = pd.read_csv(filter_table, sep=sep, index_col=0)
 
     if absolute and greater:
-        data = input_data[abs(filter_data[col]) > cutoff]
+        data = input_data.loc[filter_data.loc[abs(filter_data[col]) > cutoff].index]
     elif absolute and not greater:
-        data = input_data[abs(filter_data[col]) < cutoff]
+        data = input_data.loc[filter_data.loc[abs(filter_data[col]) < cutoff].index]
     elif not absolute and greater:
-        data = input_data[filter_data[col] > cutoff]
+        data = input_data.loc[filter_data.loc[filter_data[col] > cutoff].index]
     elif not absolute and not greater:
-        data = input_data[filter_data[col] < cutoff]
+        data = input_data.loc[filter_data.loc[filter_data[col] < cutoff].index]
 
     x_train = []
     x_test = []
 
-    for header in x_train_labels:
+    for header in train_label:
         x_train.append(data[header].tolist())
 
-    for header in x_test_labels:
+    for header in test_label:
         x_test.append(data[header].tolist())
 
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    return (x_train, y_train, x_test, y_test)
+    feature_names = np.asarray(data.index)
+
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_label, le)
 
 
-# TODO: Convert get_genome_prefiltered to work with run or remove it.
-# TODO: i.e. needs to return output_data,feature_names,test_files,labelencoder
 def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
                            filter_table=constants.PREDICTIVE_RESULTS,
                            sep=None, count=50, kwargs=None):
@@ -536,14 +549,15 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
         kwargs (dict):      Arguments to be passed to parse_metadata.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
     kwargs = kwargs or {}
 
     labels = parse_metadata(**kwargs)
-    x_train_labels = labels[0]
+    train_label = labels[0]
     y_train = labels[1]
-    x_test_labels = labels[2]
+    test_label = labels[2]
     y_test = labels[3]
 
     if sep is None:
@@ -561,66 +575,60 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
     x_train = []
     x_test = []
 
-    for header in x_train_labels:
+    for header in train_label:
         x_train.append(input_data[header].tolist())
 
-    for header in x_test_labels:
+    for header in test_label:
         x_test.append(input_data[header].tolist())
 
     x_train = np.asarray(x_train)
     x_test = np.asarray(x_test)
 
-    return (x_train, y_train, x_test, y_test)
+    feature_names = np.asarray(input_data.index)
+
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_label, le)
 
 
-# TODO: Convert get_kmer_from_json to work with run or remove it.
-# TODO: i.e. needs to return output_data,feature_names,test_files,labelencoder
-def get_kmer_from_json(database=constants.DB, recount=False, k=7, L=13,
-                       prefix=constants.MORIA, suffix='.fasta',
-                       key='assembly_barcode', *json):
+def get_kmer_from_json(train, test, database=constants.DB,
+                       recount=False, k=7, L=13, kwargs=None, verbose=True,
+                       validate=True):
     """
     Gets kmer data for the genomes specified in the json files. Divides genomes
-    into train and test sets passed on which json file they are specified in.
-    Uses parse_json
+    into train/test sets and classifies them with utils.parse_json.
 
     Args:
-        database (str): lmdb database to store kmer counts.
-        recount (bool): If True the kmers are recounted.
-        k (int):        Size of kmer to be counted. Ignored if recount is false
-        L (int):        kmer cutoff value. Ignored if recount is false.
-        prefix (str):   String to be added to the beginning of every fasta file
-                        in the json, for example the correct path to the file.
-        suffix (str):   Suffix to be added to the end of every fasta file in
-                        the json, for example .fasta
-        key (str):      Label within the json files to identify the genome
-                        names.
-        *json (str):    Two or four json files, If two the first should contain
-                        only positive genomes and the second should contain
-                        only negative genomes. If four the first json file
-                        should contain all positive training genomes, the
-                        second all negative training genomes, the third all
-                        positive test genomes, the fourth all negative test
-                        genomes.
+        train (str):        The filepath to the json file containing the
+                            training genome inforamtion.
+        test (str):         The filepath to the json file containing the testing
+                            genome information.
+        database (str):     lmdb database to store kmer counts.
+        recount (bool):     If True the kmers are recounted.
+        k (int):            Size of kmer to be counted. Ignored if recount is
+                            false
+        L (int):            kmer cutoff value. Ignored if recount is false.
+        kwargs (dict):      The arguments to pass to parse_json.
+        verbose (bool):     If True and recount is also True a status bar is
+                            displayed to show the kmer count progress.
+        validate (bool):    If True and the kmers are being recounter a status
+                            bar displaying the kmer count progress is output.
 
     Returns:
-        tuple: x_train, y_train, x_test, y_test
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
-    files = parse_json(prefix, suffix, key, *json)
+    kwargs = kwargs or {}
+    kwargs['validate'] = validate
 
-    if len(files) == 4:
-        x_train, y_train = shuffle(files[0] + files[1], [1, 0])
-        x_test, y_test = shuffle(files[2] + files[3], [1, 0])
-    elif len(files) == 2:
-        x_train, y_train = shuffle(files[0] + files[1], [1, 0])
-        cutoff = int(0.8 * len(x_train))
-        x_test = x_train[cutoff:]
-        y_test = y_train[cutoff:]
-        x_train = x_train[:cutoff]
-        y_train = y_train[:cutoff]
+    (x_train, y_train, x_test, y_test) = parse_json(train, test, **kwargs)
+
+    test_files = [str(x) for x in x_test]
 
     if recount:
-        all_files = x_train + x_test
-        count_kmers(k, L, all_files, database)
+        count_kmers(k, L, x_train + x_test, database, verbose)
 
     x_train = get_counts(x_train, database)
     x_train = np.asarray(x_train, dtype='float64')
@@ -628,45 +636,119 @@ def get_kmer_from_json(database=constants.DB, recount=False, k=7, L=13,
     x_test = get_counts(x_test, database)
     x_test = np.asarray(x_test, dtype='float64')
 
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    x_train = scaler.fit_transform(x_train)
-    x_test = scaler.transform(x_test)
+    feature_names = get_kmer_names(database)
 
-    return (x_train, y_train, x_test, y_test)
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_files, le)
 
 
-# TODO: Convert get_kmer_from_directory to work with run or remove it.
-# TODO: i.e. needs to return output_data,feature_names,test_files,labelencoder
-def get_kmer_from_directory(database=constants.DB, recount=False, k=7, L=13,
-                            *directories):
+def get_kmer_from_directory(train_dir, test_dir, database=constants.DB,
+                            recount=False, k=7, L=13, validate=True,
+                            verbose=True):
     """
-    Gets kmer data from the fasta files in *directories. Does not work with
-    run.py instead of separating output into train and test sets, the genomes
-    and grouped based on the directory they were stored in.
+    Organizes fasta files into train/test splits and classifies them based
+    on their location in a directory structure rather than a metadata sheet.
+    Returns kmer count data.
+
+    With the following directory structure and train_dir set to Data/Train/ and
+    test_dir set to Data/Test/ x_train would contain genomes 1-5 with genomes
+    1-3 being classified as Class1 and genomes 4 and 5 being classified as
+    Class2 (or whatever their respective directories are named) and x_test would
+    contain genomes 6-9. If validate is true genomes 6 and 7 would be
+    classified as Class1 and genmes 8 and 9 would classified as Class2. If
+    validate is set to False genomes 6-9 will not be classified and y_test will
+    be empty.
+
+    Data/
+      |--Train/
+      |     |--Class1/
+      |     |   |--genome1.fasta
+      |     |   |--genome2.fasta
+      |     |   |--genome3.fasta
+      |     |
+      |     |--Class2/
+      |         |--genome4.fasta
+      |         |--genome5.fasta
+      |
+      |--Test/
+            |--Class1/
+            |   |--genome6.fasta
+            |   |--genome7.fasta
+            |
+            |--Class2/
+                |--genome8.fasta
+                |--genome9.fasta
 
     Args:
+        train_dir (str):    Filepath to directory containing subdirectories for
+                            each possible classification that contain fasta
+                            files for training.
+        test_dir (str):     Filepath to directory containing subdirectories for
+                            each possible classification that contain fasta
+                            files for testing.
         database (str):     lmdb database to store kmer counts.
         recount (bool):     If True the kmers are recounted.
         k (int):            Size of kmer to be counted. Ignored if recount is
                             false.
         L (int):            kmer cutoff value. Ignored if recount is false.
-        *directories (str): One or more directories containing fasta files.
+        validate (bool):    If True y_test is created, if False y_test is an
+                            empty ndarray.
+        verbose (bool):     If True and recount is also True a status bar is
+                            displayed to show the kmer count progress.
 
     Returns:
-        tuple: Has as many items as *directories, each element is an array of
-               kmer count data.
+        tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
+                LabelEncoder
     """
-    all_files = []
-    for directory in directories:
-        all_files.append(setup_files(directory))
+    train_directories = [train_dir + x for x in os.listdir(train_dir)]
+    test_directories = [test_dir + x for x in os.listdir(test_dir)]
+
+    train_files = []
+    train_classes = []
+    for d in train_directories:
+        files = setup_files(d)
+        train_files.append(files)
+        train_classes.append(d.replace(train_dir, ''))
+
+    test_files = []
+    test_classes = []
+    for d in test_directories:
+        files = setup_files(d)
+        test_files.append(files)
+        test_classes.append(d.replace(test_dir, ''))
 
     if recount:
-        count_kmers(k, L, all_files, database)
+        all_files = train_files + test_files
+        all_files = [x for l in all_files for x in l]
+        count_kmers(k, L, all_files, database, verbose)
 
-    output = []
-    for directory in directories:
-        temp = get_counts(setup_files(directory), database)
+    train_counts = []
+    for group in train_files:
+        temp = get_counts(group, database)
         temp = np.asarray(temp, dtype='float64')
-        output.append(temp)
+        train_counts.append(temp)
 
-    return output
+    test_counts = []
+    for group in test_files:
+        temp = get_counts(group, database)
+        temp = np.asarray(temp, dtype='float64')
+        test_counts.append(temp)
+
+    test_files = [x for l in test_files for x in l]
+
+    x_train, y_train = shuffle(train_counts, train_classes)
+    x_test, y_test = shuffle(test_counts, test_classes)
+
+    if not validate:
+        y_test = np.array([], dtype='float64')
+
+    feature_names = get_kmer_names(database)
+
+    y_train, y_test, le = encode_labels(y_train, y_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    return (output_data, feature_names, test_files, le)
