@@ -90,7 +90,7 @@ from get_data import get_genome_region_us_uk_mixed as data
 from feature_selection import variance_threshold as sel
 
 d = data()
-d = sel(d[0], threshold=0.01)
+d, f = sel(d[0], d[1], threshold=0.01)
 score = neural_network(d)
 ```
 
