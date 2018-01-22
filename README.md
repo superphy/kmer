@@ -49,7 +49,7 @@ optional arguments:
 ```
 
 
-The input file should be a yaml file specifying all of the arguments to use during the run. An example can be found in Data/config.yaml
+The input file should be a yaml file specifying all of the arguments to use during the run. An example can be found at the end of this README.
 
 Running the script multiple times with the same output file will not overwrite the previous results. Each time a run is performed a new yaml document is created and appended to the bottom of the output file. Each yaml document will be a dictionary with two keys 'name' and 'output' where 'name' contains either the datatime of the run or the name provided by the user and 'output' contains a dictionary that holds the results from the run and all of the parameters specified in the input file.
 
@@ -173,3 +173,43 @@ data = get_counts(files+new_files, database)
 - files/new_files: Lists of paths to fasta files.
 - database: Name of the lmdb database you would like to use.
 - data: A list of lists of kmer counts, can be used as the input to a machine learning model.
+
+
+## Example Configuration File
+
+Not every value needs to be given, values that are not given or values that are given as `false`, `null`, or `None` will be replaced by their default values.
+
+```yaml
+model: support_vector_machine # The ML model to use, see models.py
+model_args: # The arguments to pass to the ML model
+  kernel: linear
+  C: 1
+data_method: get_kmer # The method used to gather the data, see get_data.py
+data_args: # The arguments to pass to the data method
+  kwargs:
+    blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+    fasta_header: Fasta
+    label_header: Class
+    train_header: Dataset
+    metadata: ./Data/human_bovine.csv
+    one_vs_all: false
+    remove: false
+    prefix: ~/Data/ecoli/
+    suffix: .fasta
+  database: database
+scaler: scale_to_range # The method used to scale the data, see feature_scaling.py
+scaler_args: # The arguments to pass to the scale method
+  low: -1
+  high: 1
+selection: select_k_best # The method used to perform feature selection, see feature_selection.py
+selection_args: # The arguments to pass to the feature selection method
+  score_func: f_classif
+  k: 270
+augment: false # The method used to perform data augmentation, see data_augmentation.py
+augment_args: {} # The arguments to pass to the data augmentation method
+validate: false # Whether or not to perform a validation run
+reps: 10 # How many times to repeat the run
+```
