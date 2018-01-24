@@ -263,6 +263,9 @@ def main(input_yaml, output_yaml, name):
         output_file.write('\n\n\n')
 
 
-if __name__ == "__main__":
+def cl_main():	
     cl_args = create_arg_parser()
     main(cl_args.input, cl_args.output, cl_args.name)
+
+if __name__ == "__main__":
+	cl_main()
