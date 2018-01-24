@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import range
 import unittest
 import constants
 import subprocess
@@ -65,11 +67,11 @@ class CommandLineVariation1(unittest.TestCase):
         with open(self.config_file, 'w') as f:
             yaml.dump(self.config, f)
         try:
+            self.exception_message = ''
             command = constants.SOURCE + 'run.py'
             args = ['python', command, '-i', self.config_file, '-o',
                     self.results_file]
             self.output = subprocess.check_output(args)
-            self.exception_message = ''
         except subprocess.CalledProcessError as e:
             self.output = None
             self.esception_message = e
@@ -92,9 +94,9 @@ class CommandLineVariation1(unittest.TestCase):
         v['avg_results'] = A(data['output']['avg_result'], np.asarray(data['output']['results']).mean())
         v['test_sizes'] = A(data['output']['test_sizes'], (self.samples - self.train_size))
         v['train_sizes'] = A(data['output']['train_sizes'], (self.train_size + (self.add_samples * self.classes)))
-        vals = [x[0] for x in v.values()]
+        vals = [x[0] for x in list(v.values())]
         val = False if False in vals else True
-        self.assertTrue(val, msg={k: v[1:] for k, v in v.items() if not v[0]})
+        self.assertTrue(val, msg={k: v[1:] for k, v in list(v.items()) if not v[0]})
 
 
 class CommandLineVariation2(unittest.TestCase):
@@ -177,9 +179,9 @@ class CommandLineVariation2(unittest.TestCase):
         v['results_type'] = A(type(data['output']['results']), dict)
         v['test_sizes'] = A(data['output']['test_sizes'], (self.samples - self.train_size))
         v['train_sizes'] = A(data['output']['train_sizes'],  (self.train_size + (self.add_samples * self.classes)))
-        vals = [x[0] for x in v.values()]
+        vals = [x[0] for x in list(v.values())]
         val = False if False in vals else True
-        self.assertTrue(val, msg={k: v[1:] for k, v in v.items() if not v[0]})
+        self.assertTrue(val, msg={k: v[1:] for k, v in list(v.items()) if not v[0]})
 
 
 class ScriptVariation1(unittest.TestCase):
@@ -255,9 +257,9 @@ class ScriptVariation1(unittest.TestCase):
         v['results_type'] = A(type(data['output']['results']), dict)
         v['test_sizes'] = A(data['output']['test_sizes'], (self.samples - self.train_size))
         v['train_sizes'] = A(data['output']['train_sizes'], (self.train_size))
-        vals = [x[0] for x in v.values()]
+        vals = [x[0] for x in list(v.values())]
         val = False if False in vals else True
-        self.assertTrue(val, msg={k: v[1:] for k, v in v.items() if not v[0]})
+        self.assertTrue(val, msg={k: v[1:] for k, v in list(v.items()) if not v[0]})
 
 
 class ScriptVariation2(unittest.TestCase):
@@ -340,9 +342,9 @@ class ScriptVariation2(unittest.TestCase):
         v['avg_results'] = A(data['output']['avg_result'], np.asarray(data['output']['results']).mean())
         v['test_sizes'] = A(data['output']['test_sizes'], (self.samples - self.train_size))
         v['train_sizes'] = A(data['output']['train_sizes'], (self.train_size + (self.add_samples * self.classes)))
-        vals = [x[0] for x in v.values()]
+        vals = [x[0] for x in list(v.values())]
         val = False if False in vals else True
-        self.assertTrue(val, msg={k: v[1:] for k, v in v.items() if not v[0]})
+        self.assertTrue(val, msg={k: v[1:] for k, v in list(v.items()) if not v[0]})
 
 
 if __name__ == "__main__":

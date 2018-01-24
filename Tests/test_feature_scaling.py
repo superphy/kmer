@@ -1,3 +1,4 @@
+from builtins import str
 import unittest
 import numpy as np
 from feature_scaling import scale_to_range

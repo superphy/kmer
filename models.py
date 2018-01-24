@@ -19,6 +19,7 @@ will return a list containing the predicted classification for each sample in
 x_test and y_test is ignored.
 """
 
+from builtins import zip
 import numpy as np
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
@@ -125,7 +126,7 @@ def support_vector_machine(input_data, kernel='linear', C=1,
         absolute_coefs = np.absolute(coefs)
         absolute_coefs = [float(x) for x in absolute_coefs]
         feature_names = [convert_well_index(x) for x in feature_names]
-        features_coefs = dict(zip(feature_names, absolute_coefs))
+        features_coefs = dict(list(zip(feature_names, absolute_coefs)))
         output = (output_data, features_coefs)
     else:
         output = (output_data, None)
@@ -183,7 +184,7 @@ def random_forest(input_data, n_estimators=50, feature_names=None,
         importances = model.feature_importances_.ravel()
         importances = [float(x) for x in importances]
         feature_names = [convert_well_index(x) for x in feature_names]
-        features_importances = dict(zip(feature_names, importances))
+        features_importances = dict(list(zip(feature_names, importances)))
         output = (output_data, features_importances)
     else:
         output = (output_data, None)

@@ -7,6 +7,8 @@ Chains together methods from get_data.py, feature_selection.py,
 feature_scaling, data_augmentation.py, and models.py.
 """
 
+from builtins import zip
+from builtins import range
 import inspect
 import time
 import datetime
@@ -128,7 +130,7 @@ def run(model=models.support_vector_machine, model_args=None,
         # Create dictionary with test files as keys and predictions as values
         # Convert classes back to their original values
         results = le.inverse_transform(results)
-        output['results'] = dict(zip(files, results.tolist()))
+        output['results'] = dict(list(zip(files, results.tolist())))
 
     output['repetitions'] = reps
     output['important_features'] = all_features
@@ -179,10 +181,10 @@ def convert_methods(input_dictionary):
     """
     output_dictionary = {}
     methods = get_methods()
-    for key, value in input_dictionary.items():
+    for key, value in list(input_dictionary.items()):
         if isinstance(value, dict):
             output = convert_methods(value)
-        elif value in methods.keys():
+        elif value in list(methods.keys()):
             output = methods[value]
         else:
             output = value
