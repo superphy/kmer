@@ -42,7 +42,7 @@ def start(filename, k, limit, env, txn, data):
     # Get results from kmer count
     args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
-                         encoding='utf-8', universal_newlines=True)
+                         universal_newlines=True)
     out, err = p.communicate()
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
@@ -82,7 +82,7 @@ def firstpass(filename, k, limit, env, txn):
     # Get results from kmer count
     args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
-                         encoding='utf-8', universal_newlines=True)
+                         universal_newlines=True)
     out, err = p.communicate()
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
@@ -235,7 +235,7 @@ def add(filename, k, env, txn):
     # Get results from kmer count
     args = ['jellyfish', 'dump', '-c', 'counts.jf']
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
-                         encoding='utf-8', universal_newlines=True)
+                         universal_newlines=True)
     out, err = p.communicate()
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
