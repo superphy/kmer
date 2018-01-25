@@ -1,13 +1,3 @@
 *.jf
 *.pyc
-*.fasta
-*.h5
-*.png
-/database*
-/Results
-/deprecated
-/Models/*
-/temp
-/*_test.py
-!/Tests/test*.py
-/temp*
+database
