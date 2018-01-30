@@ -27,7 +27,7 @@ from keras.layers import Dense, Flatten
 from keras.models import Sequential
 from keras.layers.convolutional import Conv1D
 from keras.utils import to_categorical
-from utils import flatten, make3D, convert_well_index
+from kmerprediction.utils import flatten, make3D, convert_well_index
 
 
 def neural_network(input_data, feature_names=None, validate=True):

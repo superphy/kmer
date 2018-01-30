@@ -11,7 +11,7 @@ y_train. x_test and y_test are not changed.
 
 from imblearn.over_sampling import SMOTE, ADASYN
 import numpy as np
-from utils import shuffle
+from kmerprediction.utils import shuffle
 
 
 def augment_data_naive_helper(data, desired_samples):

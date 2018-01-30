@@ -1,6 +1,5 @@
 from builtins import str
 import os
-import path
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 import unittest

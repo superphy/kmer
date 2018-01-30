@@ -1,7 +1,6 @@
 from __future__ import division
 import sys
 import os
-import path
 sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 from builtins import str
 from builtins import range

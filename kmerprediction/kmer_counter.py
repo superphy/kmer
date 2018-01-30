@@ -11,6 +11,7 @@ from builtins import str
 from past.utils import old_div
 import subprocess
 import sys
+import os
 import lmdb
 import numpy as np
 
@@ -44,6 +45,7 @@ def start(filename, k, limit, env, txn, data):
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
                          universal_newlines=True)
     out, err = p.communicate()
+    os.remove('counts.jf')
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
 
@@ -84,6 +86,7 @@ def firstpass(filename, k, limit, env, txn):
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
                          universal_newlines=True)
     out, err = p.communicate()
+    os.remove('counts.jf')
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
 
@@ -237,6 +240,7 @@ def add(filename, k, env, txn):
     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
                          universal_newlines=True)
     out, err = p.communicate()
+    os.remove('counts.jf')
     # Transform results into usable format
     arr = [x.split(' ') for x in out.split('\n') if x]
 
@@ -324,21 +328,23 @@ def get_counts(files, database):
     data = env.open_db('master'.encode(), dupsort=False)
 
     with env.begin(write=False, db=data) as txn:
+        if files:
+            first = env.open_db(files[0].encode(), txn=txn)
+        else:
+            return np.array([], dtype='float64')
+        num_keys = txn.stat(first)['entries']
+        output = np.zeros((len(files), num_keys), dtype='float64')
 
-        arrays = []
-
-        for f in files:
-            array = []
-
-            current = env.open_db(f.encode(), txn=txn)
+        for index, value in enumerate(files):
+            current = env.open_db(value.encode(), txn=txn)
             cursor = txn.cursor(db=current)
+            counter = 0
             for item in cursor:
-                array.append(int(item[1]))
-
-            arrays.append(array)
+                output[index, counter] = float(item[1])
+                counter += 1
 
     env.close()
-    return arrays
+    return output
 
 
 def get_kmer_names(database):

@@ -1,6 +1,5 @@
 import sys
 import os
-import path
 sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 import unittest
 import tempfile

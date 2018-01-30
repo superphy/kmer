@@ -1,7 +1,6 @@
 from __future__ import division
 import sys
 import os
-import path
 sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 from builtins import str
 from builtins import range
@@ -49,7 +48,8 @@ class ShuffleArray(unittest.TestCase):
                                   range(self.classes)]
         self.data = np.zeros(self.classes, dtype=object)
         for x in range(self.classes):
-            self.data[x] = np.full((self.samples_per_class[x], self.features), x)
+            dtype = type(x)
+            self.data[x] = np.full((self.samples_per_class[x], self.features), x, dtype=dtype)
         self.labels = np.arange(self.classes)
         self.new_data, self.new_labels = shuffle(self.data, self.labels)
 

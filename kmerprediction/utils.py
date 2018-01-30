@@ -13,7 +13,7 @@ import json
 import re
 import pandas as pd
 import numpy as np
-import constants
+from kmerprediction import constants
 from Bio import SeqIO
 from sklearn.preprocessing import LabelEncoder
 
@@ -118,7 +118,11 @@ def shuffle(data, labels):
         all_labels = []
         count = 0
         for label in labels:
-            all_labels.append(np.full(data[count].shape[0], label))
+            if isinstance(label, str):
+                dtype = 'object'
+            else:
+                dtype = type(label)
+            all_labels.append(np.full(data[count].shape[0], label, dtype=dtype))
             count += 1
         all_labels = np.concatenate(all_labels, axis=0)
         all_data, all_labels = same_shuffle(all_data, all_labels)
