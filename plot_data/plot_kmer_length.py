@@ -4,9 +4,6 @@ import pandas as pd
 import seaborn as sns
 import os
 
-data = pd.DataFrame(index=np.arange((31 - 3) * 15),
-                    columns=['K-mer Length', 'Cutoff Value', 'Accuracy'])
-
 datadir = './kmer_data/'
 labels = [x for x in os.listdir(datadir) if '.txt' in x]
 data_files = [datadir + x for x in labels]
