@@ -177,5 +177,4 @@ dependencies:
   - urllib3==1.22
   - widgetsnbextension==3.0.3
   - wrapt==1.10.11
-prefix: /home/rboothman/miniconda3/envs/kmer
 

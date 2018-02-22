@@ -1,7 +1,7 @@
 """
 This is essentially the main method.
 
-Provides a rapper to gather data, preprocess the data, perform feature
+Provides a wrapper to gather data, preprocess the data, perform feature
 selection, build the model, train the model, and test/use the model.
 Chains together methods from get_data.py, feature_selection.py,
 feature_scaling, data_augmentation.py, and models.py.
