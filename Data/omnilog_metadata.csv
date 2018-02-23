@@ -101,7 +101,7 @@
 26,Mar 28 2014 11:57 AM,12-B,./ECI-1717x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-1717,1,O157,H7,Bovine,Culture,12/12/2002,O157:H7
 30,Nov 26 2013 10:14 AM,1-B,./ECI-1830x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-1830,1,O113,H4,Bovine,Culture,,O113:H4
 36,Nov 26 2013 12:29 PM,7-B,./ECI-1841x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-1841,1,O113,NM,Bovine,Culture,,O113:NM
-242,Nov 22 2013 11:56 AM,3-B,./ECI-715x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-0715,1,O111,?,Bovine,Faecal,,O111:?
+242,Nov 22 2013 11:56 AM,3-B,./ECI-715x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-0715,1,O111,H8,Bovine,Faecal,,O111:?
 14,Nov 22 2013 1:11 PM,6-B,./ECI-1364x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-1364,1,O26,H11,Bovine,Faecal,,O26:H11
 1219,Feb 15 2013 11:54 AM,10-A,./PM1-34a-ECI-1437-kinetic.csv,ECI-1437,1,O157,H7,Bovine,Faecal,,O157:H7
 1081,Sep 17 2013 12:07 PM,10-A,./ECI-1907x(1)_PM-M 1-_PM1_allHours_kinetic.csv,ECI-1907,1,O157,H7,Bovine,Faecal,,O157:H7
@@ -137,7 +137,7 @@
 249,Feb 06 2013 3:43 PM,1-B,./PM10-1a-ECI-2644-kinetic.csv,ECI-2644,1,O139,H19,Bovine,Faecal,4/12/2010,O139:H19
 208,Oct 10 2012 9:43 AM,5-B,./ECI-2654_PM-M10-_PM10xReplicatex1_allHours_kinetic.csv,ECI-2654,1,O93,H28,Bovine,Faecal,4/12/2010,O93:H28
 259,Feb 07 2013 11:40 AM,19-B,./PM10-2a-ECI-2681-kinetic.csv,ECI-2681,1,O109,H5,Bovine,Faecal,4/12/2024,O109:H5
-211,Mar 12 2014 2:25 PM,22-B,./ECI-2688x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-2688,1,OR,H38,Bovine,Faecal,4/12/2024,OR:H38
+211,Mar 12 2014 2:25 PM,22-B,./ECI-2688x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-2688,1,O46,H38,Bovine,Faecal,4/12/2024,OR:H38
 214,Mar 11 2014 11:20 AM,4-B,./ECI-2699x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-2699,1,O26,H11,Bovine,Faecal,,O26:H11
 217,Mar 11 2014 12:26 PM,7-B,./ECI-2701x(1)_PM-M10-_PM10_allHours_kinetic.csv,ECI-2701,1,O111,H11,Bovine,Faecal,,O111:H11
 0,Apr 15 2013 11:08 AM,7-B,./_PM-M10-_PM10x3a-ECI-2754_allHours_kinetic.csv,ECI-2754,1,O130,H38,Bovine,Faecal,5/12/2014,O130:H38
