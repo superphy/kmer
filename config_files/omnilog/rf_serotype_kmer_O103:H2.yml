@@ -1,0 +1,23 @@
+augment: null
+augment_args: {}
+data_args:
+  database: database
+  kwargs:
+    blacklist: [ECI-2624, ECI-2859, ECI-2836]
+    fasta_header: Strain
+    label_header: Serotype
+    metadata: ../../Data/omnilog_metadata.csv
+    one_vs_all: O103:H2
+    prefix: /home/rboothman/Data/ecomnilog/fasta/
+    remove: false
+    suffix: .fasta
+    train_header: None
+data_method: get_kmer
+model: random_forest
+model_args: {}
+reps: 50
+scaler: scale_to_range
+scaler_args: {high: 1, low: -1}
+selection: select_k_best
+selection_args: {k: 270, score_func: f_classif}
+validate: true

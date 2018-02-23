@@ -143,6 +143,9 @@ def run(model=models.support_vector_machine, model_args=None,
     output['augment'] = augment
     output['augment_args'] = augment_args
     output['datetime'] = datetime.datetime.now()
+    classes, class_counts = np.unique(np.concatenate((data[1], data[3])),
+                                      return_counts=True)
+    output['class_sample_size'] = dict(zip(classes, class_counts))
     return output
 
 
