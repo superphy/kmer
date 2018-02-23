@@ -1,0 +1,276 @@
+---
+name: NN+omni+Host
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.8394625685569169
+  avg_run_time: 3.74653844833374
+  data: !!python/name:get_data.get_omnilog_data ''
+  data_args:
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: Host
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: null
+      prefix: ''
+      remove: Unknown
+      suffix: ''
+      train_header: null
+      validate: true
+    omnilog_sheet: /home/rylan/data/ecomnilog/wide_format_header.txt
+    validate: true
+  datetime: 2018-02-20 14:04:30.624288
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 114
+  repetitions: 10
+  results:
+  - 0.8768115976582402
+  - 0.8333333432674408
+  - 0.7986111218730608
+  - 0.8333333432674408
+  - 0.7847222338120142
+  - 0.8055555646618208
+  - 0.8680555621782938
+  - 0.8985507306845292
+  - 0.8333333432674408
+  - 0.8623188448988873
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.034862675737987424
+  std_dev_run_times: 0.2419392547942057
+  test_sizes: 23.7
+  train_sizes: 90.3
+...
+
+
+
+---
+name: NN+omni+O type
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.9694840579564348
+  avg_run_time: 4.394458150863647
+  data: !!python/name:get_data.get_omnilog_data ''
+  data_args:
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: O type
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: null
+      prefix: ''
+      remove: Unknown
+      suffix: ''
+      train_header: null
+      validate: true
+    omnilog_sheet: /home/rylan/data/ecomnilog/wide_format_header.txt
+    validate: true
+  datetime: 2018-02-20 14:05:14.588511
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 140
+  repetitions: 10
+  results:
+  - 0.9709618913716284
+  - 0.9661654127495629
+  - 0.9727767726470684
+  - 0.9727767705917358
+  - 0.9637023621592028
+  - 0.9637023621592028
+  - 0.9736842129911695
+  - 0.9709618934269609
+  - 0.9745916600885063
+  - 0.9655172413793104
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.004042101804977762
+  std_dev_run_times: 0.3319112600391403
+  test_sizes: 28.8
+  train_sizes: 111.2
+...
+
+
+
+---
+name: NN+omni+H type
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.9625519735582415
+  avg_run_time: 4.193269991874695
+  data: !!python/name:get_data.get_omnilog_data ''
+  data_args:
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: H type
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: null
+      prefix: ''
+      remove: Unknown
+      suffix: ''
+      train_header: null
+      validate: true
+    omnilog_sheet: /home/rylan/data/ecomnilog/wide_format_header.txt
+    validate: true
+  datetime: 2018-02-20 14:05:56.540337
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 140
+  repetitions: 10
+  results:
+  - 0.9569892498754686
+  - 0.969892474912828
+  - 0.954838712369242
+  - 0.9612903248879218
+  - 0.9505376373567889
+  - 0.9733333349227905
+  - 0.9655913999003749
+  - 0.951111114025116
+  - 0.9763440874315077
+  - 0.9655913999003749
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.008637632399028683
+  std_dev_run_times: 0.0617567652254056
+  test_sizes: 30.8
+  train_sizes: 109.2
+...
+
+
+
+---
+name: NN+omni+Serotype
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.985394920288555
+  avg_run_time: 4.440296483039856
+  data: !!python/name:get_data.get_omnilog_data ''
+  data_args:
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: Serotype
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: null
+      prefix: ''
+      remove: Unknown
+      suffix: ''
+      train_header: null
+      validate: true
+    omnilog_sheet: /home/rylan/data/ecomnilog/wide_format_header.txt
+    validate: true
+  datetime: 2018-02-20 14:06:40.962195
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 140
+  repetitions: 10
+  results:
+  - 0.988970585167408
+  - 0.9862132295966148
+  - 0.9816176425665617
+  - 0.983455877751112
+  - 0.9825367610901594
+  - 0.9908088203519583
+  - 0.9788602907210588
+  - 0.9829221983109752
+  - 0.9905123306858924
+  - 0.9880514666438103
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.0038861674639121
+  std_dev_run_times: 0.48357095019034035
+  test_sizes: 31.8
+  train_sizes: 108.2
+...
+
+
+

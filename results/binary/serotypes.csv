@@ -1,0 +1,561 @@
+,Model Type,Data Type,Serotype,Accuracy
+0,Neural Network,Omnilog AUC,O103:H2,0.896551724138
+1,Neural Network,Omnilog AUC,O103:H2,0.931034482759
+2,Neural Network,Omnilog AUC,O103:H2,0.896551724138
+3,Neural Network,Omnilog AUC,O103:H2,0.965517241379
+4,Neural Network,Omnilog AUC,O103:H2,0.931034482759
+5,Neural Network,Omnilog AUC,O103:H2,0.931034482759
+6,Neural Network,Omnilog AUC,O103:H2,0.964285714286
+7,Neural Network,Omnilog AUC,O103:H2,0.931034482759
+8,Neural Network,Omnilog AUC,O103:H2,1.0
+9,Neural Network,Omnilog AUC,O103:H2,0.965517241379
+10,Neural Network,Omnilog AUC,O113:H21,0.931034482759
+11,Neural Network,Omnilog AUC,O113:H21,0.931034482759
+12,Neural Network,Omnilog AUC,O113:H21,0.931034482759
+13,Neural Network,Omnilog AUC,O113:H21,0.928571428571
+14,Neural Network,Omnilog AUC,O113:H21,0.931034482759
+15,Neural Network,Omnilog AUC,O113:H21,0.931034482759
+16,Neural Network,Omnilog AUC,O113:H21,0.928571428571
+17,Neural Network,Omnilog AUC,O113:H21,0.931034482759
+18,Neural Network,Omnilog AUC,O113:H21,0.931034482759
+19,Neural Network,Omnilog AUC,O113:H21,0.931034482759
+20,Neural Network,Omnilog AUC,O121:H19,0.964285714286
+21,Neural Network,Omnilog AUC,O121:H19,0.964285714286
+22,Neural Network,Omnilog AUC,O121:H19,1.0
+23,Neural Network,Omnilog AUC,O121:H19,0.964285714286
+24,Neural Network,Omnilog AUC,O121:H19,0.964285714286
+25,Neural Network,Omnilog AUC,O121:H19,1.0
+26,Neural Network,Omnilog AUC,O121:H19,1.0
+27,Neural Network,Omnilog AUC,O121:H19,0.964285714286
+28,Neural Network,Omnilog AUC,O121:H19,1.0
+29,Neural Network,Omnilog AUC,O121:H19,0.964285714286
+30,Neural Network,Omnilog AUC,O145:NM,0.965517241379
+31,Neural Network,Omnilog AUC,O145:NM,0.965517241379
+32,Neural Network,Omnilog AUC,O145:NM,0.931034482759
+33,Neural Network,Omnilog AUC,O145:NM,0.965517241379
+34,Neural Network,Omnilog AUC,O145:NM,0.965517241379
+35,Neural Network,Omnilog AUC,O145:NM,0.965517241379
+36,Neural Network,Omnilog AUC,O145:NM,0.965517241379
+37,Neural Network,Omnilog AUC,O145:NM,0.931034482759
+38,Neural Network,Omnilog AUC,O145:NM,0.964285714286
+39,Neural Network,Omnilog AUC,O145:NM,0.965517241379
+40,Neural Network,Omnilog AUC,O157:H7,1.0
+41,Neural Network,Omnilog AUC,O157:H7,0.965517241379
+42,Neural Network,Omnilog AUC,O157:H7,1.0
+43,Neural Network,Omnilog AUC,O157:H7,0.965517241379
+44,Neural Network,Omnilog AUC,O157:H7,0.931034482759
+45,Neural Network,Omnilog AUC,O157:H7,0.964285714286
+46,Neural Network,Omnilog AUC,O157:H7,0.931034482759
+47,Neural Network,Omnilog AUC,O157:H7,0.965517241379
+48,Neural Network,Omnilog AUC,O157:H7,0.965517241379
+49,Neural Network,Omnilog AUC,O157:H7,0.931034482759
+50,Neural Network,Omnilog AUC,O26:H11,1.0
+51,Neural Network,Omnilog AUC,O26:H11,0.928571428571
+52,Neural Network,Omnilog AUC,O26:H11,0.964285714286
+53,Neural Network,Omnilog AUC,O26:H11,0.928571428571
+54,Neural Network,Omnilog AUC,O26:H11,0.928571428571
+55,Neural Network,Omnilog AUC,O26:H11,0.892857142857
+56,Neural Network,Omnilog AUC,O26:H11,0.964285714286
+57,Neural Network,Omnilog AUC,O26:H11,0.962962962963
+58,Neural Network,Omnilog AUC,O26:H11,0.892857142857
+59,Neural Network,Omnilog AUC,O26:H11,0.928571428571
+60,Neural Network,Omnilog AUC,O45:H2,0.931034482759
+61,Neural Network,Omnilog AUC,O45:H2,0.931034482759
+62,Neural Network,Omnilog AUC,O45:H2,0.928571428571
+63,Neural Network,Omnilog AUC,O45:H2,0.896551724138
+64,Neural Network,Omnilog AUC,O45:H2,0.931034482759
+65,Neural Network,Omnilog AUC,O45:H2,0.896551724138
+66,Neural Network,Omnilog AUC,O45:H2,0.931034482759
+67,Neural Network,Omnilog AUC,O45:H2,0.931034482759
+68,Neural Network,Omnilog AUC,O45:H2,0.892857142857
+69,Neural Network,Omnilog AUC,O45:H2,0.931034482759
+70,Neural Network,Omnilog AUC,O91:H21,0.965517241379
+71,Neural Network,Omnilog AUC,O91:H21,0.965517241379
+72,Neural Network,Omnilog AUC,O91:H21,0.964285714286
+73,Neural Network,Omnilog AUC,O91:H21,0.931034482759
+74,Neural Network,Omnilog AUC,O91:H21,0.965517241379
+75,Neural Network,Omnilog AUC,O91:H21,0.931034482759
+76,Neural Network,Omnilog AUC,O91:H21,0.931034482759
+77,Neural Network,Omnilog AUC,O91:H21,0.928571428571
+78,Neural Network,Omnilog AUC,O91:H21,0.964285714286
+79,Neural Network,Omnilog AUC,O91:H21,0.931034482759
+80,Support Vector Machine,Omnilog AUC,O103:H2,0.928571428571
+81,Support Vector Machine,Omnilog AUC,O103:H2,0.931034482759
+82,Support Vector Machine,Omnilog AUC,O103:H2,0.965517241379
+83,Support Vector Machine,Omnilog AUC,O103:H2,0.931034482759
+84,Support Vector Machine,Omnilog AUC,O103:H2,0.896551724138
+85,Support Vector Machine,Omnilog AUC,O103:H2,0.931034482759
+86,Support Vector Machine,Omnilog AUC,O103:H2,0.931034482759
+87,Support Vector Machine,Omnilog AUC,O103:H2,0.896551724138
+88,Support Vector Machine,Omnilog AUC,O103:H2,0.928571428571
+89,Support Vector Machine,Omnilog AUC,O103:H2,0.965517241379
+90,Support Vector Machine,Omnilog AUC,O113:H21,0.928571428571
+91,Support Vector Machine,Omnilog AUC,O113:H21,0.928571428571
+92,Support Vector Machine,Omnilog AUC,O113:H21,0.931034482759
+93,Support Vector Machine,Omnilog AUC,O113:H21,0.931034482759
+94,Support Vector Machine,Omnilog AUC,O113:H21,0.965517241379
+95,Support Vector Machine,Omnilog AUC,O113:H21,0.964285714286
+96,Support Vector Machine,Omnilog AUC,O113:H21,0.931034482759
+97,Support Vector Machine,Omnilog AUC,O113:H21,0.931034482759
+98,Support Vector Machine,Omnilog AUC,O113:H21,0.931034482759
+99,Support Vector Machine,Omnilog AUC,O113:H21,0.931034482759
+100,Support Vector Machine,Omnilog AUC,O121:H19,0.964285714286
+101,Support Vector Machine,Omnilog AUC,O121:H19,0.964285714286
+102,Support Vector Machine,Omnilog AUC,O121:H19,0.964285714286
+103,Support Vector Machine,Omnilog AUC,O121:H19,0.964285714286
+104,Support Vector Machine,Omnilog AUC,O121:H19,0.964285714286
+105,Support Vector Machine,Omnilog AUC,O121:H19,1.0
+106,Support Vector Machine,Omnilog AUC,O121:H19,0.964285714286
+107,Support Vector Machine,Omnilog AUC,O121:H19,1.0
+108,Support Vector Machine,Omnilog AUC,O121:H19,0.964285714286
+109,Support Vector Machine,Omnilog AUC,O121:H19,0.964285714286
+110,Support Vector Machine,Omnilog AUC,O145:NM,0.931034482759
+111,Support Vector Machine,Omnilog AUC,O145:NM,0.965517241379
+112,Support Vector Machine,Omnilog AUC,O145:NM,0.964285714286
+113,Support Vector Machine,Omnilog AUC,O145:NM,1.0
+114,Support Vector Machine,Omnilog AUC,O145:NM,0.931034482759
+115,Support Vector Machine,Omnilog AUC,O145:NM,1.0
+116,Support Vector Machine,Omnilog AUC,O145:NM,0.965517241379
+117,Support Vector Machine,Omnilog AUC,O145:NM,0.931034482759
+118,Support Vector Machine,Omnilog AUC,O145:NM,0.931034482759
+119,Support Vector Machine,Omnilog AUC,O145:NM,0.928571428571
+120,Support Vector Machine,Omnilog AUC,O157:H7,1.0
+121,Support Vector Machine,Omnilog AUC,O157:H7,0.965517241379
+122,Support Vector Machine,Omnilog AUC,O157:H7,1.0
+123,Support Vector Machine,Omnilog AUC,O157:H7,0.965517241379
+124,Support Vector Machine,Omnilog AUC,O157:H7,1.0
+125,Support Vector Machine,Omnilog AUC,O157:H7,0.896551724138
+126,Support Vector Machine,Omnilog AUC,O157:H7,0.928571428571
+127,Support Vector Machine,Omnilog AUC,O157:H7,0.896551724138
+128,Support Vector Machine,Omnilog AUC,O157:H7,0.931034482759
+129,Support Vector Machine,Omnilog AUC,O157:H7,0.931034482759
+130,Support Vector Machine,Omnilog AUC,O26:H11,0.892857142857
+131,Support Vector Machine,Omnilog AUC,O26:H11,0.925925925926
+132,Support Vector Machine,Omnilog AUC,O26:H11,0.892857142857
+133,Support Vector Machine,Omnilog AUC,O26:H11,1.0
+134,Support Vector Machine,Omnilog AUC,O26:H11,0.928571428571
+135,Support Vector Machine,Omnilog AUC,O26:H11,0.928571428571
+136,Support Vector Machine,Omnilog AUC,O26:H11,0.928571428571
+137,Support Vector Machine,Omnilog AUC,O26:H11,0.925925925926
+138,Support Vector Machine,Omnilog AUC,O26:H11,0.925925925926
+139,Support Vector Machine,Omnilog AUC,O26:H11,0.892857142857
+140,Support Vector Machine,Omnilog AUC,O45:H2,0.931034482759
+141,Support Vector Machine,Omnilog AUC,O45:H2,0.862068965517
+142,Support Vector Machine,Omnilog AUC,O45:H2,0.931034482759
+143,Support Vector Machine,Omnilog AUC,O45:H2,0.928571428571
+144,Support Vector Machine,Omnilog AUC,O45:H2,0.931034482759
+145,Support Vector Machine,Omnilog AUC,O45:H2,0.931034482759
+146,Support Vector Machine,Omnilog AUC,O45:H2,0.931034482759
+147,Support Vector Machine,Omnilog AUC,O45:H2,0.931034482759
+148,Support Vector Machine,Omnilog AUC,O45:H2,0.862068965517
+149,Support Vector Machine,Omnilog AUC,O45:H2,0.931034482759
+150,Support Vector Machine,Omnilog AUC,O91:H21,0.931034482759
+151,Support Vector Machine,Omnilog AUC,O91:H21,0.931034482759
+152,Support Vector Machine,Omnilog AUC,O91:H21,0.965517241379
+153,Support Vector Machine,Omnilog AUC,O91:H21,0.931034482759
+154,Support Vector Machine,Omnilog AUC,O91:H21,0.896551724138
+155,Support Vector Machine,Omnilog AUC,O91:H21,0.862068965517
+156,Support Vector Machine,Omnilog AUC,O91:H21,0.965517241379
+157,Support Vector Machine,Omnilog AUC,O91:H21,0.896551724138
+158,Support Vector Machine,Omnilog AUC,O91:H21,0.965517241379
+159,Support Vector Machine,Omnilog AUC,O91:H21,0.896551724138
+160,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+161,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+162,Random Forest,Omnilog AUC,O103:H2,0.928571428571
+163,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+164,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+165,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+166,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+167,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+168,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+169,Random Forest,Omnilog AUC,O103:H2,0.896551724138
+170,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+171,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+172,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+173,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+174,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+175,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+176,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+177,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+178,Random Forest,Omnilog AUC,O113:H21,0.928571428571
+179,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+180,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+181,Random Forest,Omnilog AUC,O121:H19,0.962962962963
+182,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+183,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+184,Random Forest,Omnilog AUC,O121:H19,0.962962962963
+185,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+186,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+187,Random Forest,Omnilog AUC,O121:H19,1.0
+188,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+189,Random Forest,Omnilog AUC,O121:H19,0.962962962963
+190,Random Forest,Omnilog AUC,O145:NM,0.965517241379
+191,Random Forest,Omnilog AUC,O145:NM,0.928571428571
+192,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+193,Random Forest,Omnilog AUC,O145:NM,0.965517241379
+194,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+195,Random Forest,Omnilog AUC,O145:NM,0.964285714286
+196,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+197,Random Forest,Omnilog AUC,O145:NM,0.928571428571
+198,Random Forest,Omnilog AUC,O145:NM,0.928571428571
+199,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+200,Random Forest,Omnilog AUC,O157:H7,0.965517241379
+201,Random Forest,Omnilog AUC,O157:H7,1.0
+202,Random Forest,Omnilog AUC,O157:H7,1.0
+203,Random Forest,Omnilog AUC,O157:H7,0.964285714286
+204,Random Forest,Omnilog AUC,O157:H7,0.931034482759
+205,Random Forest,Omnilog AUC,O157:H7,0.892857142857
+206,Random Forest,Omnilog AUC,O157:H7,1.0
+207,Random Forest,Omnilog AUC,O157:H7,0.965517241379
+208,Random Forest,Omnilog AUC,O157:H7,1.0
+209,Random Forest,Omnilog AUC,O157:H7,0.896551724138
+210,Random Forest,Omnilog AUC,O26:H11,0.925925925926
+211,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+212,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+213,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+214,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+215,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+216,Random Forest,Omnilog AUC,O26:H11,0.964285714286
+217,Random Forest,Omnilog AUC,O26:H11,0.925925925926
+218,Random Forest,Omnilog AUC,O26:H11,0.964285714286
+219,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+220,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+221,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+222,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+223,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+224,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+225,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+226,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+227,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+228,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+229,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+230,Random Forest,Omnilog AUC,O91:H21,0.928571428571
+231,Random Forest,Omnilog AUC,O91:H21,0.928571428571
+232,Random Forest,Omnilog AUC,O91:H21,0.928571428571
+233,Random Forest,Omnilog AUC,O91:H21,0.965517241379
+234,Random Forest,Omnilog AUC,O91:H21,0.931034482759
+235,Random Forest,Omnilog AUC,O91:H21,0.931034482759
+236,Random Forest,Omnilog AUC,O91:H21,0.931034482759
+237,Random Forest,Omnilog AUC,O91:H21,0.928571428571
+238,Random Forest,Omnilog AUC,O91:H21,0.965517241379
+239,Random Forest,Omnilog AUC,O91:H21,0.965517241379
+240,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+241,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+242,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+243,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+244,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+245,Random Forest,Omnilog AUC,O103:H2,0.896551724138
+246,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+247,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+248,Random Forest,Omnilog AUC,O103:H2,0.965517241379
+249,Random Forest,Omnilog AUC,O103:H2,0.931034482759
+250,Random Forest,Omnilog AUC,O113:H21,0.928571428571
+251,Random Forest,Omnilog AUC,O113:H21,0.928571428571
+252,Random Forest,Omnilog AUC,O113:H21,0.928571428571
+253,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+254,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+255,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+256,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+257,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+258,Random Forest,Omnilog AUC,O113:H21,0.931034482759
+259,Random Forest,Omnilog AUC,O113:H21,0.928571428571
+260,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+261,Random Forest,Omnilog AUC,O121:H19,0.962962962963
+262,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+263,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+264,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+265,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+266,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+267,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+268,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+269,Random Forest,Omnilog AUC,O121:H19,0.964285714286
+270,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+271,Random Forest,Omnilog AUC,O145:NM,0.965517241379
+272,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+273,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+274,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+275,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+276,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+277,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+278,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+279,Random Forest,Omnilog AUC,O145:NM,0.931034482759
+280,Random Forest,Omnilog AUC,O157:H7,0.965517241379
+281,Random Forest,Omnilog AUC,O157:H7,0.931034482759
+282,Random Forest,Omnilog AUC,O157:H7,1.0
+283,Random Forest,Omnilog AUC,O157:H7,0.965517241379
+284,Random Forest,Omnilog AUC,O157:H7,0.931034482759
+285,Random Forest,Omnilog AUC,O157:H7,1.0
+286,Random Forest,Omnilog AUC,O157:H7,0.931034482759
+287,Random Forest,Omnilog AUC,O157:H7,0.965517241379
+288,Random Forest,Omnilog AUC,O157:H7,1.0
+289,Random Forest,Omnilog AUC,O157:H7,1.0
+290,Random Forest,Omnilog AUC,O26:H11,0.892857142857
+291,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+292,Random Forest,Omnilog AUC,O26:H11,0.925925925926
+293,Random Forest,Omnilog AUC,O26:H11,0.925925925926
+294,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+295,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+296,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+297,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+298,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+299,Random Forest,Omnilog AUC,O26:H11,0.928571428571
+300,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+301,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+302,Random Forest,Omnilog AUC,O45:H2,0.928571428571
+303,Random Forest,Omnilog AUC,O45:H2,0.928571428571
+304,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+305,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+306,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+307,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+308,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+309,Random Forest,Omnilog AUC,O45:H2,0.931034482759
+310,Random Forest,Omnilog AUC,O91:H21,0.931034482759
+311,Random Forest,Omnilog AUC,O91:H21,0.964285714286
+312,Random Forest,Omnilog AUC,O91:H21,0.931034482759
+313,Random Forest,Omnilog AUC,O91:H21,0.965517241379
+314,Random Forest,Omnilog AUC,O91:H21,0.964285714286
+315,Random Forest,Omnilog AUC,O91:H21,0.931034482759
+316,Random Forest,Omnilog AUC,O91:H21,0.965517241379
+317,Random Forest,Omnilog AUC,O91:H21,0.931034482759
+318,Random Forest,Omnilog AUC,O91:H21,0.931034482759
+319,Random Forest,Omnilog AUC,O91:H21,0.965517241379
+320,Neural Network,K-mer Count,O103:H2,0.965517241379
+321,Neural Network,K-mer Count,O103:H2,0.965517241379
+322,Neural Network,K-mer Count,O103:H2,0.965517241379
+323,Neural Network,K-mer Count,O103:H2,0.931034482759
+324,Neural Network,K-mer Count,O103:H2,0.965517241379
+325,Neural Network,K-mer Count,O103:H2,0.931034482759
+326,Neural Network,K-mer Count,O103:H2,1.0
+327,Neural Network,K-mer Count,O103:H2,0.931034482759
+328,Neural Network,K-mer Count,O103:H2,0.931034482759
+329,Neural Network,K-mer Count,O103:H2,1.0
+330,Neural Network,K-mer Count,O113:H21,0.965517241379
+331,Neural Network,K-mer Count,O113:H21,1.0
+332,Neural Network,K-mer Count,O113:H21,0.965517241379
+333,Neural Network,K-mer Count,O113:H21,1.0
+334,Neural Network,K-mer Count,O113:H21,1.0
+335,Neural Network,K-mer Count,O113:H21,0.931034482759
+336,Neural Network,K-mer Count,O113:H21,0.931034482759
+337,Neural Network,K-mer Count,O113:H21,0.965517241379
+338,Neural Network,K-mer Count,O113:H21,0.965517241379
+339,Neural Network,K-mer Count,O113:H21,1.0
+340,Neural Network,K-mer Count,O121:H19,1.0
+341,Neural Network,K-mer Count,O121:H19,0.964285714286
+342,Neural Network,K-mer Count,O121:H19,1.0
+343,Neural Network,K-mer Count,O121:H19,1.0
+344,Neural Network,K-mer Count,O121:H19,1.0
+345,Neural Network,K-mer Count,O121:H19,0.964285714286
+346,Neural Network,K-mer Count,O121:H19,1.0
+347,Neural Network,K-mer Count,O121:H19,1.0
+348,Neural Network,K-mer Count,O121:H19,1.0
+349,Neural Network,K-mer Count,O121:H19,0.964285714286
+350,Neural Network,K-mer Count,O145:NM,0.965517241379
+351,Neural Network,K-mer Count,O145:NM,1.0
+352,Neural Network,K-mer Count,O145:NM,1.0
+353,Neural Network,K-mer Count,O145:NM,1.0
+354,Neural Network,K-mer Count,O145:NM,0.965517241379
+355,Neural Network,K-mer Count,O145:NM,0.965517241379
+356,Neural Network,K-mer Count,O145:NM,0.931034482759
+357,Neural Network,K-mer Count,O145:NM,1.0
+358,Neural Network,K-mer Count,O145:NM,0.965517241379
+359,Neural Network,K-mer Count,O145:NM,1.0
+360,Neural Network,K-mer Count,O157:H7,1.0
+361,Neural Network,K-mer Count,O157:H7,1.0
+362,Neural Network,K-mer Count,O157:H7,1.0
+363,Neural Network,K-mer Count,O157:H7,0.965517241379
+364,Neural Network,K-mer Count,O157:H7,0.965517241379
+365,Neural Network,K-mer Count,O157:H7,1.0
+366,Neural Network,K-mer Count,O157:H7,0.965517241379
+367,Neural Network,K-mer Count,O157:H7,0.965517241379
+368,Neural Network,K-mer Count,O157:H7,1.0
+369,Neural Network,K-mer Count,O157:H7,0.965517241379
+370,Neural Network,K-mer Count,O26:H11,0.964285714286
+371,Neural Network,K-mer Count,O26:H11,1.0
+372,Neural Network,K-mer Count,O26:H11,0.928571428571
+373,Neural Network,K-mer Count,O26:H11,0.964285714286
+374,Neural Network,K-mer Count,O26:H11,0.964285714286
+375,Neural Network,K-mer Count,O26:H11,1.0
+376,Neural Network,K-mer Count,O26:H11,1.0
+377,Neural Network,K-mer Count,O26:H11,1.0
+378,Neural Network,K-mer Count,O26:H11,0.928571428571
+379,Neural Network,K-mer Count,O26:H11,1.0
+380,Neural Network,K-mer Count,O45:H2,0.965517241379
+381,Neural Network,K-mer Count,O45:H2,0.931034482759
+382,Neural Network,K-mer Count,O45:H2,0.931034482759
+383,Neural Network,K-mer Count,O45:H2,0.965517241379
+384,Neural Network,K-mer Count,O45:H2,0.931034482759
+385,Neural Network,K-mer Count,O45:H2,0.896551724138
+386,Neural Network,K-mer Count,O45:H2,0.965517241379
+387,Neural Network,K-mer Count,O45:H2,0.896551724138
+388,Neural Network,K-mer Count,O45:H2,0.896551724138
+389,Neural Network,K-mer Count,O45:H2,1.0
+390,Neural Network,K-mer Count,O91:H21,1.0
+391,Neural Network,K-mer Count,O91:H21,0.965517241379
+392,Neural Network,K-mer Count,O91:H21,1.0
+393,Neural Network,K-mer Count,O91:H21,1.0
+394,Neural Network,K-mer Count,O91:H21,1.0
+395,Neural Network,K-mer Count,O91:H21,1.0
+396,Neural Network,K-mer Count,O91:H21,1.0
+397,Neural Network,K-mer Count,O91:H21,1.0
+398,Neural Network,K-mer Count,O91:H21,1.0
+399,Neural Network,K-mer Count,O91:H21,1.0
+400,Support Vector Machine,K-mer Count,O103:H2,1.0
+401,Support Vector Machine,K-mer Count,O103:H2,1.0
+402,Support Vector Machine,K-mer Count,O103:H2,0.965517241379
+403,Support Vector Machine,K-mer Count,O103:H2,0.965517241379
+404,Support Vector Machine,K-mer Count,O103:H2,0.965517241379
+405,Support Vector Machine,K-mer Count,O103:H2,1.0
+406,Support Vector Machine,K-mer Count,O103:H2,0.965517241379
+407,Support Vector Machine,K-mer Count,O103:H2,0.965517241379
+408,Support Vector Machine,K-mer Count,O103:H2,1.0
+409,Support Vector Machine,K-mer Count,O103:H2,0.965517241379
+410,Support Vector Machine,K-mer Count,O113:H21,0.965517241379
+411,Support Vector Machine,K-mer Count,O113:H21,1.0
+412,Support Vector Machine,K-mer Count,O113:H21,0.965517241379
+413,Support Vector Machine,K-mer Count,O113:H21,1.0
+414,Support Vector Machine,K-mer Count,O113:H21,0.965517241379
+415,Support Vector Machine,K-mer Count,O113:H21,1.0
+416,Support Vector Machine,K-mer Count,O113:H21,1.0
+417,Support Vector Machine,K-mer Count,O113:H21,0.931034482759
+418,Support Vector Machine,K-mer Count,O113:H21,0.931034482759
+419,Support Vector Machine,K-mer Count,O113:H21,0.965517241379
+420,Support Vector Machine,K-mer Count,O121:H19,0.964285714286
+421,Support Vector Machine,K-mer Count,O121:H19,1.0
+422,Support Vector Machine,K-mer Count,O121:H19,1.0
+423,Support Vector Machine,K-mer Count,O121:H19,1.0
+424,Support Vector Machine,K-mer Count,O121:H19,1.0
+425,Support Vector Machine,K-mer Count,O121:H19,1.0
+426,Support Vector Machine,K-mer Count,O121:H19,1.0
+427,Support Vector Machine,K-mer Count,O121:H19,1.0
+428,Support Vector Machine,K-mer Count,O121:H19,0.964285714286
+429,Support Vector Machine,K-mer Count,O121:H19,1.0
+430,Support Vector Machine,K-mer Count,O145:NM,0.965517241379
+431,Support Vector Machine,K-mer Count,O145:NM,0.931034482759
+432,Support Vector Machine,K-mer Count,O145:NM,0.965517241379
+433,Support Vector Machine,K-mer Count,O145:NM,1.0
+434,Support Vector Machine,K-mer Count,O145:NM,1.0
+435,Support Vector Machine,K-mer Count,O145:NM,0.931034482759
+436,Support Vector Machine,K-mer Count,O145:NM,1.0
+437,Support Vector Machine,K-mer Count,O145:NM,0.965517241379
+438,Support Vector Machine,K-mer Count,O145:NM,1.0
+439,Support Vector Machine,K-mer Count,O145:NM,1.0
+440,Support Vector Machine,K-mer Count,O157:H7,1.0
+441,Support Vector Machine,K-mer Count,O157:H7,1.0
+442,Support Vector Machine,K-mer Count,O157:H7,0.965517241379
+443,Support Vector Machine,K-mer Count,O157:H7,1.0
+444,Support Vector Machine,K-mer Count,O157:H7,1.0
+445,Support Vector Machine,K-mer Count,O157:H7,0.965517241379
+446,Support Vector Machine,K-mer Count,O157:H7,0.965517241379
+447,Support Vector Machine,K-mer Count,O157:H7,0.931034482759
+448,Support Vector Machine,K-mer Count,O157:H7,1.0
+449,Support Vector Machine,K-mer Count,O157:H7,1.0
+450,Support Vector Machine,K-mer Count,O26:H11,0.964285714286
+451,Support Vector Machine,K-mer Count,O26:H11,0.928571428571
+452,Support Vector Machine,K-mer Count,O26:H11,0.964285714286
+453,Support Vector Machine,K-mer Count,O26:H11,0.964285714286
+454,Support Vector Machine,K-mer Count,O26:H11,0.964285714286
+455,Support Vector Machine,K-mer Count,O26:H11,0.964285714286
+456,Support Vector Machine,K-mer Count,O26:H11,1.0
+457,Support Vector Machine,K-mer Count,O26:H11,0.928571428571
+458,Support Vector Machine,K-mer Count,O26:H11,0.964285714286
+459,Support Vector Machine,K-mer Count,O26:H11,1.0
+460,Support Vector Machine,K-mer Count,O45:H2,1.0
+461,Support Vector Machine,K-mer Count,O45:H2,0.965517241379
+462,Support Vector Machine,K-mer Count,O45:H2,0.896551724138
+463,Support Vector Machine,K-mer Count,O45:H2,0.931034482759
+464,Support Vector Machine,K-mer Count,O45:H2,1.0
+465,Support Vector Machine,K-mer Count,O45:H2,1.0
+466,Support Vector Machine,K-mer Count,O45:H2,0.965517241379
+467,Support Vector Machine,K-mer Count,O45:H2,0.896551724138
+468,Support Vector Machine,K-mer Count,O45:H2,1.0
+469,Support Vector Machine,K-mer Count,O45:H2,0.931034482759
+470,Support Vector Machine,K-mer Count,O91:H21,1.0
+471,Support Vector Machine,K-mer Count,O91:H21,0.965517241379
+472,Support Vector Machine,K-mer Count,O91:H21,1.0
+473,Support Vector Machine,K-mer Count,O91:H21,1.0
+474,Support Vector Machine,K-mer Count,O91:H21,1.0
+475,Support Vector Machine,K-mer Count,O91:H21,0.965517241379
+476,Support Vector Machine,K-mer Count,O91:H21,0.965517241379
+477,Support Vector Machine,K-mer Count,O91:H21,1.0
+478,Support Vector Machine,K-mer Count,O91:H21,0.931034482759
+479,Support Vector Machine,K-mer Count,O91:H21,0.931034482759
+480,Random Forest,K-mer Count,O103:H2,0.931034482759
+481,Random Forest,K-mer Count,O103:H2,0.965517241379
+482,Random Forest,K-mer Count,O103:H2,1.0
+483,Random Forest,K-mer Count,O103:H2,0.965517241379
+484,Random Forest,K-mer Count,O103:H2,1.0
+485,Random Forest,K-mer Count,O103:H2,0.965517241379
+486,Random Forest,K-mer Count,O103:H2,0.965517241379
+487,Random Forest,K-mer Count,O103:H2,1.0
+488,Random Forest,K-mer Count,O103:H2,0.931034482759
+489,Random Forest,K-mer Count,O103:H2,0.931034482759
+490,Random Forest,K-mer Count,O113:H21,0.965517241379
+491,Random Forest,K-mer Count,O113:H21,0.896551724138
+492,Random Forest,K-mer Count,O113:H21,0.931034482759
+493,Random Forest,K-mer Count,O113:H21,0.931034482759
+494,Random Forest,K-mer Count,O113:H21,0.931034482759
+495,Random Forest,K-mer Count,O113:H21,0.931034482759
+496,Random Forest,K-mer Count,O113:H21,0.931034482759
+497,Random Forest,K-mer Count,O113:H21,0.931034482759
+498,Random Forest,K-mer Count,O113:H21,0.931034482759
+499,Random Forest,K-mer Count,O113:H21,0.931034482759
+500,Random Forest,K-mer Count,O121:H19,0.964285714286
+501,Random Forest,K-mer Count,O121:H19,1.0
+502,Random Forest,K-mer Count,O121:H19,1.0
+503,Random Forest,K-mer Count,O121:H19,1.0
+504,Random Forest,K-mer Count,O121:H19,1.0
+505,Random Forest,K-mer Count,O121:H19,0.964285714286
+506,Random Forest,K-mer Count,O121:H19,0.964285714286
+507,Random Forest,K-mer Count,O121:H19,0.964285714286
+508,Random Forest,K-mer Count,O121:H19,1.0
+509,Random Forest,K-mer Count,O121:H19,1.0
+510,Random Forest,K-mer Count,O145:NM,0.965517241379
+511,Random Forest,K-mer Count,O145:NM,1.0
+512,Random Forest,K-mer Count,O145:NM,0.965517241379
+513,Random Forest,K-mer Count,O145:NM,0.965517241379
+514,Random Forest,K-mer Count,O145:NM,0.965517241379
+515,Random Forest,K-mer Count,O145:NM,0.965517241379
+516,Random Forest,K-mer Count,O145:NM,0.965517241379
+517,Random Forest,K-mer Count,O145:NM,0.965517241379
+518,Random Forest,K-mer Count,O145:NM,1.0
+519,Random Forest,K-mer Count,O145:NM,0.965517241379
+520,Random Forest,K-mer Count,O157:H7,0.965517241379
+521,Random Forest,K-mer Count,O157:H7,0.931034482759
+522,Random Forest,K-mer Count,O157:H7,0.965517241379
+523,Random Forest,K-mer Count,O157:H7,1.0
+524,Random Forest,K-mer Count,O157:H7,1.0
+525,Random Forest,K-mer Count,O157:H7,0.965517241379
+526,Random Forest,K-mer Count,O157:H7,0.931034482759
+527,Random Forest,K-mer Count,O157:H7,1.0
+528,Random Forest,K-mer Count,O157:H7,0.965517241379
+529,Random Forest,K-mer Count,O157:H7,1.0
+530,Random Forest,K-mer Count,O26:H11,0.964285714286
+531,Random Forest,K-mer Count,O26:H11,0.964285714286
+532,Random Forest,K-mer Count,O26:H11,0.964285714286
+533,Random Forest,K-mer Count,O26:H11,0.928571428571
+534,Random Forest,K-mer Count,O26:H11,1.0
+535,Random Forest,K-mer Count,O26:H11,1.0
+536,Random Forest,K-mer Count,O26:H11,0.964285714286
+537,Random Forest,K-mer Count,O26:H11,0.964285714286
+538,Random Forest,K-mer Count,O26:H11,0.892857142857
+539,Random Forest,K-mer Count,O26:H11,0.928571428571
+540,Random Forest,K-mer Count,O45:H2,0.931034482759
+541,Random Forest,K-mer Count,O45:H2,0.931034482759
+542,Random Forest,K-mer Count,O45:H2,0.896551724138
+543,Random Forest,K-mer Count,O45:H2,0.896551724138
+544,Random Forest,K-mer Count,O45:H2,0.931034482759
+545,Random Forest,K-mer Count,O45:H2,0.896551724138
+546,Random Forest,K-mer Count,O45:H2,0.931034482759
+547,Random Forest,K-mer Count,O45:H2,0.931034482759
+548,Random Forest,K-mer Count,O45:H2,0.965517241379
+549,Random Forest,K-mer Count,O45:H2,0.862068965517
+550,Random Forest,K-mer Count,O91:H21,1.0
+551,Random Forest,K-mer Count,O91:H21,1.0
+552,Random Forest,K-mer Count,O91:H21,1.0
+553,Random Forest,K-mer Count,O91:H21,1.0
+554,Random Forest,K-mer Count,O91:H21,0.965517241379
+555,Random Forest,K-mer Count,O91:H21,0.965517241379
+556,Random Forest,K-mer Count,O91:H21,0.965517241379
+557,Random Forest,K-mer Count,O91:H21,0.965517241379
+558,Random Forest,K-mer Count,O91:H21,1.0
+559,Random Forest,K-mer Count,O91:H21,1.0

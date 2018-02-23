@@ -1,0 +1,241 @@
+Model Type,Data Type,Prediction,Accuracy
+Random Forest,K-mer Count,All Hosts,0.458333333333
+Random Forest,K-mer Count,All Hosts,0.375
+Random Forest,K-mer Count,All Hosts,0.458333333333
+Random Forest,K-mer Count,All Hosts,0.583333333333
+Random Forest,K-mer Count,All Hosts,0.541666666667
+Random Forest,K-mer Count,All Hosts,0.458333333333
+Random Forest,K-mer Count,All Hosts,0.375
+Random Forest,K-mer Count,All Hosts,0.291666666667
+Random Forest,K-mer Count,All Hosts,0.5
+Random Forest,K-mer Count,All Hosts,0.541666666667
+Random Forest,K-mer Count,All O Types,0.724137931034
+Random Forest,K-mer Count,All O Types,0.793103448276
+Random Forest,K-mer Count,All O Types,0.793103448276
+Random Forest,K-mer Count,All O Types,0.724137931034
+Random Forest,K-mer Count,All O Types,0.724137931034
+Random Forest,K-mer Count,All O Types,0.827586206897
+Random Forest,K-mer Count,All O Types,0.724137931034
+Random Forest,K-mer Count,All O Types,0.827586206897
+Random Forest,K-mer Count,All O Types,0.827586206897
+Random Forest,K-mer Count,All O Types,0.827586206897
+Random Forest,K-mer Count,All H Types,0.677419354839
+Random Forest,K-mer Count,All H Types,0.774193548387
+Random Forest,K-mer Count,All H Types,0.806451612903
+Random Forest,K-mer Count,All H Types,0.709677419355
+Random Forest,K-mer Count,All H Types,0.838709677419
+Random Forest,K-mer Count,All H Types,0.806451612903
+Random Forest,K-mer Count,All H Types,0.774193548387
+Random Forest,K-mer Count,All H Types,0.806451612903
+Random Forest,K-mer Count,All H Types,0.870967741935
+Random Forest,K-mer Count,All H Types,0.741935483871
+Random Forest,K-mer Count,All Serotypes,0.75
+Random Forest,K-mer Count,All Serotypes,0.75
+Random Forest,K-mer Count,All Serotypes,0.6875
+Random Forest,K-mer Count,All Serotypes,0.71875
+Random Forest,K-mer Count,All Serotypes,0.6875
+Random Forest,K-mer Count,All Serotypes,0.78125
+Random Forest,K-mer Count,All Serotypes,0.65625
+Random Forest,K-mer Count,All Serotypes,0.6875
+Random Forest,K-mer Count,All Serotypes,0.75
+Random Forest,K-mer Count,All Serotypes,0.78125
+Random Forest,Omnilog AUC,All Hosts,0.541666666667
+Random Forest,Omnilog AUC,All Hosts,0.391304347826
+Random Forest,Omnilog AUC,All Hosts,0.708333333333
+Random Forest,Omnilog AUC,All Hosts,0.375
+Random Forest,Omnilog AUC,All Hosts,0.333333333333
+Random Forest,Omnilog AUC,All Hosts,0.608695652174
+Random Forest,Omnilog AUC,All Hosts,0.541666666667
+Random Forest,Omnilog AUC,All Hosts,0.541666666667
+Random Forest,Omnilog AUC,All Hosts,0.5
+Random Forest,Omnilog AUC,All Hosts,0.625
+Random Forest,Omnilog AUC,All O Types,0.689655172414
+Random Forest,Omnilog AUC,All O Types,0.551724137931
+Random Forest,Omnilog AUC,All O Types,0.586206896552
+Random Forest,Omnilog AUC,All O Types,0.642857142857
+Random Forest,Omnilog AUC,All O Types,0.586206896552
+Random Forest,Omnilog AUC,All O Types,0.689655172414
+Random Forest,Omnilog AUC,All O Types,0.620689655172
+Random Forest,Omnilog AUC,All O Types,0.620689655172
+Random Forest,Omnilog AUC,All O Types,0.551724137931
+Random Forest,Omnilog AUC,All O Types,0.655172413793
+Random Forest,Omnilog AUC,All H Types,0.677419354839
+Random Forest,Omnilog AUC,All H Types,0.645161290323
+Random Forest,Omnilog AUC,All H Types,0.58064516129
+Random Forest,Omnilog AUC,All H Types,0.709677419355
+Random Forest,Omnilog AUC,All H Types,0.612903225806
+Random Forest,Omnilog AUC,All H Types,0.612903225806
+Random Forest,Omnilog AUC,All H Types,0.677419354839
+Random Forest,Omnilog AUC,All H Types,0.612903225806
+Random Forest,Omnilog AUC,All H Types,0.741935483871
+Random Forest,Omnilog AUC,All H Types,0.612903225806
+Random Forest,Omnilog AUC,All Serotypes,0.5625
+Random Forest,Omnilog AUC,All Serotypes,0.5625
+Random Forest,Omnilog AUC,All Serotypes,0.5625
+Random Forest,Omnilog AUC,All Serotypes,0.5625
+Random Forest,Omnilog AUC,All Serotypes,0.58064516129
+Random Forest,Omnilog AUC,All Serotypes,0.59375
+Random Forest,Omnilog AUC,All Serotypes,0.53125
+Random Forest,Omnilog AUC,All Serotypes,0.58064516129
+Random Forest,Omnilog AUC,All Serotypes,0.58064516129
+Random Forest,Omnilog AUC,All Serotypes,0.59375
+Support Vector Machine,K-mer Count,All Hosts,0.25
+Support Vector Machine,K-mer Count,All Hosts,0.375
+Support Vector Machine,K-mer Count,All Hosts,0.458333333333
+Support Vector Machine,K-mer Count,All Hosts,0.416666666667
+Support Vector Machine,K-mer Count,All Hosts,0.583333333333
+Support Vector Machine,K-mer Count,All Hosts,0.291666666667
+Support Vector Machine,K-mer Count,All Hosts,0.416666666667
+Support Vector Machine,K-mer Count,All Hosts,0.333333333333
+Support Vector Machine,K-mer Count,All Hosts,0.458333333333
+Support Vector Machine,K-mer Count,All Hosts,0.333333333333
+Support Vector Machine,K-mer Count,All O Types,0.896551724138
+Support Vector Machine,K-mer Count,All O Types,0.793103448276
+Support Vector Machine,K-mer Count,All O Types,0.827586206897
+Support Vector Machine,K-mer Count,All O Types,0.827586206897
+Support Vector Machine,K-mer Count,All O Types,0.862068965517
+Support Vector Machine,K-mer Count,All O Types,0.896551724138
+Support Vector Machine,K-mer Count,All O Types,0.931034482759
+Support Vector Machine,K-mer Count,All O Types,0.862068965517
+Support Vector Machine,K-mer Count,All O Types,0.862068965517
+Support Vector Machine,K-mer Count,All O Types,0.896551724138
+Support Vector Machine,K-mer Count,All H Types,0.709677419355
+Support Vector Machine,K-mer Count,All H Types,0.838709677419
+Support Vector Machine,K-mer Count,All H Types,0.774193548387
+Support Vector Machine,K-mer Count,All H Types,0.870967741935
+Support Vector Machine,K-mer Count,All H Types,0.903225806452
+Support Vector Machine,K-mer Count,All H Types,0.806451612903
+Support Vector Machine,K-mer Count,All H Types,0.870967741935
+Support Vector Machine,K-mer Count,All H Types,0.774193548387
+Support Vector Machine,K-mer Count,All H Types,0.806451612903
+Support Vector Machine,K-mer Count,All H Types,0.774193548387
+Support Vector Machine,K-mer Count,All Serotypes,0.71875
+Support Vector Machine,K-mer Count,All Serotypes,0.78125
+Support Vector Machine,K-mer Count,All Serotypes,0.84375
+Support Vector Machine,K-mer Count,All Serotypes,0.8125
+Support Vector Machine,K-mer Count,All Serotypes,0.75
+Support Vector Machine,K-mer Count,All Serotypes,0.78125
+Support Vector Machine,K-mer Count,All Serotypes,0.84375
+Support Vector Machine,K-mer Count,All Serotypes,0.875
+Support Vector Machine,K-mer Count,All Serotypes,0.8125
+Support Vector Machine,K-mer Count,All Serotypes,0.875
+Neural Network,K-mer Count,All Hosts,0.784722231328
+Neural Network,K-mer Count,All Hosts,0.840277783573
+Neural Network,K-mer Count,All Hosts,0.770833343267
+Neural Network,K-mer Count,All Hosts,0.840277781089
+Neural Network,K-mer Count,All Hosts,0.854166671634
+Neural Network,K-mer Count,All Hosts,0.77777778854
+Neural Network,K-mer Count,All Hosts,0.819444450239
+Neural Network,K-mer Count,All Hosts,0.812500007451
+Neural Network,K-mer Count,All Hosts,0.777777778606
+Neural Network,K-mer Count,All Hosts,0.826388893028
+Neural Network,K-mer Count,All O Types,0.981851179024
+Neural Network,K-mer Count,All O Types,0.9836660603
+Neural Network,K-mer Count,All O Types,0.976406531087
+Neural Network,K-mer Count,All O Types,0.981851176969
+Neural Network,K-mer Count,All O Types,0.976406531087
+Neural Network,K-mer Count,All O Types,0.989110706181
+Neural Network,K-mer Count,All O Types,0.978221414418
+Neural Network,K-mer Count,All O Types,0.98548094363
+Neural Network,K-mer Count,All O Types,0.980036295693
+Neural Network,K-mer Count,All O Types,0.980036295693
+Neural Network,K-mer Count,All H Types,0.978494624938
+Neural Network,K-mer Count,All H Types,0.98279569995
+Neural Network,K-mer Count,All H Types,0.980645162444
+Neural Network,K-mer Count,All H Types,0.987096774963
+Neural Network,K-mer Count,All H Types,0.969892474913
+Neural Network,K-mer Count,All H Types,0.987096774963
+Neural Network,K-mer Count,All H Types,0.969892474913
+Neural Network,K-mer Count,All H Types,0.978494624938
+Neural Network,K-mer Count,All H Types,0.991397849975
+Neural Network,K-mer Count,All H Types,0.98279569995
+Neural Network,K-mer Count,All Serotypes,0.988051468506
+Neural Network,K-mer Count,All Serotypes,0.991727940738
+Neural Network,K-mer Count,All Serotypes,0.985294112936
+Neural Network,K-mer Count,All Serotypes,0.989889703691
+Neural Network,K-mer Count,All Serotypes,0.989889703691
+Neural Network,K-mer Count,All Serotypes,0.987132351846
+Neural Network,K-mer Count,All Serotypes,0.991727938876
+Neural Network,K-mer Count,All Serotypes,0.988051470369
+Neural Network,K-mer Count,All Serotypes,0.988970585167
+Neural Network,K-mer Count,All Serotypes,0.982536762953
+Support Vector Machine,Omnilog AUC,All Hosts,0.881944447756
+Support Vector Machine,Omnilog AUC,All Hosts,0.861111116906
+Support Vector Machine,Omnilog AUC,All Hosts,0.902777783573
+Support Vector Machine,Omnilog AUC,All Hosts,0.91666666915
+Support Vector Machine,Omnilog AUC,All Hosts,0.833333341972
+Support Vector Machine,Omnilog AUC,All Hosts,0.819444455206
+Support Vector Machine,Omnilog AUC,All Hosts,0.888888895512
+Support Vector Machine,Omnilog AUC,All Hosts,0.812500009934
+Support Vector Machine,Omnilog AUC,All Hosts,0.805555567145
+Support Vector Machine,Omnilog AUC,All Hosts,0.86111111939
+Support Vector Machine,Omnilog AUC,All O Types,0.976406535198
+Support Vector Machine,Omnilog AUC,All O Types,0.96733212471
+Support Vector Machine,Omnilog AUC,All O Types,0.963702358049
+Support Vector Machine,Omnilog AUC,All O Types,0.980036303915
+Support Vector Machine,Omnilog AUC,All O Types,0.969147010096
+Support Vector Machine,Omnilog AUC,All O Types,0.970961889316
+Support Vector Machine,Omnilog AUC,All O Types,0.969147010096
+Support Vector Machine,Omnilog AUC,All O Types,0.974591651867
+Support Vector Machine,Omnilog AUC,All O Types,0.970961889316
+Support Vector Machine,Omnilog AUC,All O Types,0.978221420584
+Support Vector Machine,Omnilog AUC,All H Types,0.967741937407
+Support Vector Machine,Omnilog AUC,All H Types,0.976344087432
+Support Vector Machine,Omnilog AUC,All H Types,0.963440862394
+Support Vector Machine,Omnilog AUC,All H Types,0.9655913999
+Support Vector Machine,Omnilog AUC,All H Types,0.959139787382
+Support Vector Machine,Omnilog AUC,All H Types,0.967741937407
+Support Vector Machine,Omnilog AUC,All H Types,0.963440862394
+Support Vector Machine,Omnilog AUC,All H Types,0.969892474913
+Support Vector Machine,Omnilog AUC,All H Types,0.969892474913
+Support Vector Machine,Omnilog AUC,All H Types,0.969892474913
+Support Vector Machine,Omnilog AUC,All Serotypes,0.989889701828
+Support Vector Machine,Omnilog AUC,All Serotypes,0.984374996275
+Support Vector Machine,Omnilog AUC,All Serotypes,0.985294114798
+Support Vector Machine,Omnilog AUC,All Serotypes,0.986717260653
+Support Vector Machine,Omnilog AUC,All Serotypes,0.987666032007
+Support Vector Machine,Omnilog AUC,All Serotypes,0.982536762953
+Support Vector Machine,Omnilog AUC,All Serotypes,0.984819729482
+Support Vector Machine,Omnilog AUC,All Serotypes,0.987132344395
+Support Vector Machine,Omnilog AUC,All Serotypes,0.980075897709
+Support Vector Machine,Omnilog AUC,All Serotypes,0.981617642567
+Neural Network,Omnilog AUC,All Hosts,0.876811597658
+Neural Network,Omnilog AUC,All Hosts,0.833333343267
+Neural Network,Omnilog AUC,All Hosts,0.798611121873
+Neural Network,Omnilog AUC,All Hosts,0.833333343267
+Neural Network,Omnilog AUC,All Hosts,0.784722233812
+Neural Network,Omnilog AUC,All Hosts,0.805555564662
+Neural Network,Omnilog AUC,All Hosts,0.868055562178
+Neural Network,Omnilog AUC,All Hosts,0.898550730685
+Neural Network,Omnilog AUC,All Hosts,0.833333343267
+Neural Network,Omnilog AUC,All Hosts,0.862318844899
+Neural Network,Omnilog AUC,All O Types,0.970961891372
+Neural Network,Omnilog AUC,All O Types,0.96616541275
+Neural Network,Omnilog AUC,All O Types,0.972776772647
+Neural Network,Omnilog AUC,All O Types,0.972776770592
+Neural Network,Omnilog AUC,All O Types,0.963702362159
+Neural Network,Omnilog AUC,All O Types,0.963702362159
+Neural Network,Omnilog AUC,All O Types,0.973684212991
+Neural Network,Omnilog AUC,All O Types,0.970961893427
+Neural Network,Omnilog AUC,All O Types,0.974591660089
+Neural Network,Omnilog AUC,All O Types,0.965517241379
+Neural Network,Omnilog AUC,All H Types,0.956989249875
+Neural Network,Omnilog AUC,All H Types,0.969892474913
+Neural Network,Omnilog AUC,All H Types,0.954838712369
+Neural Network,Omnilog AUC,All H Types,0.961290324888
+Neural Network,Omnilog AUC,All H Types,0.950537637357
+Neural Network,Omnilog AUC,All H Types,0.973333334923
+Neural Network,Omnilog AUC,All H Types,0.9655913999
+Neural Network,Omnilog AUC,All H Types,0.951111114025
+Neural Network,Omnilog AUC,All H Types,0.976344087432
+Neural Network,Omnilog AUC,All H Types,0.9655913999
+Neural Network,Omnilog AUC,All Serotypes,0.988970585167
+Neural Network,Omnilog AUC,All Serotypes,0.986213229597
+Neural Network,Omnilog AUC,All Serotypes,0.981617642567
+Neural Network,Omnilog AUC,All Serotypes,0.983455877751
+Neural Network,Omnilog AUC,All Serotypes,0.98253676109
+Neural Network,Omnilog AUC,All Serotypes,0.990808820352
+Neural Network,Omnilog AUC,All Serotypes,0.978860290721
+Neural Network,Omnilog AUC,All Serotypes,0.982922198311
+Neural Network,Omnilog AUC,All Serotypes,0.990512330686
+Neural Network,Omnilog AUC,All Serotypes,0.988051466644

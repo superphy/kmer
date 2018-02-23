@@ -1,0 +1,138 @@
+---
+name: SVM+omni+Human
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.6978260869565218
+  avg_run_time: 1.9843873023986816
+  data: !!python/name:get_data.get_omnilog_data ''
+  data_args:
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: Host
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: Human
+      prefix: ''
+      remove: Unknown
+      suffix: ''
+      train_header: null
+      validate: true
+    omnilog_sheet: /home/rylan/data/ecomnilog/wide_format_header.txt
+    validate: true
+  datetime: 2018-02-20 10:10:32.495830
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 114
+  repetitions: 10
+  results:
+  - 0.7083333333333334
+  - 0.6666666666666666
+  - 0.7391304347826086
+  - 0.5416666666666666
+  - 0.75
+  - 0.7083333333333334
+  - 0.8333333333333334
+  - 0.5416666666666666
+  - 0.7391304347826086
+  - 0.75
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.08785316701178884
+  std_dev_run_times: 0.12060334596061936
+  test_sizes: 23.8
+  train_sizes: 90.2
+...
+
+
+
+---
+name: SVM+omni+Bovine
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.6443840579710145
+  avg_run_time: 2.2292809963226317
+  data: !!python/name:get_data.get_omnilog_data ''
+  data_args:
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: Host
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: Bovine
+      prefix: ''
+      remove: Unknown
+      suffix: ''
+      train_header: null
+      validate: true
+    omnilog_sheet: /home/rylan/data/ecomnilog/wide_format_header.txt
+    validate: true
+  datetime: 2018-02-20 10:10:54.815125
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 114
+  repetitions: 10
+  results:
+  - 0.5833333333333334
+  - 0.75
+  - 0.6956521739130435
+  - 0.625
+  - 0.5833333333333334
+  - 0.6956521739130435
+  - 0.5652173913043478
+  - 0.6956521739130435
+  - 0.7083333333333334
+  - 0.5416666666666666
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.06912151865754174
+  std_dev_run_times: 0.2248062766068812
+  test_sizes: 23.6
+  train_sizes: 90.4
+...
+
+
+

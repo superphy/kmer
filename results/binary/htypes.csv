@@ -1,0 +1,361 @@
+,Model Type,Data Type,Htype,Accuracy
+0,Neural Network,K-mer Count,H11,1.0
+1,Neural Network,K-mer Count,H11,0.965517241379
+2,Neural Network,K-mer Count,H11,1.0
+3,Neural Network,K-mer Count,H11,0.965517241379
+4,Neural Network,K-mer Count,H11,0.965517241379
+5,Neural Network,K-mer Count,H11,0.965517241379
+6,Neural Network,K-mer Count,H11,0.931034482759
+7,Neural Network,K-mer Count,H11,0.931034482759
+8,Neural Network,K-mer Count,H11,1.0
+9,Neural Network,K-mer Count,H11,1.0
+10,Neural Network,K-mer Count,H19,1.0
+11,Neural Network,K-mer Count,H19,0.965517241379
+12,Neural Network,K-mer Count,H19,1.0
+13,Neural Network,K-mer Count,H19,1.0
+14,Neural Network,K-mer Count,H19,1.0
+15,Neural Network,K-mer Count,H19,1.0
+16,Neural Network,K-mer Count,H19,1.0
+17,Neural Network,K-mer Count,H19,1.0
+18,Neural Network,K-mer Count,H19,1.0
+19,Neural Network,K-mer Count,H19,1.0
+20,Neural Network,K-mer Count,H2,0.931034482759
+21,Neural Network,K-mer Count,H2,0.965517241379
+22,Neural Network,K-mer Count,H2,0.896551724138
+23,Neural Network,K-mer Count,H2,1.0
+24,Neural Network,K-mer Count,H2,0.965517241379
+25,Neural Network,K-mer Count,H2,0.965517241379
+26,Neural Network,K-mer Count,H2,0.896551724138
+27,Neural Network,K-mer Count,H2,0.931034482759
+28,Neural Network,K-mer Count,H2,0.965517241379
+29,Neural Network,K-mer Count,H2,0.931034482759
+30,Neural Network,K-mer Count,H21,1.0
+31,Neural Network,K-mer Count,H21,1.0
+32,Neural Network,K-mer Count,H21,0.965517241379
+33,Neural Network,K-mer Count,H21,1.0
+34,Neural Network,K-mer Count,H21,0.931034482759
+35,Neural Network,K-mer Count,H21,0.896551724138
+36,Neural Network,K-mer Count,H21,0.965517241379
+37,Neural Network,K-mer Count,H21,1.0
+38,Neural Network,K-mer Count,H21,0.965517241379
+39,Neural Network,K-mer Count,H21,0.931034482759
+40,Neural Network,K-mer Count,H7,0.896551724138
+41,Neural Network,K-mer Count,H7,0.931034482759
+42,Neural Network,K-mer Count,H7,0.965517241379
+43,Neural Network,K-mer Count,H7,0.931034482759
+44,Neural Network,K-mer Count,H7,0.965517241379
+45,Neural Network,K-mer Count,H7,0.965517241379
+46,Neural Network,K-mer Count,H7,0.931034482759
+47,Neural Network,K-mer Count,H7,0.793103448276
+48,Neural Network,K-mer Count,H7,1.0
+49,Neural Network,K-mer Count,H7,0.965517241379
+50,Neural Network,K-mer Count,NM,0.821428571429
+51,Neural Network,K-mer Count,NM,0.892857142857
+52,Neural Network,K-mer Count,NM,0.928571428571
+53,Neural Network,K-mer Count,NM,0.964285714286
+54,Neural Network,K-mer Count,NM,0.892857142857
+55,Neural Network,K-mer Count,NM,0.928571428571
+56,Neural Network,K-mer Count,NM,0.857142857143
+57,Neural Network,K-mer Count,NM,0.928571428571
+58,Neural Network,K-mer Count,NM,0.928571428571
+59,Neural Network,K-mer Count,NM,0.928571428571
+60,Random Forest,K-mer Count,H11,0.931034482759
+61,Random Forest,K-mer Count,H11,0.931034482759
+62,Random Forest,K-mer Count,H11,0.965517241379
+63,Random Forest,K-mer Count,H11,0.965517241379
+64,Random Forest,K-mer Count,H11,0.931034482759
+65,Random Forest,K-mer Count,H11,0.896551724138
+66,Random Forest,K-mer Count,H11,0.931034482759
+67,Random Forest,K-mer Count,H11,0.931034482759
+68,Random Forest,K-mer Count,H11,0.931034482759
+69,Random Forest,K-mer Count,H11,0.931034482759
+70,Random Forest,K-mer Count,H19,0.965517241379
+71,Random Forest,K-mer Count,H19,0.931034482759
+72,Random Forest,K-mer Count,H19,0.965517241379
+73,Random Forest,K-mer Count,H19,1.0
+74,Random Forest,K-mer Count,H19,0.931034482759
+75,Random Forest,K-mer Count,H19,0.965517241379
+76,Random Forest,K-mer Count,H19,0.965517241379
+77,Random Forest,K-mer Count,H19,0.931034482759
+78,Random Forest,K-mer Count,H19,1.0
+79,Random Forest,K-mer Count,H19,0.965517241379
+80,Random Forest,K-mer Count,H2,0.896551724138
+81,Random Forest,K-mer Count,H2,0.931034482759
+82,Random Forest,K-mer Count,H2,0.896551724138
+83,Random Forest,K-mer Count,H2,0.862068965517
+84,Random Forest,K-mer Count,H2,1.0
+85,Random Forest,K-mer Count,H2,0.931034482759
+86,Random Forest,K-mer Count,H2,0.931034482759
+87,Random Forest,K-mer Count,H2,0.931034482759
+88,Random Forest,K-mer Count,H2,0.965517241379
+89,Random Forest,K-mer Count,H2,0.896551724138
+90,Random Forest,K-mer Count,H21,0.965517241379
+91,Random Forest,K-mer Count,H21,0.965517241379
+92,Random Forest,K-mer Count,H21,0.896551724138
+93,Random Forest,K-mer Count,H21,0.965517241379
+94,Random Forest,K-mer Count,H21,0.965517241379
+95,Random Forest,K-mer Count,H21,0.896551724138
+96,Random Forest,K-mer Count,H21,0.896551724138
+97,Random Forest,K-mer Count,H21,1.0
+98,Random Forest,K-mer Count,H21,0.862068965517
+99,Random Forest,K-mer Count,H21,0.965517241379
+100,Random Forest,K-mer Count,H7,0.896551724138
+101,Random Forest,K-mer Count,H7,0.896551724138
+102,Random Forest,K-mer Count,H7,0.862068965517
+103,Random Forest,K-mer Count,H7,0.931034482759
+104,Random Forest,K-mer Count,H7,0.931034482759
+105,Random Forest,K-mer Count,H7,0.965517241379
+106,Random Forest,K-mer Count,H7,1.0
+107,Random Forest,K-mer Count,H7,0.896551724138
+108,Random Forest,K-mer Count,H7,0.965517241379
+109,Random Forest,K-mer Count,H7,0.896551724138
+110,Random Forest,K-mer Count,NM,0.928571428571
+111,Random Forest,K-mer Count,NM,0.964285714286
+112,Random Forest,K-mer Count,NM,0.928571428571
+113,Random Forest,K-mer Count,NM,0.928571428571
+114,Random Forest,K-mer Count,NM,0.928571428571
+115,Random Forest,K-mer Count,NM,0.821428571429
+116,Random Forest,K-mer Count,NM,0.964285714286
+117,Random Forest,K-mer Count,NM,0.892857142857
+118,Random Forest,K-mer Count,NM,0.892857142857
+119,Random Forest,K-mer Count,NM,0.857142857143
+120,Support Vector Machine,K-mer Count,H11,0.965517241379
+121,Support Vector Machine,K-mer Count,H11,0.965517241379
+122,Support Vector Machine,K-mer Count,H11,0.965517241379
+123,Support Vector Machine,K-mer Count,H11,0.965517241379
+124,Support Vector Machine,K-mer Count,H11,0.965517241379
+125,Support Vector Machine,K-mer Count,H11,0.965517241379
+126,Support Vector Machine,K-mer Count,H11,1.0
+127,Support Vector Machine,K-mer Count,H11,0.965517241379
+128,Support Vector Machine,K-mer Count,H11,1.0
+129,Support Vector Machine,K-mer Count,H11,0.931034482759
+130,Support Vector Machine,K-mer Count,H19,1.0
+131,Support Vector Machine,K-mer Count,H19,1.0
+132,Support Vector Machine,K-mer Count,H19,1.0
+133,Support Vector Machine,K-mer Count,H19,0.931034482759
+134,Support Vector Machine,K-mer Count,H19,0.965517241379
+135,Support Vector Machine,K-mer Count,H19,1.0
+136,Support Vector Machine,K-mer Count,H19,0.965517241379
+137,Support Vector Machine,K-mer Count,H19,1.0
+138,Support Vector Machine,K-mer Count,H19,0.965517241379
+139,Support Vector Machine,K-mer Count,H19,0.965517241379
+140,Support Vector Machine,K-mer Count,H2,0.931034482759
+141,Support Vector Machine,K-mer Count,H2,0.965517241379
+142,Support Vector Machine,K-mer Count,H2,1.0
+143,Support Vector Machine,K-mer Count,H2,0.931034482759
+144,Support Vector Machine,K-mer Count,H2,0.965517241379
+145,Support Vector Machine,K-mer Count,H2,0.965517241379
+146,Support Vector Machine,K-mer Count,H2,0.931034482759
+147,Support Vector Machine,K-mer Count,H2,0.965517241379
+148,Support Vector Machine,K-mer Count,H2,1.0
+149,Support Vector Machine,K-mer Count,H2,0.965517241379
+150,Support Vector Machine,K-mer Count,H21,0.965517241379
+151,Support Vector Machine,K-mer Count,H21,0.965517241379
+152,Support Vector Machine,K-mer Count,H21,0.965517241379
+153,Support Vector Machine,K-mer Count,H21,0.965517241379
+154,Support Vector Machine,K-mer Count,H21,0.965517241379
+155,Support Vector Machine,K-mer Count,H21,0.965517241379
+156,Support Vector Machine,K-mer Count,H21,1.0
+157,Support Vector Machine,K-mer Count,H21,0.827586206897
+158,Support Vector Machine,K-mer Count,H21,1.0
+159,Support Vector Machine,K-mer Count,H21,0.965517241379
+160,Support Vector Machine,K-mer Count,H7,0.896551724138
+161,Support Vector Machine,K-mer Count,H7,1.0
+162,Support Vector Machine,K-mer Count,H7,0.965517241379
+163,Support Vector Machine,K-mer Count,H7,0.827586206897
+164,Support Vector Machine,K-mer Count,H7,0.965517241379
+165,Support Vector Machine,K-mer Count,H7,0.965517241379
+166,Support Vector Machine,K-mer Count,H7,0.931034482759
+167,Support Vector Machine,K-mer Count,H7,0.931034482759
+168,Support Vector Machine,K-mer Count,H7,0.965517241379
+169,Support Vector Machine,K-mer Count,H7,0.862068965517
+170,Support Vector Machine,K-mer Count,NM,0.892857142857
+171,Support Vector Machine,K-mer Count,NM,0.857142857143
+172,Support Vector Machine,K-mer Count,NM,0.928571428571
+173,Support Vector Machine,K-mer Count,NM,0.892857142857
+174,Support Vector Machine,K-mer Count,NM,0.964285714286
+175,Support Vector Machine,K-mer Count,NM,0.892857142857
+176,Support Vector Machine,K-mer Count,NM,0.964285714286
+177,Support Vector Machine,K-mer Count,NM,0.821428571429
+178,Support Vector Machine,K-mer Count,NM,0.928571428571
+179,Support Vector Machine,K-mer Count,NM,0.928571428571
+180,Support Vector Machine,Omnilog AUC,H11,0.931034482759
+181,Support Vector Machine,Omnilog AUC,H11,0.965517241379
+182,Support Vector Machine,Omnilog AUC,H11,0.931034482759
+183,Support Vector Machine,Omnilog AUC,H11,1.0
+184,Support Vector Machine,Omnilog AUC,H11,0.965517241379
+185,Support Vector Machine,Omnilog AUC,H11,0.931034482759
+186,Support Vector Machine,Omnilog AUC,H11,0.965517241379
+187,Support Vector Machine,Omnilog AUC,H11,0.931034482759
+188,Support Vector Machine,Omnilog AUC,H11,0.928571428571
+189,Support Vector Machine,Omnilog AUC,H11,0.862068965517
+190,Support Vector Machine,Omnilog AUC,H19,0.931034482759
+191,Support Vector Machine,Omnilog AUC,H19,0.931034482759
+192,Support Vector Machine,Omnilog AUC,H19,0.965517241379
+193,Support Vector Machine,Omnilog AUC,H19,0.965517241379
+194,Support Vector Machine,Omnilog AUC,H19,0.862068965517
+195,Support Vector Machine,Omnilog AUC,H19,0.965517241379
+196,Support Vector Machine,Omnilog AUC,H19,0.965517241379
+197,Support Vector Machine,Omnilog AUC,H19,1.0
+198,Support Vector Machine,Omnilog AUC,H19,0.931034482759
+199,Support Vector Machine,Omnilog AUC,H19,0.928571428571
+200,Support Vector Machine,Omnilog AUC,H2,0.862068965517
+201,Support Vector Machine,Omnilog AUC,H2,0.896551724138
+202,Support Vector Machine,Omnilog AUC,H2,0.965517241379
+203,Support Vector Machine,Omnilog AUC,H2,0.896551724138
+204,Support Vector Machine,Omnilog AUC,H2,0.965517241379
+205,Support Vector Machine,Omnilog AUC,H2,0.862068965517
+206,Support Vector Machine,Omnilog AUC,H2,0.896551724138
+207,Support Vector Machine,Omnilog AUC,H2,0.965517241379
+208,Support Vector Machine,Omnilog AUC,H2,0.928571428571
+209,Support Vector Machine,Omnilog AUC,H2,0.931034482759
+210,Support Vector Machine,Omnilog AUC,H21,0.827586206897
+211,Support Vector Machine,Omnilog AUC,H21,0.793103448276
+212,Support Vector Machine,Omnilog AUC,H21,0.931034482759
+213,Support Vector Machine,Omnilog AUC,H21,0.862068965517
+214,Support Vector Machine,Omnilog AUC,H21,0.793103448276
+215,Support Vector Machine,Omnilog AUC,H21,0.793103448276
+216,Support Vector Machine,Omnilog AUC,H21,0.862068965517
+217,Support Vector Machine,Omnilog AUC,H21,0.896551724138
+218,Support Vector Machine,Omnilog AUC,H21,0.928571428571
+219,Support Vector Machine,Omnilog AUC,H21,0.896551724138
+220,Support Vector Machine,Omnilog AUC,H7,0.857142857143
+221,Support Vector Machine,Omnilog AUC,H7,0.827586206897
+222,Support Vector Machine,Omnilog AUC,H7,0.724137931034
+223,Support Vector Machine,Omnilog AUC,H7,0.862068965517
+224,Support Vector Machine,Omnilog AUC,H7,0.896551724138
+225,Support Vector Machine,Omnilog AUC,H7,0.758620689655
+226,Support Vector Machine,Omnilog AUC,H7,0.862068965517
+227,Support Vector Machine,Omnilog AUC,H7,0.758620689655
+228,Support Vector Machine,Omnilog AUC,H7,0.758620689655
+229,Support Vector Machine,Omnilog AUC,H7,0.724137931034
+230,Support Vector Machine,Omnilog AUC,NM,0.857142857143
+231,Support Vector Machine,Omnilog AUC,NM,0.892857142857
+232,Support Vector Machine,Omnilog AUC,NM,0.928571428571
+233,Support Vector Machine,Omnilog AUC,NM,0.75
+234,Support Vector Machine,Omnilog AUC,NM,0.892857142857
+235,Support Vector Machine,Omnilog AUC,NM,0.928571428571
+236,Support Vector Machine,Omnilog AUC,NM,0.857142857143
+237,Support Vector Machine,Omnilog AUC,NM,0.851851851852
+238,Support Vector Machine,Omnilog AUC,NM,0.814814814815
+239,Support Vector Machine,Omnilog AUC,NM,0.892857142857
+240,Neural Network,Omnilog AUC,H11,1.0
+241,Neural Network,Omnilog AUC,H11,0.965517241379
+242,Neural Network,Omnilog AUC,H11,0.964285714286
+243,Neural Network,Omnilog AUC,H11,0.965517241379
+244,Neural Network,Omnilog AUC,H11,0.931034482759
+245,Neural Network,Omnilog AUC,H11,1.0
+246,Neural Network,Omnilog AUC,H11,1.0
+247,Neural Network,Omnilog AUC,H11,1.0
+248,Neural Network,Omnilog AUC,H11,0.965517241379
+249,Neural Network,Omnilog AUC,H11,0.931034482759
+250,Neural Network,Omnilog AUC,H19,0.931034482759
+251,Neural Network,Omnilog AUC,H19,1.0
+252,Neural Network,Omnilog AUC,H19,0.931034482759
+253,Neural Network,Omnilog AUC,H19,0.931034482759
+254,Neural Network,Omnilog AUC,H19,0.928571428571
+255,Neural Network,Omnilog AUC,H19,0.965517241379
+256,Neural Network,Omnilog AUC,H19,0.931034482759
+257,Neural Network,Omnilog AUC,H19,0.965517241379
+258,Neural Network,Omnilog AUC,H19,0.896551724138
+259,Neural Network,Omnilog AUC,H19,0.965517241379
+260,Neural Network,Omnilog AUC,H2,0.862068965517
+261,Neural Network,Omnilog AUC,H2,0.896551724138
+262,Neural Network,Omnilog AUC,H2,0.928571428571
+263,Neural Network,Omnilog AUC,H2,0.965517241379
+264,Neural Network,Omnilog AUC,H2,0.892857142857
+265,Neural Network,Omnilog AUC,H2,0.896551724138
+266,Neural Network,Omnilog AUC,H2,0.931034482759
+267,Neural Network,Omnilog AUC,H2,0.965517241379
+268,Neural Network,Omnilog AUC,H2,0.896551724138
+269,Neural Network,Omnilog AUC,H2,0.892857142857
+270,Neural Network,Omnilog AUC,H21,0.827586206897
+271,Neural Network,Omnilog AUC,H21,0.862068965517
+272,Neural Network,Omnilog AUC,H21,0.862068965517
+273,Neural Network,Omnilog AUC,H21,0.896551724138
+274,Neural Network,Omnilog AUC,H21,0.862068965517
+275,Neural Network,Omnilog AUC,H21,0.793103448276
+276,Neural Network,Omnilog AUC,H21,0.931034482759
+277,Neural Network,Omnilog AUC,H21,0.965517241379
+278,Neural Network,Omnilog AUC,H21,0.827586206897
+279,Neural Network,Omnilog AUC,H21,0.964285714286
+280,Neural Network,Omnilog AUC,H7,0.965517241379
+281,Neural Network,Omnilog AUC,H7,0.862068965517
+282,Neural Network,Omnilog AUC,H7,0.793103448276
+283,Neural Network,Omnilog AUC,H7,0.862068965517
+284,Neural Network,Omnilog AUC,H7,0.896551724138
+285,Neural Network,Omnilog AUC,H7,0.965517241379
+286,Neural Network,Omnilog AUC,H7,0.931034482759
+287,Neural Network,Omnilog AUC,H7,0.896551724138
+288,Neural Network,Omnilog AUC,H7,0.862068965517
+289,Neural Network,Omnilog AUC,H7,0.896551724138
+290,Neural Network,Omnilog AUC,NM,0.928571428571
+291,Neural Network,Omnilog AUC,NM,0.925925925926
+292,Neural Network,Omnilog AUC,NM,0.821428571429
+293,Neural Network,Omnilog AUC,NM,0.892857142857
+294,Neural Network,Omnilog AUC,NM,0.821428571429
+295,Neural Network,Omnilog AUC,NM,0.964285714286
+296,Neural Network,Omnilog AUC,NM,0.892857142857
+297,Neural Network,Omnilog AUC,NM,0.928571428571
+298,Neural Network,Omnilog AUC,NM,0.928571428571
+299,Neural Network,Omnilog AUC,NM,0.892857142857
+300,Random Forest,Omnilog AUC,H11,0.896551724138
+301,Random Forest,Omnilog AUC,H11,0.896551724138
+302,Random Forest,Omnilog AUC,H11,0.896551724138
+303,Random Forest,Omnilog AUC,H11,0.896551724138
+304,Random Forest,Omnilog AUC,H11,0.896551724138
+305,Random Forest,Omnilog AUC,H11,0.896551724138
+306,Random Forest,Omnilog AUC,H11,0.931034482759
+307,Random Forest,Omnilog AUC,H11,0.931034482759
+308,Random Forest,Omnilog AUC,H11,0.892857142857
+309,Random Forest,Omnilog AUC,H11,0.931034482759
+310,Random Forest,Omnilog AUC,H19,0.931034482759
+311,Random Forest,Omnilog AUC,H19,0.931034482759
+312,Random Forest,Omnilog AUC,H19,0.931034482759
+313,Random Forest,Omnilog AUC,H19,0.931034482759
+314,Random Forest,Omnilog AUC,H19,0.931034482759
+315,Random Forest,Omnilog AUC,H19,0.931034482759
+316,Random Forest,Omnilog AUC,H19,0.928571428571
+317,Random Forest,Omnilog AUC,H19,0.931034482759
+318,Random Forest,Omnilog AUC,H19,0.931034482759
+319,Random Forest,Omnilog AUC,H19,0.931034482759
+320,Random Forest,Omnilog AUC,H2,0.931034482759
+321,Random Forest,Omnilog AUC,H2,0.931034482759
+322,Random Forest,Omnilog AUC,H2,0.896551724138
+323,Random Forest,Omnilog AUC,H2,0.931034482759
+324,Random Forest,Omnilog AUC,H2,0.931034482759
+325,Random Forest,Omnilog AUC,H2,0.862068965517
+326,Random Forest,Omnilog AUC,H2,0.827586206897
+327,Random Forest,Omnilog AUC,H2,0.896551724138
+328,Random Forest,Omnilog AUC,H2,0.931034482759
+329,Random Forest,Omnilog AUC,H2,0.862068965517
+330,Random Forest,Omnilog AUC,H21,0.896551724138
+331,Random Forest,Omnilog AUC,H21,0.892857142857
+332,Random Forest,Omnilog AUC,H21,0.931034482759
+333,Random Forest,Omnilog AUC,H21,0.827586206897
+334,Random Forest,Omnilog AUC,H21,0.931034482759
+335,Random Forest,Omnilog AUC,H21,0.896551724138
+336,Random Forest,Omnilog AUC,H21,0.758620689655
+337,Random Forest,Omnilog AUC,H21,0.931034482759
+338,Random Forest,Omnilog AUC,H21,0.931034482759
+339,Random Forest,Omnilog AUC,H21,0.892857142857
+340,Random Forest,Omnilog AUC,H7,0.896551724138
+341,Random Forest,Omnilog AUC,H7,0.931034482759
+342,Random Forest,Omnilog AUC,H7,0.931034482759
+343,Random Forest,Omnilog AUC,H7,0.931034482759
+344,Random Forest,Omnilog AUC,H7,0.896551724138
+345,Random Forest,Omnilog AUC,H7,0.931034482759
+346,Random Forest,Omnilog AUC,H7,0.892857142857
+347,Random Forest,Omnilog AUC,H7,0.965517241379
+348,Random Forest,Omnilog AUC,H7,0.931034482759
+349,Random Forest,Omnilog AUC,H7,0.862068965517
+350,Random Forest,Omnilog AUC,NM,0.925925925926
+351,Random Forest,Omnilog AUC,NM,0.857142857143
+352,Random Forest,Omnilog AUC,NM,0.857142857143
+353,Random Forest,Omnilog AUC,NM,0.892857142857
+354,Random Forest,Omnilog AUC,NM,0.857142857143
+355,Random Forest,Omnilog AUC,NM,0.857142857143
+356,Random Forest,Omnilog AUC,NM,0.851851851852
+357,Random Forest,Omnilog AUC,NM,0.857142857143
+358,Random Forest,Omnilog AUC,NM,0.851851851852
+359,Random Forest,Omnilog AUC,NM,0.851851851852

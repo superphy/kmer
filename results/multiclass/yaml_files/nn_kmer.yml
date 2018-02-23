@@ -1,0 +1,276 @@
+---
+name: NN+k-mer+Host
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.8104166728754839
+  avg_run_time: 2.8870856046676634
+  data: !!python/name:get_data.get_kmer ''
+  data_args:
+    database: database
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: Host
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: null
+      prefix: /home/rylan/data/ecomnilog/fasta/
+      remove: Unknown
+      suffix: .fasta
+      train_header: null
+      validate: true
+    validate: true
+  datetime: 2018-02-20 13:58:33.015895
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 115
+  repetitions: 10
+  results:
+  - 0.7847222313284874
+  - 0.8402777835726738
+  - 0.7708333432674408
+  - 0.840277781089147
+  - 0.8541666716337204
+  - 0.7777777885397276
+  - 0.8194444502393404
+  - 0.8125000074505806
+  - 0.77777777860562
+  - 0.8263888930281004
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.02897589596537725
+  std_dev_run_times: 0.14495321820828488
+  test_sizes: 24.0
+  train_sizes: 91.0
+...
+
+
+
+---
+name: NN+k-mer+O type
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.9813067134084372
+  avg_run_time: 3.667942476272583
+  data: !!python/name:get_data.get_kmer ''
+  data_args:
+    database: database
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: O type
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: null
+      prefix: /home/rylan/data/ecomnilog/fasta/
+      remove: Unknown
+      suffix: .fasta
+      train_header: null
+      validate: true
+    validate: true
+  datetime: 2018-02-20 13:59:09.710641
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 141
+  repetitions: 10
+  results:
+  - 0.9818511790242689
+  - 0.9836660602997089
+  - 0.9764065310872835
+  - 0.9818511769689363
+  - 0.9764065310872835
+  - 0.9891107061813618
+  - 0.9782214144180561
+  - 0.9854809436304816
+  - 0.9800362956934962
+  - 0.9800362956934962
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.003811252655458424
+  std_dev_run_times: 0.21890748924566242
+  test_sizes: 29.0
+  train_sizes: 112.0
+...
+
+
+
+---
+name: NN+k-mer+H type
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.9808602161945835
+  avg_run_time: 3.7668740510940553
+  data: !!python/name:get_data.get_kmer ''
+  data_args:
+    database: database
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: H type
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: null
+      prefix: /home/rylan/data/ecomnilog/fasta/
+      remove: Unknown
+      suffix: .fasta
+      train_header: null
+      validate: true
+    validate: true
+  datetime: 2018-02-20 13:59:47.398644
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 141
+  repetitions: 10
+  results:
+  - 0.9784946249377343
+  - 0.9827956999501875
+  - 0.9806451624439608
+  - 0.9870967749626406
+  - 0.969892474912828
+  - 0.9870967749626406
+  - 0.969892474912828
+  - 0.9784946249377343
+  - 0.9913978499750937
+  - 0.9827956999501875
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.006694357629489842
+  std_dev_run_times: 0.16722049876575765
+  test_sizes: 31.0
+  train_sizes: 110.0
+...
+
+
+
+---
+name: NN+k-mer+Serotype
+output:
+  augment: !!python/name:utils.do_nothing ''
+  augment_args: {}
+  avg_result: 0.9883272038772702
+  avg_run_time: 4.250942325592041
+  data: !!python/name:get_data.get_kmer ''
+  data_args:
+    database: database
+    kwargs:
+      blacklist:
+      - ECI-2624
+      - ECI-2859
+      - ECI-2836
+      fasta_header: Strain
+      label_header: Serotype
+      metadata: /home/rylan/kmer/Data/omnilog_metadata.csv
+      one_vs_all: null
+      prefix: /home/rylan/data/ecomnilog/fasta/
+      remove: Unknown
+      suffix: .fasta
+      train_header: null
+      validate: true
+    validate: true
+  datetime: 2018-02-20 14:00:29.927322
+  important_features:
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  - null
+  model: !!python/name:models.neural_network ''
+  model_args:
+    validate: true
+  num_genomes: 141
+  repetitions: 10
+  results:
+  - 0.9880514685064554
+  - 0.9917279407382011
+  - 0.9852941129356623
+  - 0.9898897036910057
+  - 0.9898897036910057
+  - 0.9871323518455029
+  - 0.991727938875556
+  - 0.9880514703691006
+  - 0.988970585167408
+  - 0.9825367629528046
+  scaler: !!python/name:feature_scaling.scale_to_range ''
+  scaler_args:
+    high: 1
+    low: -1
+  selection: !!python/name:feature_selection.select_k_best ''
+  selection_args:
+    k: 270
+    score_func: !!python/name:sklearn.feature_selection.univariate_selection.f_classif ''
+  std_dev_results: 0.002696948973304123
+  std_dev_run_times: 0.21266707670412155
+  test_sizes: 32.0
+  train_sizes: 109.0
+...
+
+
+

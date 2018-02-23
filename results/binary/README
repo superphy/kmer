@@ -1,0 +1,6 @@
+Binary prediction results.
+
+hosts.csv, serotypes.csv, htypes.csv, otypes.csv -> pandas dataframes containing accuracy results from each run
+yaml_files/ -> the yaml output files/documents containing the complete results from each run
+plot.py -> script to make box and whisker plots of the *.csv files
+
