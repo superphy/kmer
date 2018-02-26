@@ -12,3 +12,4 @@
 !/Tests/test*.py
 /temp*
 /Data/omnilog_metadata.xlsx
+/analysis/config_files/
