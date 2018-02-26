@@ -1,2 +1,5 @@
 *.jf
 *.pyc
+database
+results/
+config_files/
