@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
+from builtins import str
 import unittest
 import shutil
 import tempfile
@@ -31,11 +35,14 @@ class CountKmers(unittest.TestCase):
         count1 = 0
         count2 = 0
         env = lmdb.open(str(self.db), max_dbs=100)
-        A1 = env.open_db(self.dir + '/A1')
+        name = self.db + '/A1'
+        A1 = env.open_db(name.encode())
         with env.begin(write=False, db=A1) as txn:
             with txn.cursor() as cursor:
                 for key, val in cursor:
                     count2 += 1
+                    key = key.decode()
+                    val = val.decode()
                     if key == 'AA' and val == '3':
                         count1 += 1
                     elif key == 'AC' and val == '1':
@@ -50,11 +57,14 @@ class CountKmers(unittest.TestCase):
         count1 = 0
         count2 = 0
         env = lmdb.open(str(self.db), max_dbs=100)
-        A2 = env.open_db(self.dir + '/A2')
+        name = self.dir + '/A2'
+        A2 = env.open_db(name.encode())
         with env.begin(write=False, db=A2) as txn:
             with txn.cursor() as cursor:
                 for key, val in cursor:
                     count2 += 1
+                    key = key.decode()
+                    val = val.decode()
                     if key == 'AA' and val == '2':
                         count1 += 1
                     elif key == 'AC' and val == '1':
@@ -69,11 +79,14 @@ class CountKmers(unittest.TestCase):
         count1 = 0
         count2 = 0
         env = lmdb.open(str(self.db), max_dbs=100)
-        B1 = env.open_db(self.dir + '/B1')
+        name = self.dir + '/B1'
+        B1 = env.open_db(name.encode())
         with env.begin(write=False, db=B1) as txn:
             with txn.cursor() as cursor:
                 for key, val in cursor:
                     count2 += 1
+                    key = key.decode()
+                    val = val.decode()
                     if key == 'AA' and val == '2':
                         count1 += 1
                     elif key == 'AC' and val == '2':

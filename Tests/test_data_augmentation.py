@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
+from builtins import range
 import unittest
 import numpy as np
 from data_augmentation import augment_data_naive

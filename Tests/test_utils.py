@@ -1,3 +1,10 @@
+from __future__ import division
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import os
 import unittest
 import shutil
@@ -41,7 +48,8 @@ class ShuffleArray(unittest.TestCase):
                                   range(self.classes)]
         self.data = np.zeros(self.classes, dtype=object)
         for x in range(self.classes):
-            self.data[x] = np.full((self.samples_per_class[x], self.features), x)
+            dtype = type(x)
+            self.data[x] = np.full((self.samples_per_class[x], self.features), x, dtype=dtype)
         self.labels = np.arange(self.classes)
         self.new_data, self.new_labels = shuffle(self.data, self.labels)
 
@@ -412,7 +420,8 @@ class CheckFasta(unittest.TestCase):
         files = [constants.ECOLI + x for x in os.listdir(constants.ECOLI)]
         self.fasta = files[:self.num_files]
         bad_files = [constants.SOURCE + x for x in
-                     os.listdir(constants.SOURCE) if os.path.isfile(x)]
+                     os.listdir(constants.SOURCE) if os.path.isfile(x) and
+                     x[-1] != 'c']
         self.non_fasta = bad_files[:self.num_files]
 
     def test_non_fasta(self):
@@ -480,12 +489,12 @@ class SensitivitySpecificity(unittest.TestCase):
         predicted_values = np.array([1, 1, 1, 2, 1, 1, 2, 2, 2, 3, 2, 1, 2, 1])
         true_values = np.array([1, 1, 2, 1, 1, 1, 2, 2, 2, 3, 3, 3, 2, 1])
         self.results = sensitivity_specificity(predicted_values, true_values)
-        self.correct = {1: {'sensitivity': 6.0 / 7.0,
-                            'specificity': 8.0 / 10.0},
-                        2: {'sensitivity': 5.0 / 6.0,
-                            'specificity': 9.0 / 11.0},
-                        3: {'sensitivity': 3.0 / 5.0,
-                            'specificity': 11.0 / 11.0}}
+        self.correct = {1: {'sensitivity': old_div(6.0, 7.0),
+                            'specificity': old_div(8.0, 10.0)},
+                        2: {'sensitivity': old_div(5.0, 6.0),
+                            'specificity': old_div(9.0, 11.0)},
+                        3: {'sensitivity': old_div(3.0, 5.0),
+                            'specificity': old_div(11.0, 11.0)}}
 
     def test_sensitivity(self):
         count1 = 0

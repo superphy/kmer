@@ -1,3 +1,10 @@
+from __future__ import division
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import unittest
 import numpy as np
 import pandas as pd
@@ -145,7 +152,7 @@ class SelectPercentile(unittest.TestCase):
         x_test = np.random.randint(15, size=(10, self.features))
         y_test = np.random.randint(self.classes, size=(10))
         self.data = [x_train, y_train, x_test, y_test]
-        p = 200 / self.features
+        p = old_div(200, self.features)
         self.new_data, self.f = select_percentile(self.data, None,
                                                   score_func=self.score_func,
                                                   percentile=p)
@@ -169,7 +176,7 @@ class SelectPercentile(unittest.TestCase):
         features_before = np.random.randint(self.features,
                                             size=(self.features))
         features_after = features_before[[0, -1]]
-        p = 200 / self.features
+        p = old_div(200, self.features)
         sf = self.score_func
         fn = features_before
         data, features = select_percentile(self.data, fn, score_func=sf,

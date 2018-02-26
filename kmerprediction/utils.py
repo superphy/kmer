@@ -1,14 +1,19 @@
 """
 Odds and ends used by other modules in the program.
 """
+from __future__ import division
+from __future__ import print_function
 
+from builtins import zip
+from builtins import str
+from past.utils import old_div
 import os
 import random
 import json
 import re
 import pandas as pd
 import numpy as np
-import constants
+from kmerprediction import constants
 from Bio import SeqIO
 from sklearn.preprocessing import LabelEncoder
 
@@ -40,9 +45,10 @@ def check_fasta(filename):
         bool: True if file is fasta|q otherwise False.
     """
     with open(filename, 'r') as f:
-        fasta = SeqIO.parse(f, "fasta")
-        fastq = SeqIO.parse(f, "fastq")
-        return bool(any(fasta) or any(fastq))
+        fasta = any(SeqIO.parse(f, "fasta"))
+    with open(filename, 'r') as f:
+        fastq = any(SeqIO.parse(f, "fastq"))
+    return bool(fasta or fastq)
 
 
 def valid_file(test_files, *invalid_files):
@@ -79,7 +85,7 @@ def same_shuffle(a, b):
     """
     temp = list(zip(a, b))
     random.shuffle(temp)
-    a, b = zip(*temp)
+    a, b = list(zip(*temp))
     return list(a), list(b)
 
 
@@ -112,7 +118,11 @@ def shuffle(data, labels):
         all_labels = []
         count = 0
         for label in labels:
-            all_labels.append(np.full(data[count].shape[0], label))
+            if isinstance(label, str):
+                dtype = 'object'
+            else:
+                dtype = type(label)
+            all_labels.append(np.full(data[count].shape[0], label, dtype=dtype))
             count += 1
         all_labels = np.concatenate(all_labels, axis=0)
         all_data, all_labels = same_shuffle(all_data, all_labels)
@@ -179,8 +189,8 @@ def sensitivity_specificity(predicted_values, true_values):
         FP = sum(true_neg & predicted_pos)
         FN = sum(true_pos & predicted_neg)
 
-        sensitivity = (1.0 * TP) / (TP + FN)
-        specificity = (1.0 * TN) / (TN + FP)
+        sensitivity = old_div((1.0 * TP), (TP + FN))
+        specificity = old_div((1.0 * TN), (TN + FP))
 
         results[c] = {'sensitivity': sensitivity, 'specificity': specificity}
 
@@ -338,7 +348,7 @@ def parse_json_helper(json_file, fasta_key, label_key, prefix, suffix,
 
     all_fasta = []
     all_labels = []
-    temp = zip(fasta, labels)
+    temp = list(zip(fasta, labels))
     for L in np.unique(labels):
         out = []
         for elem in temp:
@@ -469,7 +479,7 @@ def combine_lists(input_lists):
 
     length_of_list = len(input_lists[0])
     num_of_lists = len(input_lists)
-    weight = 1.0 / (length_of_list * num_of_lists)
+    weight = old_div(1.0, (length_of_list * num_of_lists))
 
     all_features = [elem for ranked_list in input_lists for elem in ranked_list]
     unique_features = np.unique(np.asarray(all_features)).tolist()

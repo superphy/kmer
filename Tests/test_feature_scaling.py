@@ -1,3 +1,7 @@
+from builtins import str
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 import unittest
 import numpy as np
 from feature_scaling import scale_to_range

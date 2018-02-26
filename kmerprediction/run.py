@@ -7,18 +7,20 @@ Chains together methods from get_data.py, feature_selection.py,
 feature_scaling, data_augmentation.py, and models.py.
 """
 
+from builtins import zip
+from builtins import range
 import inspect
 import time
 import datetime
 import argparse
-import models
-import get_data
-import feature_scaling
-import feature_selection
-import data_augmentation
+from kmerprediction import models
+from kmerprediction import get_data
+from kmerprediction import feature_scaling
+from kmerprediction import feature_selection
+from kmerprediction import data_augmentation
 import numpy as np
 import yaml
-from utils import do_nothing
+from kmerprediction.utils import do_nothing
 
 
 def run(model=models.support_vector_machine, model_args=None,
@@ -131,7 +133,7 @@ def run(model=models.support_vector_machine, model_args=None,
         # Create dictionary with test files as keys and predictions as values
         # Convert classes back to their original values
         results = le.inverse_transform(results)
-        output['results'] = dict(zip(files, results.tolist()))
+        output['results'] = dict(list(zip(files, results.tolist())))
 
     if collect_features:
         output['important_features'] = feature_importances
@@ -187,10 +189,10 @@ def convert_methods(input_dictionary):
     """
     output_dictionary = {}
     methods = get_methods()
-    for key, value in input_dictionary.items():
+    for key, value in list(input_dictionary.items()):
         if isinstance(value, dict):
             output = convert_methods(value)
-        elif value in methods.keys():
+        elif value in list(methods.keys()):
             output = methods[value]
         else:
             output = value
