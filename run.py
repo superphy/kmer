@@ -25,7 +25,7 @@ def run(model=models.support_vector_machine, model_args=None,
         data_method=get_data.get_kmer_us_uk_split, data_args=None,
         scaler=do_nothing, scaler_args=None, selection=do_nothing,
         selection_args=None, augment=do_nothing, augment_args=None,
-        validate=False, reps=10):
+        validate=False, reps=10, collect_features=True):
     """
     Chains a data gathering method, data preprocessing methods, and a machine
     learning model together. Stores the settings for all the methods and the
@@ -54,6 +54,9 @@ def run(model=models.support_vector_machine, model_args=None,
                                 inputs and their predictions.
         reps (int):             How many times to run the model, used only when
                                 doing validation otherwise set to 1.
+        collect_features (bool):If true, a list of dictionaries containing
+                                keys of feature names and values of their
+                                feature importance from each run is returned.
 
     Returns:
         (dict):   Contains all of the arguments and results from the run.
@@ -79,7 +82,7 @@ def run(model=models.support_vector_machine, model_args=None,
     data_args['validate'] = validate
     model_args['validate'] = validate
 
-    all_features = []
+    feature_importances = []
     for i in range(reps):
         start = time.time()
         # Get input data
@@ -109,7 +112,7 @@ def run(model=models.support_vector_machine, model_args=None,
             results = output_data
         train_sizes[i] = data[0].shape[0]
         test_sizes[i] = data[2].shape[0]
-        all_features.append(features)
+        feature_importances.append(features)
 
     # Store information about the run in a dictionary
     output = {}
@@ -130,8 +133,10 @@ def run(model=models.support_vector_machine, model_args=None,
         results = le.inverse_transform(results)
         output['results'] = dict(zip(files, results.tolist()))
 
+    if collect_features:
+        output['important_features'] = feature_importances
+
     output['repetitions'] = reps
-    output['important_features'] = all_features
     output['model'] = model
     output['model_args'] = model_args
     output['data'] = data_method
