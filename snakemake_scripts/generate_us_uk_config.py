@@ -11,7 +11,7 @@ import yaml
 import constants
 
 def generate_config_files():
-    directory = './config_files/'
+    directory = '../config_files/'
     if not os.path.exists(directory):
         os.makedirs(directory)
 
