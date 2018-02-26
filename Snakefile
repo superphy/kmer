@@ -5,7 +5,7 @@ rule generate_us_uk_config:
                data=['kmer', 'genome'],
                split=['split', 'mixed'])
     script:
-        'generate_us_uk_config.py'
+        'snakemake_scripts/generate_us_uk_config.py'
 
 rule generate_omni_config:
     output:
@@ -28,7 +28,7 @@ rule generate_omni_config:
                data=['kmer', 'omni'],
                prediction=['all', 'H11', 'H19', 'H21', 'H2', 'H7', 'NM'])
     script:
-        'generate_omni_config.py'
+        'snakemake_scripts/generate_omni_config.py'
 
 rule run_single:
     input:
