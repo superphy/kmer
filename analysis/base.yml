@@ -4,17 +4,8 @@ data_args:
   kwargs:
     blacklist: [ECI-2624, ECI-2859, ECI-2836]
     fasta_header: Strain
-    label_header: O type
-    metadata: ../../Data/omnilog_metadata.csv
-    one_vs_all: O91
-    prefix: ''
-    remove: OR
-    suffix: ''
     train_header: None
-data_method: get_omnilog_data
-model: random_forest
 model_args: {}
-reps: 50
 scaler: scale_to_range
 scaler_args: {high: 1, low: -1}
 selection: select_k_best

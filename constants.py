@@ -10,7 +10,7 @@ import os
 # default filepaths to data
 SALMONELLA = '/home/rboothman/Data/salmonella_amr/'
 ECOLI = '/home/rboothman/Data/ecoli/'
-OMNILOG_FASTA = '/home/rboothman/Data/ecomnilog/fasta/'
+OMNILOG_FASTA = '/home/rylan/Data/ecomnilog/fasta/'
 MORIA = '/home/rboothman/moria/enterobase_db/'
 GENOME_REGIONS = '/home/rboothman/Data/genome_regions/binary_tables/'
 
@@ -18,7 +18,7 @@ GENOME_REGIONS = '/home/rboothman/Data/genome_regions/binary_tables/'
 GENOME_REGION_TABLE = '/home/rboothman/Data/genome_regions/binary_tables/binary_table.txt'  # noqa
 
 # omnilog data file
-OMNILOG_DATA = '/home/rboothman/Data/ecomnilog/wide_format_header.txt'
+OMNILOG_DATA = '/home/rylan/Data/ecomnilog/wide_format_header.txt'
 
 # roary data file
 ROARY = '/home/rboothman/Data/Roary/roary_results.csv'
@@ -43,3 +43,6 @@ ECOLI_METADATA = SOURCE + 'Data/human_bovine.csv'
 OMNILOG_METADATA = SOURCE + 'Data/omnilog_metadata.csv'
 PREDICTIVE_RESULTS = SOURCE + 'Data/hb_train_predictiveresults.csv'
 OMNILOG_WELLS = SOURCE + 'Data/omnilog_wells.csv'
+
+# Default repitions to place in config files created by generate_config.py
+DEFAULT_REPITITIONS = 100
