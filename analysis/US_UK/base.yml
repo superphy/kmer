@@ -1,0 +1,9 @@
+augment: null
+augment_args: {}
+data_args: {}
+model_args: {}
+scaler: scale_to_range
+scaler_args: {high: 1, low: -1}
+selection: select_k_best
+selection_args: {k: 270, score_func: f_classif}
+validate: true

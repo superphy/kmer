@@ -37,7 +37,7 @@ def generate_config_files():
 
 # create base kmer file
     base_yaml['data_method'] = 'get_kmer'
-    base_yaml['data_args']['database'] = 'database'
+    base_yaml['data_args']['database'] = constants.DB
     base_yaml['data_args']['kwargs']['prefix'] = constants.OMNILOG_FASTA
     base_yaml['data_args']['kwargs']['suffix'] = '.fasta'
 

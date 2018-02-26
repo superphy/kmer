@@ -11,4 +11,4 @@
 /*_test.py
 !/Tests/test*.py
 /temp*
-/analysis/config_files/
+/analysis/*/config_files/
