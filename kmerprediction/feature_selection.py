@@ -17,7 +17,7 @@ is also returned.
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, chi2
 from sklearn.feature_selection import SelectPercentile, f_classif, RFE, RFECV
 from sklearn.svm import SVC
-from kmerprediction.utils import flatten, make3D
+from utils import flatten, make3D
 import pandas as pd
 import numpy as np
 

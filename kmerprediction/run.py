@@ -13,14 +13,14 @@ import inspect
 import time
 import datetime
 import argparse
-from kmerprediction import models
-from kmerprediction import get_data
-from kmerprediction import feature_scaling
-from kmerprediction import feature_selection
-from kmerprediction import data_augmentation
+import models
+import get_data
+import feature_scaling
+import feature_selection
+import data_augmentation
 import numpy as np
 import yaml
-from kmerprediction.utils import do_nothing
+from utils import do_nothing
 
 
 def run(model=models.support_vector_machine, model_args=None,

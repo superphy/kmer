@@ -13,7 +13,7 @@ import json
 import re
 import pandas as pd
 import numpy as np
-from kmerprediction import constants
+import constants
 from Bio import SeqIO
 from sklearn.preprocessing import LabelEncoder
 
