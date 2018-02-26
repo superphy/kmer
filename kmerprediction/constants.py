@@ -9,16 +9,16 @@ import os
 
 # default filepaths to data
 SALMONELLA = '/home/rboothman/Data/salmonella_amr/'
-ECOLI = '/home/rboothman/Data/ecoli/'
-OMNILOG_FASTA = '/home/rboothman/Data/ecomnilog/fasta/'
+ECOLI = '/home/rylan/Data/ecoli/'
+OMNILOG_FASTA = '/home/rylan/Data/ecomnilog/fasta/'
 MORIA = '/home/rboothman/moria/enterobase_db/'
 GENOME_REGIONS = '/home/rboothman/Data/genome_regions/binary_tables/'
 
 # default genome_region table
-GENOME_REGION_TABLE = '/home/rboothman/Data/genome_regions/binary_tables/binary_table.txt'  # noqa
+GENOME_REGION_TABLE = '/home/rylan/Data/binary_table.txt'
 
 # omnilog data file
-OMNILOG_DATA = '/home/rboothman/Data/ecomnilog/wide_format_header.txt'
+OMNILOG_DATA = '/home/rylan/Data/ecomnilog/wide_format_header.txt'
 
 # roary data file
 ROARY = '/home/rboothman/Data/Roary/roary_results.csv'
