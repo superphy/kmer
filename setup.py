@@ -1,5 +1,5 @@
 from distutils.core import setup
-setup(name='kmerpredict',
+setup(name='kmerprediction',
       version='0.0.1',
       author='Chad Laing, Rylan Boothman',
       author_email='chadr.laing@canada.ca, boothmanrylan@gmail.com',
