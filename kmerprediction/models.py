@@ -27,7 +27,7 @@ from keras.layers import Dense, Flatten
 from keras.models import Sequential
 from keras.layers.convolutional import Conv1D
 from keras.utils import to_categorical
-from utils import flatten, make3D, convert_well_index
+from kmerprediction.utils import flatten, make3D, convert_well_index
 
 
 def neural_network(input_data, feature_names=None, validate=True):
@@ -53,12 +53,13 @@ def neural_network(input_data, feature_names=None, validate=True):
     x_test = input_data[2]
     y_test = input_data[3]
 
-    train_classes = np.unique(np.asarray(y_train))
-    num_classes = len(list(train_classes))
+    all_labels = np.concatenate((y_train, y_test))
+    unique_labels = np.unique(all_labels)
+    num_classes = unique_labels.shape[0]
 
-    y_train = to_categorical(y_train)
+    y_train = to_categorical(y_train, num_classes=num_classes)
     if validate:
-        y_test = to_categorical(y_test)
+        y_test = to_categorical(y_test, num_classes=num_classes)
 
     if len(x_train.shape) == 2:
         x_train = make3D(x_train)
