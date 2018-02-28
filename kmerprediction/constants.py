@@ -5,6 +5,8 @@ everything from just one file ofter starting to use the program on their
 computer.
 """
 
+import numpy as np
+import pandas as pd
 import os
 
 # default filepaths to data
@@ -46,3 +48,20 @@ OMNILOG_WELLS = SOURCE + 'Data/omnilog_wells.csv'
 
 # Default repitions to place in config files created by generate_config.py
 DEFAULT_REPITITIONS = 100
+
+MIN_FREQUENCY = 5
+metadata = pd.read_csv(OMNILOG_METADATA)
+
+sero, count = np.unique(metadata['Serotype'].values, return_counts=True)
+VALID_SEROTYPES = [sero[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
+
+otype, count = np.unique(metadata['O type'].values, return_counts=True)
+VALID_OTYPES = [otype[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
+
+htype, count = np.unique(metadata['H type'].values, return_counts=True)
+VALID_HTYPES = [htype[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
+
+host, count = np.unique(metadata['Host'].values, return_counts=True)
+VALID_HOSTS = [host[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
+
+
