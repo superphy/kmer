@@ -13,7 +13,7 @@ import json
 import re
 import pandas as pd
 import numpy as np
-import constants
+from kmerprediction import constants
 from Bio import SeqIO
 from sklearn.preprocessing import LabelEncoder
 
@@ -250,7 +250,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         data = pd.read_csv(metadata, sep=sep)
 
     if extra_header:
-        data = data[data[extra_header] == extra_label]
+        data = data.loc[data[extra_header] == extra_label]
 
     if remove:
         data = data.drop(data[data[label_header] == remove].index)
@@ -265,8 +265,8 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
     all_labels = all_labels[pd.notnull(all_labels)]
 
     if train_header:
-        train_data = data[data[train_header] == train_label]
-        test_data = data[data[train_header] == test_label]
+        train_data = data.loc[data[train_header] == train_label]
+        test_data = data.loc[data[train_header] == test_label]
         all_train_data = []
         all_test_data = []
         for label in all_labels:
@@ -282,7 +282,7 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         all_train_data = []
         all_test_data = []
         for label in all_labels:
-            label_data = data[data[label_header] == label]
+            label_data = data.loc[data[label_header] == label]
             label_data = label_data[fasta_header].values
             np.random.shuffle(label_data)
             if label_data.shape[0] == 1:

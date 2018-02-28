@@ -13,14 +13,14 @@ import inspect
 import time
 import datetime
 import argparse
-import models
-import get_data
-import feature_scaling
-import feature_selection
-import data_augmentation
+from kmerprediction import models
+from kmerprediction import get_data
+from kmerprediction import feature_scaling
+from kmerprediction import feature_selection
+from kmerprediction import data_augmentation
 import numpy as np
 import yaml
-from utils import do_nothing
+from kmerprediction.utils import do_nothing
 
 
 def run(model=models.support_vector_machine, model_args=None,
@@ -150,9 +150,15 @@ def run(model=models.support_vector_machine, model_args=None,
     output['augment'] = augment
     output['augment_args'] = augment_args
     output['datetime'] = datetime.datetime.now()
-    classes, class_counts = np.unique(np.concatenate((data[1], data[3])),
-                                      return_counts=True)
-    output['class_sample_size'] = dict(zip(classes, class_counts))
+
+    all_labels = np.concatenate((data[1], data[3]))
+    classes, class_counts = np.unique(all_labels, return_counts=True)
+    print(classes)
+    classes = le.inverse_transform(classes).tolist()
+    class_counts = class_counts.tolist()
+    class_sample_sizes = dict(zip(classes, class_counts))
+    output['class_sample_sizes'] = class_sample_sizes
+
     return output
 
 

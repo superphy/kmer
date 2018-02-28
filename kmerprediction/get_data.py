@@ -22,12 +22,12 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 from builtins import str
 import os
 from sklearn.preprocessing import Imputer
-from kmer_counter import count_kmers, get_counts, get_kmer_names
-from utils import shuffle, setup_files, parse_metadata, parse_json
-from utils import encode_labels
+from kmerprediction.kmer_counter import count_kmers, get_counts, get_kmer_names
+from kmerprediction.utils import shuffle, setup_files, parse_metadata, parse_json
+from kmerprediction.utils import encode_labels
 import numpy as np
 import pandas as pd
-import constants
+from kmerprediction import constants
 
 
 def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
