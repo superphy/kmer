@@ -1,5 +1,8 @@
 *.jf
 *.pyc
 database
-results/
+results/omni/
+results/US_UK/
 config_files/
+build/
+.snakemake/
