@@ -1,6 +1,0 @@
-Multiclass prediction results
-
-yaml_files/ -> The complete output from each run
-results.csv -> Pandas dataframe containing the accuracy results from each run
-plot.py -> script to make box and whisker plot of results.csv
-make_dataframe.py -> script to convert yaml_files/ to results.csv
