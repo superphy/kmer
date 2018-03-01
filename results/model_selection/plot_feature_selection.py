@@ -1,3 +1,7 @@
+import matplotlib
+
+matplotlib.use('agg')
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -27,7 +31,7 @@ labels = ['SelectKBest by F-Test', 'SelectKBest by Chi-Squared Test',
 
 all_data = zip(all_data, labels)
 
-palette = sns.blend_palette(sns.color_palette('deep'), len(all_data))
+palette = sns.blend_palette(sns.color_palette('deep'), len(labels))
 sns.set(palette=palette, context='paper')
 
 plt.figure(1, figsize=(20, 12.5))
@@ -55,4 +59,4 @@ plt.title('E. coli Host Prediction Accuracy Using an SVM and Different Feature S
 
 plt.tight_layout()
 
-plt.show()
+plt.savefig('./Figures/FeatureSelection.pdf')
