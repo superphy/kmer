@@ -1,13 +1,10 @@
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 from builtins import str
 import os
 import unittest
 import shutil
-from get_data import get_kmer, get_genome_regions, get_omnilog_data
-from get_data import get_genome_custom_filtered, get_genome_prefiltered
-from get_data import get_kmer_from_directory, get_kmer_from_json
+from kmerprediction.get_data import get_kmer, get_genome_regions, get_omnilog_data
+from kmerprediction.get_data import get_genome_custom_filtered, get_genome_prefiltered
+from kmerprediction.get_data import get_kmer_from_directory, get_kmer_from_json
 import numpy as np
 import tempfile
 import json

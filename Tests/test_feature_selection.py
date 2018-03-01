@@ -1,7 +1,4 @@
 from __future__ import division
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 from builtins import str
 from builtins import range
 from past.utils import old_div
@@ -9,8 +6,8 @@ import unittest
 import numpy as np
 import pandas as pd
 from sklearn.feature_selection import chi2
-from feature_selection import variance_threshold, remove_constant
-from feature_selection import select_k_best, select_percentile
+from kmerprediction.feature_selection import variance_threshold, remove_constant
+from kmerprediction.feature_selection import select_k_best, select_percentile
 
 
 class VarianceThreshold(unittest.TestCase):

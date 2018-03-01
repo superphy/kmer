@@ -1,17 +1,14 @@
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 from builtins import str
 from builtins import range
 import unittest
-import constants
+from kmerprediction import constants
 import subprocess
 import shutil
 import tempfile
 import yaml
 from random import randint
 import numpy as np
-from run import main
+from kmerprediction.run import main
 
 
 class CommandLineVariation1(unittest.TestCase):

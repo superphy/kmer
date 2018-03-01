@@ -1,13 +1,10 @@
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 from builtins import str
 import unittest
 import shutil
 import tempfile
 import lmdb
 import numpy as np
-from kmer_counter import count_kmers, get_counts, add_counts, get_kmer_names
+from kmerprediction.kmer_counter import count_kmers, get_counts, add_counts, get_kmer_names
 
 
 def create_temp_files():

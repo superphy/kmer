@@ -1,7 +1,4 @@
 from __future__ import division
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 from builtins import str
 from builtins import range
 from past.utils import old_div
@@ -13,11 +10,11 @@ import numpy as np
 import pandas as pd
 import string
 import tempfile
-import constants
+from kmerprediction import constants
 import json
-from utils import same_shuffle, shuffle, parse_metadata, setup_files
-from utils import check_fasta, valid_file, flatten, make3D
-from utils import sensitivity_specificity, parse_json
+from kmerprediction.utils import same_shuffle, shuffle, parse_metadata, setup_files
+from kmerprediction.utils import check_fasta, valid_file, flatten, make3D
+from kmerprediction.utils import sensitivity_specificity, parse_json
 
 
 class SameShuffle(unittest.TestCase):

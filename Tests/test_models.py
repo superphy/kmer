@@ -1,9 +1,6 @@
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../kmerprediction"))
 import unittest
 import numpy as np
-from models import neural_network, support_vector_machine, random_forest
+from kmerprediction.models import neural_network, support_vector_machine, random_forest
 
 
 class NeuralNetwork(unittest.TestCase):
