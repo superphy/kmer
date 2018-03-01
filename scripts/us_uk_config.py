@@ -2,7 +2,7 @@ from kmerprediction import constants
 import os
 import yaml
 
-directory = '../config_files/US_UK/'
+directory = 'config_files/US_UK/'
 
 if not os.path.exists(directory):
     os.makedirs(directory)
