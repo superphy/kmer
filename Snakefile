@@ -147,4 +147,4 @@ rule us_uk_analysis:
     output:
         'results/US_UK/Figures/results.pdf'
     script:
-        'scripts/plot_us_uk_data.py'
+        'scripts/plot_us_uk.py'

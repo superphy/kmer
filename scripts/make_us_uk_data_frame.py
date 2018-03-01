@@ -12,7 +12,7 @@ for yf in snakemake.input:
     name = name.split('_')
     dataset = name[-1].replace('.yml', '')
     data_type = name[-2]
-    model_type = ' '.join(name[:-3]).title()
+    model_type = ' '.join(name[:-2]).title()
     with open(yf, 'r') as f:
         data = yaml.load(f)
         acc = data['output']['results']
