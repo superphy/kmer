@@ -1,22 +1,33 @@
 import yaml
 import pandas as pd
 import numpy as np
+
 important_features = []
 models = []
+
 for yf in snakemake.input:
     with open(yf, 'r') as f:
         data = yaml.load(f)
-    features = data['output']['important_features']
+    important_features_dicts = data['output']['important_features']
+
     curr_model = yf.split('/')[-1]
     curr_model = curr_model.split('_')
     curr_model = ' '.join(curr_model[:-3]).title()
     models.append(curr_model)
+
     feature_scores = {}
-    for feature_list in features:
-        ranked_list = sorted(feature_list, reverse=True,
-                             key=lambda k: feature_list[k])
-        for index, value in enumerate(ranked_list):
-            score = (len(ranked_list) - index)/(len(ranked_list) * len(features))
+
+    for feature_dict in important_features_dicts:
+        ranked_features = sorted(feature_dict, reverse=True,
+                                 key=lambda k: feature_dict[k])
+
+        for index, value in enumerate(ranked_features):
+            # Score of a feature determined by the sum of the Log2 decay
+            # of its index in each ranking divided by the total number
+            # of rankings provided.
+            # A total score of 1.0 indicates that a feature was ranked
+            # first overall in every ranking.
+            score = (1/(2**index))/len(important_features_dicts)
             if value not in feature_scores:
                 feature_scores[value] = 0
             feature_scores[value] += score
@@ -37,4 +48,5 @@ for elem in top_features:
     if elem in dictionary2:
         output_df.loc[count] = [models[1], elem, dictionary2[elem]]
         count += 1
+output_df = output_df.sort_values(by=['Score'], ascending=False)
 output_df.to_csv(snakemake.output[0], index=False, sep=',')
