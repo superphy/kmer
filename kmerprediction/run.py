@@ -151,7 +151,10 @@ def run(model=models.support_vector_machine, model_args=None,
     output['augment_args'] = augment_args
     output['datetime'] = datetime.datetime.now()
 
-    all_labels = np.concatenate((data[1], data[3]))
+    if validate:
+        all_labels = np.concatenate((data[1], data[3]))
+    else:
+        all_labels = data[1]
     classes, class_counts = np.unique(all_labels, return_counts=True)
     classes = le.inverse_transform(classes).tolist()
     class_counts = class_counts.tolist()
