@@ -35,24 +35,24 @@ Running the script multiple times with the same output file will not overwrite t
 To get the same behaviour as from the command line:
 
 ```python
-from run import main
+from kmerprediction.run import main
 main('config_file.yml', 'output_file.yml', 'name of run')
 ```
 
 Or to get a results dictionary with the default parameters:
 
 ```python
-from run import run
+from kmerprediction.run import run
 output = run()
 ```
 
 Or to get a results dictionary with custom parameters:
 
 ```python
-from models import neural_network as nn
-from get_data import get_genome_region_us_uk_split as data
-from feature_selection import variance_threshold as sel
-from run import run
+from kmerprediction.models import neural_network as nn
+from kmerprediction.get_data import get_genome_region_us_uk_split as data
+from kmerprediction.feature_selection import variance_threshold as sel
+from kmerprediction.run import run
 
 output = run(model=nn, data_method=data, selection=sel,
              selection_args={'threshold': 0.01}, scaler=None, reps=1,
@@ -62,9 +62,9 @@ output = run(model=nn, data_method=data, selection=sel,
 It is also possible to skip run.py altogether and do something like:
 
 ```python
-from models import neural_network
-from get_data import get_genome_region_us_uk_mixed as data
-from feature_selection import variance_threshold as sel
+from kmerprediction.models import neural_network
+from kmerprediction.get_data import get_genome_region_us_uk_mixed as data
+from kmerprediction.feature_selection import variance_threshold as sel
 
 d = data()
 d, f = sel(d[0], d[1], threshold=0.01)
@@ -139,7 +139,7 @@ The three methods useful to a user in kmer_counter.py are:
 #### To use in another script:
 
 ```python
-from kmer_counter import count_kmers, add_kmers, get_counts
+from kmerprediction.kmer_counter import count_kmers, add_kmers, get_counts
 count_kmers(k, limit, files, database)
 add_counts(new_files, database)
 data = get_counts(files+new_files, database)

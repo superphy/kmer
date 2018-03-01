@@ -10,7 +10,8 @@
 #### Some Common Errors:
 
 * File/filepath does not exist
-  * Update the filepaths in constants.py to point to the correct locations on your machine
+  * Update the filepaths in `kmerprediction/constants.py` to point to the correct locations on your machine
+  * You will have to rerun `python setup.py install` in order for the changes to take effect.
 * Import error stating that python can't find the module lmdb
   * run `pip install lmdb` with the conda environment activated.
 * Error like:
@@ -24,7 +25,7 @@
 
 # Run Analysis from Paper
 
-Update `kmerprediction/constants.py` so that `OMNILOG_FASTA`, `OMNILOG_DATA`,`GENOME_REGION_TABLE`, and `ECOLI` point to the correct locations on your machine. 
+Update `kmerprediction/constants.py` so that `OMNILOG_FASTA`, `OMNILOG_DATA`,`GENOME_REGION_TABLE`, and `ECOLI` point to the correct locations on your machine. You will have to rerun `python setup.py install` in order for the changes to take effect. 
 
 * `OMNILOG_FASTA`: Path to directory containing the Omnilog fasta files,
 * `OMNILOG_DATA`: Path to the `wide_format_header.txt` file containing the Omnilog AUC data.
