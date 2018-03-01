@@ -153,7 +153,6 @@ def run(model=models.support_vector_machine, model_args=None,
 
     all_labels = np.concatenate((data[1], data[3]))
     classes, class_counts = np.unique(all_labels, return_counts=True)
-    print(classes)
     classes = le.inverse_transform(classes).tolist()
     class_counts = class_counts.tolist()
     class_sample_sizes = dict(zip(classes, class_counts))

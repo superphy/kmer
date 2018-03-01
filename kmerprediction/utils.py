@@ -431,7 +431,6 @@ def convert_feature_name(feature_name):
     Returns:
         tuple(str, str): plate number, well index
     """
-    feature_name = feature_name.encode('utf-8')
     df = pd.read_csv(constants.OMNILOG_WELLS)
     index = '(' + feature_name + ')'
     coordinates = df.loc[df['Value'] == index, 'Key'].iloc[0]
