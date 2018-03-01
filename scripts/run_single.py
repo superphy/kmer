@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from kmerprediction import constants
 from kmerprediction.run import main
