@@ -79,7 +79,7 @@ rule plot_binary_omni:
     input:
         'results/omni/DataFrames/{prediction}.csv'
     output:
-        'results/omni/Figures/{prediction}.pdf'
+        'results/omni/Figures/{prediction, (Host)|(Otype)|(Htype)|(Serotype)}.pdf'
     script:
         'scripts/plot_binary.py'
 
@@ -114,20 +114,20 @@ rule plot_important_features:
     input:
         'results/omni/Important_Features/{prediction}_{ova}.csv'
     output:
-        'results/omni/Figures/{prediction}_{ova}_important_features.pdf'
+        'results/omni/Figures/Important_Features/{prediction}_{ova}.pdf'
     script:
         'scripts/plot_important_features.py'
 
 
 rule important_features_analysis:
     input:
-        expand('results/omni/Figures/Host_{ova}_important_features.pdf',
+        expand('results/omni/Figures/Important_Features/Host_{ova}.pdf',
                ova=constants.VALID_HOSTS + ['all']),
-        expand('results/omni/Figures/Serotype_{ova}_important_features.pdf',
+        expand('results/omni/Figures/Important_Features/Serotype_{ova}.pdf',
                ova=constants.VALID_SEROTYPES + ['all']),
-        expand('results/omni/Figures/Otype_{ova}_important_features.pdf',
+        expand('results/omni/Figures/Important_Features/Otype_{ova}.pdf',
                ova=constants.VALID_OTYPES + ['all']),
-        expand('results/omni/Figures/Htype_{ova}_important_features.pdf',
+        expand('results/omni/Figures/Important_Features/Htype_{ova}.pdf',
                ova=constants.VALID_HTYPES + ['all'])
 
 rule make_us_uk_data_frame:
