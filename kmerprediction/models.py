@@ -123,7 +123,10 @@ def support_vector_machine(input_data, kernel='linear', C=1,
         output_data = model.predict(x_test)
 
     if feature_names is not None:
-        coefs = model.coef_.ravel()
+        coefs = model.coef_
+        if coefs.ndim > 1:
+            coefs = coefs.sum(axis=0)
+        coefs = coefs.ravel()
         absolute_coefs = np.absolute(coefs)
         absolute_coefs = [float(x) for x in absolute_coefs]
         feature_names = [convert_well_index(x) for x in feature_names]
