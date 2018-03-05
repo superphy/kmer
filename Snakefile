@@ -50,12 +50,12 @@ rule run_single: # Run kmerprediction.run.main on the specified input and ouput 
 # Convert the Omnilog binary results into pandas DataFrames to plot the model accuracies
 rule make_omni_binary_data_frames:
     input:
-        lambda wildcards: expand('results/omni/yaml/{model}_{prediction}_{data}_{ova}.yml',
+        lambda wc: expand('results/omni/yaml/{model}_{prediction}_{data}_{ova}.yml',
                                   model=['support_vector_machine', 'neural_network',
                                          'random_forest'],
                                   data=['kmer', 'omni'],
-                                  ova=ova_dict[wildcards.prediction],
-                                  prediction=wildcards.prediction)
+                                  ova=ova_dict[wc.prediction],
+                                  prediction=wc.prediction)
     output:
         'results/omni/DataFrames/{prediction}.csv'
     script:
@@ -148,3 +148,44 @@ rule us_uk_analysis:
         'results/US_UK/Figures/results.pdf'
     script:
         'scripts/plot_us_uk.py'
+
+rule make_omni_table:
+    input:
+        lambda wc : expand('results/omni/yaml/{model}_{p_class}_{datatype}_{p}.yml',
+                           model=['random_forest', 'support_vector_machine',
+                                  'neural_network'],
+                           datatype=['kmer', 'omni'],
+                           p_class = wc.p_class,
+                           p=ova_dict[wc.p_class] + ['all'])
+    output:
+        'results/omni/Tables/{p_class}_table.md'
+    script:
+        'scripts/make_omni_tables.py'
+
+rule make_all_omni_tables:
+    input:
+        expand('results/omni/Tables/{p_class}_table.md',
+               p_class=['Host', 'Htype', 'Otype', 'Serotype'])
+    output:
+        'results/omni/Tables/complete_results.md'
+    run:
+        import pandas as pd
+        frames = [pd.read_csv(x, sep='|') for x in input]
+        complete = pd.concat(frames, ignore_index=True)
+        complete = complete[complete.Model != '---']
+        new = pd.DataFrame(columns=complete.columns)
+        new.loc[0] = ['---',]*len(complete.columns)
+        output_df = pd.concat([new, complete], ignore_index=True)
+        output_df.to_csv(output[0], sep='|', index=False)
+
+rule make_us_uk_table:
+    input:
+        expand('results/US_UK/yaml/{model}_{data}_{split}.yml',
+               model=['neural_network', 'support_vector_machine', 'random_forest'],
+               data=['kmer', 'genome'],
+               split=['split', 'mixed'])
+    output:
+        'results/US_UK/Tables/complete_results.md'
+    script:
+        'scripts/make_us_uk_tables.py'
+
