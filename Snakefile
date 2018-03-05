@@ -93,7 +93,7 @@ rule plot_multiclass_omni:
         'scripts/plot_multiclass.py'
 
 
-rule omnilog_analysis:
+rule plot_all_omnilog:
     input:
         expand('results/omni/Figures/{figure}.pdf',
                figure=['Multiclass', 'Host', 'Htype', 'Otype', 'Serotype'])
@@ -141,7 +141,7 @@ rule make_us_uk_data_frame:
     script:
         'scripts/make_us_uk_data_frame.py'
 
-rule us_uk_analysis:
+rule plot_us_uk:
     input:
         'results/US_UK/DataFrames/results.csv'
     output:
@@ -189,3 +189,13 @@ rule make_us_uk_table:
     script:
         'scripts/make_us_uk_tables.py'
 
+rule omnilog_analysis:
+    input:
+        'results/omni/Tables/complete_results.md',
+        expand('results/omni/Figures/{figure}.pdf',
+               figure=['Multiclass', 'Host', 'Htype', 'Otype', 'Serotype'])
+
+rule us_uk_analysis:
+    input:
+        'results/US_UK/Tables/complete_results.md',
+        'results/US_UK/Figures/results.pdf'
