@@ -21,12 +21,13 @@ for yf in snakemake.input:
         ranked_features = sorted(feature_dict, reverse=True,
                                  key=lambda k: feature_dict[k])
 
+        # The score of a feature is determined by the sum of 
+        # of 1/(2^index_i) for each ranking divided by the total
+        # number of rankings provided. Where index_i is a feature's 
+        # position in ranking i.
+        # A total score of 1.0 would indicate that a feature was
+        # ranked first overall in every ranking.
         for index, value in enumerate(ranked_features):
-            # Score of a feature determined by the sum of the Log2 decay
-            # of its index in each ranking divided by the total number
-            # of rankings provided.
-            # A total score of 1.0 indicates that a feature was ranked
-            # first overall in every ranking.
             score = (1/(2**index))/len(important_features_dicts)
             if value not in feature_scores:
                 feature_scores[value] = 0
