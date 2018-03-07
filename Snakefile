@@ -187,7 +187,7 @@ rule make_us_uk_table:
     output:
         'results/US_UK/Tables/complete_results.md'
     script:
-        'scripts/make_us_uk_tables.py'
+        'scripts/make_us_uk_table.py'
 
 rule omnilog_analysis:
     input:
