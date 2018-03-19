@@ -62,11 +62,11 @@ def get_kmer(kwargs=None, directory='./', recount=False, k=7, L=13,
 
     if recount:
         count_kmers(k, L, x_train + x_test, directory, verbose)
-
-    try:
-        train = get_counts(k, L, x_train, directory)
-    except:
-        count_kmers(k, L, x_train + x_test, directory, verbose)
+    else:
+        try:
+            train = get_counts(k, L, x_train, directory)
+        except:
+            count_kmers(k, L, x_train + x_test, directory, verbose)
 
     x_train = get_counts(k, L, list(x_train), directory)
     x_train = np.asarray(x_train, dtype='float64')
