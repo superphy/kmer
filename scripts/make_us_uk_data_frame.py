@@ -13,8 +13,9 @@ for yf in snakemake.input:
     name = name.split('_')
     N = name[-1].replace('.yml', '')
     k = name[-2]
-    data_type = name[-3]
-    model_type = ' '.join(name[:-3]).title()
+    dataset = name[-3]
+    data_type = name[-4]
+    model_type = ' '.join(name[:-4]).title()
     with open(yf, 'r') as f:
         data = yaml.load(f)
         acc = data['output']['results']
