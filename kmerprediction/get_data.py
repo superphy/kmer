@@ -22,7 +22,7 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 from builtins import str
 import os
 from sklearn.preprocessing import Imputer
-from kmerprediction.kmer_counter import count_kmers, get_counts, get_kmer_names
+from kmerprediction.kmer_counter4 import count_kmers, get_counts, get_kmer_names
 from kmerprediction.utils import shuffle, setup_files, parse_metadata, parse_json
 from kmerprediction.utils import encode_labels
 import numpy as np
@@ -30,7 +30,7 @@ import pandas as pd
 from kmerprediction import constants
 
 
-def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
+def get_kmer(kwargs=None, directory='./', recount=False, k=7, L=13,
              validate=True, verbose=True):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
@@ -61,15 +61,20 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
     test_files = [str(x) for x in x_test]
 
     if recount:
-        count_kmers(k, L, x_train + x_test, database, verbose)
+        count_kmers(k, L, x_train + x_test, directory, verbose)
 
-    x_train = get_counts(x_train, database)
+    try:
+        train = get_counts(k, L, x_train, directory)
+    except:
+        count_kmers(k, L, x_train + x_test, directory, verbose)
+
+    x_train = get_counts(k, L, list(x_train), directory)
     x_train = np.asarray(x_train, dtype='float64')
 
-    x_test = get_counts(x_test, database)
+    x_test = get_counts(k, L, list(x_test), directory)
     x_test = np.asarray(x_test, dtype='float64')
 
-    feature_names = get_kmer_names(database)
+    feature_names = get_kmer_names(k, L, directory)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
@@ -125,7 +130,7 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
     return (output_data, feature_names, test_label, le)
 
 
-def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13,
+def get_kmer_us_uk_split(directory='./', recount=False, k=7, L=13,
                          validate=True, verbose=True):
     """
     Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et
@@ -148,11 +153,11 @@ def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13,
     kwargs = {'prefix': constants.ECOLI,
               'suffix': '.fasta',
               'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True,
+    return get_kmer(kwargs, directory, recount, k, L, validate=True,
                     verbose=verbose)
 
 
-def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13,
+def get_kmer_us_uk_mixed(directory='./', recount=False, k=7, L=13,
                          validate=True, verbose=True):
     """
     Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et
@@ -176,7 +181,7 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13,
               'suffix': '.fasta',
               'train_header': None,
               'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True,
+    return get_kmer(kwargs, directory, recount, k, L, validate=True,
                     verbose=verbose)
 
 
