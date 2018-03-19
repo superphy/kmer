@@ -13,7 +13,7 @@ base_yaml = {'augment': False,
              'scaler': 'scale_to_range',
              'scaler_args': {'high': 1, 'low': -1},
              'selection': 'f_test_threshold',
-             'selection_args': {'threshold': 0.05},
+             'selection_args': {'threshold': 0.2},
              'validate': True,
              'reps': constants.DEFAULT_REPITITIONS}
 
