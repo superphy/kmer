@@ -49,7 +49,7 @@ PREDICTIVE_RESULTS = SOURCE + 'Data/hb_train_predictiveresults.csv'
 OMNILOG_WELLS = SOURCE + 'Data/omnilog_wells.csv'
 
 # Default repitions to place in config files created by generate_config.py
-DEFAULT_REPITITIONS = 10000
+DEFAULT_REPITITIONS = 100
 
 MIN_FREQUENCY = 5
 metadata = pd.read_csv(OMNILOG_METADATA)
