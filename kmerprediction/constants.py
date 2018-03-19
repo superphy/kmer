@@ -39,6 +39,8 @@ CONFIG = SOURCE + 'Data/config.yml'
 # default file to store results to
 OUTPUT = SOURCE + 'Data/run_results.yml'
 
+OUTPUT_DIR = SOURCE + 'kmer_data/'
+
 # default filepaths to metadata sheets
 SALMONELLA_METADATA = SOURCE + 'Data/amr_sorted.csv'
 ECOLI_METADATA = SOURCE + 'Data/human_bovine.csv'
@@ -47,7 +49,7 @@ PREDICTIVE_RESULTS = SOURCE + 'Data/hb_train_predictiveresults.csv'
 OMNILOG_WELLS = SOURCE + 'Data/omnilog_wells.csv'
 
 # Default repitions to place in config files created by generate_config.py
-DEFAULT_REPITITIONS = 100
+DEFAULT_REPITITIONS = 10000
 
 MIN_FREQUENCY = 5
 metadata = pd.read_csv(OMNILOG_METADATA)
