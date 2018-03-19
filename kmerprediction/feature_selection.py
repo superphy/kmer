@@ -21,6 +21,30 @@ from kmerprediction.utils import flatten, make3D
 import pandas as pd
 import numpy as np
 
+def f_test_threshold(input_data, feature_names, threshold=0.05):
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
+    dims = len(x_train.shape)
+    if dims == 3:
+        x_train = flatten(x_train)
+        x_test = flatten(x_test)
+
+    F, pval = f_classif(x_train, y_train)
+
+    keep = np.where(pval <= threshold, True, False)
+
+    x_train = x_train[:, keep]
+    x_test = x_test[:, keep]
+
+    output_data = (x_train, y_train, x_test, y_test)
+
+    if feature_names is not None:
+        feature_names = feature_names[keep]
+
+    return output_data, feature_names
 
 def variance_threshold(input_data, feature_names, threshold=0.16):
     """
