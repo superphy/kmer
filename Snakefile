@@ -199,3 +199,21 @@ rule us_uk_analysis:
     input:
         'results/US_UK/Tables/complete_results.md',
         'results/US_UK/Figures/results.pdf'
+
+rule values_for_paper:
+    input:
+        expand('results/omni/DataFrames/{df}.csv',
+               df=['Host', 'Htype', 'Multiclass','Otype', 'Serotype']),
+        'results/US_UK/DataFrames/results.csv'
+    output:
+        'results/tex_files/values.pkl'
+    script:
+        'scripts/values_for_paper.py'
+
+rule generate_tex:
+    input:
+        'results/tex_files/values.pkl'
+    output:
+        'results/tex_files/values.tex'
+    script:
+        'scripts/make_macros.py'
