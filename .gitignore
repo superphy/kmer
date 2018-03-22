@@ -1,5 +1,6 @@
 *.jf
 *.pyc
+*.swp
 database
 results/omni/
 results/US_UK/
