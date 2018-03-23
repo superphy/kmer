@@ -15,10 +15,13 @@ base_yaml = {'augment': False,
              'selection': 'f_test_threshold',
              'selection_args': {'threshold': 0.2},
              'validate': True,
+             'verbose': True,
              'reps': constants.DEFAULT_REPITITIONS}
 
 models = ['support_vector_machine', 'random_forest', 'neural_network']
 data_methods = ['get_kmer_us_uk_split', 'get_kmer_us_uk_mixed']
+selection_methods = [('kbest', 'select_k_best', {'threshold': 0.2}),
+                     ('pthreshold', 'f_test_threshold', {'score_func': 'f_classif', 'k': 270})]
 
 for m in models:
     base_yaml['model'] = m
@@ -27,10 +30,10 @@ for m in models:
         dm = dm.split('_')
         for k in snakemake.config['k_vals']:
             base_yaml['data_args']['k'] = k
-            for N in snakemake.config['N_vals']:
-                base_yaml['data_args']['L'] = N
+            for key, selection_method, selection_args in selection_methods:
+                base_yaml['selection'] = selection_method
+                base_yaml['selection_args'] = selection_args
                 k = str(k)
-                N = str(N)
-                file_name = directory+m+'_'+dm[1]+'_'+dm[-1]+'_'+k+'_'+N+'.yml'
+                file_name = directory+m+'_'+dm[1]+'_'+dm[-1]+'_'+k+'_'+key+'.yml'
                 with open(file_name, 'w') as f:
                     yaml.dump(base_yaml, f)

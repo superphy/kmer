@@ -85,15 +85,19 @@ def run(model=models.support_vector_machine, model_args=None,
     model_args['validate'] = validate
 
     feature_importances = []
+    num_features_before_selection = []
+    num_features_after_selection = []
     for i in range(reps):
         start = time.time()
         # Get input data
         data, features, files, le = data_method(**data_args)
+        num_features_before_selection.append(data[0].shape[1])
 
         # Perform feature selection on input_data
         selection_args['feature_names'] = features
         data, features = selection(data, **selection_args)
         selection_args.pop('feature_names', None)
+        num_feature_after_selection.append(data[0].shape[1])
 
         # Scale input data
         data = scaler(data, **scaler_args)
@@ -123,6 +127,8 @@ def run(model=models.support_vector_machine, model_args=None,
     output['avg_run_time'] = times.mean().tolist()
     output['std_dev_run_times'] = times.std().tolist()
     output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
+    output['features_before_selection'] = num_features_before_selection.mean().tolist()
+    output['features_after_selection'] = num_features_after_selection.mean().tolist()
 
     if validate:
         # Compute the mean and std dev of all the runs

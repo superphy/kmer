@@ -22,7 +22,7 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 from builtins import str
 import os
 from sklearn.preprocessing import Imputer
-from kmerprediction.kmer_counter4 import count_kmers, get_counts, get_kmer_names
+from kmerprediction.kmer_counter5 import count_kmers, get_counts, get_kmer_names
 from kmerprediction.utils import shuffle, setup_files, parse_metadata, parse_json
 from kmerprediction.utils import encode_labels
 import numpy as np
@@ -61,20 +61,20 @@ def get_kmer(kwargs=None, directory='./', recount=False, k=7, L=13,
     test_files = [str(x) for x in x_test]
 
     if recount:
-        count_kmers(k, L, x_train + x_test, directory, verbose)
+        count_kmers(k, x_train + x_test, directory, verbose)
     else:
         try:
-            train = get_counts(k, L, x_train, directory)
+            train = get_counts(k, x_train, directory)
         except:
-            count_kmers(k, L, x_train + x_test, directory, verbose)
+            count_kmers(k, x_train + x_test, directory, verbose)
 
-    x_train = get_counts(k, L, list(x_train), directory)
+    x_train = get_counts(k, list(x_train), directory)
     x_train = np.asarray(x_train, dtype='float64')
 
-    x_test = get_counts(k, L, list(x_test), directory)
+    x_test = get_counts(k, list(x_test), directory)
     x_test = np.asarray(x_test, dtype='float64')
 
-    feature_names = get_kmer_names(k, L, directory)
+    feature_names = get_kmer_names(k, directory)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
