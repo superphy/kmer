@@ -6,3 +6,4 @@ results/US_UK/
 config_files/
 build/
 .snakemake/
+*.swp
