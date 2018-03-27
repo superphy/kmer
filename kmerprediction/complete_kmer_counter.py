@@ -8,6 +8,11 @@ from threading import Thread
 import tempfile
 import shutil
 
+
+class KmerCounterError(Exception):
+    """Raise for errors in kmer_counter module"""
+
+
 def count_file(input_file, output_file, k, verbose):
     handle, temp_file = tempfile.mkstemp()
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
@@ -22,6 +27,7 @@ def count_file(input_file, output_file, k, verbose):
     os.remove(temp_file)
     if verbose:
         print('Counted kmers for {}'.format(input_file))
+
 
 def add_file(input_file, key, env, global_counts, file_counts, verbose):
     current = env.open_db(key.encode())
@@ -42,6 +48,7 @@ def add_file(input_file, key, env, global_counts, file_counts, verbose):
     if verbose:
         print('Added {} to DB'.format(key))
 
+
 def backfill_file(db_key, env, global_counts, verbose):
     current = env.open_db(db_key.encode())
     with env.begin(write=True, db=current) as txn:
@@ -51,6 +58,7 @@ def backfill_file(db_key, env, global_counts, verbose):
                     txn.put(key, '0'.encode(), db=current)
     if verbose:
         print('Backfilled {}'.format(db_key))
+
 
 def make_output(key, valid_kmers, env, name, verbose):
     db = env.open_db(key.encode())
@@ -62,11 +70,13 @@ def make_output(key, valid_kmers, env, name, verbose):
     if verbose:
         print('Made output key for {}'.format(db_key))
 
+
 def make_db_keys(input_files):
     output = [x.split('/')[-1] for x in input_files]
     output = [x.split('.')[:-1] for x in output]
     output = ['.'.join(x) for x in output]
     return output
+
 
 def count_kmers(k, fasta_files, database, verbose, output_db=None,
                 min_global_count=0, max_global_count=None, min_file_count=0,
@@ -110,12 +120,12 @@ def count_kmers(k, fasta_files, database, verbose, output_db=None,
 
     # Count kmers of length k for each file in fasta_files
     # Store results in coresponding file in temp_files
-    # Don't count kmers for fasta file if corresponding csv file already exists
     threads = []
     for i, v in enumerate(fasta_files):
-        if not os.path.exists(temp_files[i]):
-            args = [v, temp_files[i], k, verbose]
-            threads.append(Thread(target=count_file, args=args))
+        with env.begin(write=False) as txn:
+            if not txn.get(db_keys[i].encode(), default=False)
+                args = [v, temp_files[i], k, verbose]
+                threads.append(Thread(target=count_file, args=args))
     for t in threads:
         t.start()
     for t in threads:
@@ -195,24 +205,47 @@ def count_kmers(k, fasta_files, database, verbose, output_db=None,
 
     env.close()
 
-def get_counts(k, files, database, name='results'):
+
+def get_counts(files, database, name='results'):
     db_keys = make_db_keys(files)
+
+    if not os.path.exists(database):
+        msg = 'Attempted to get counts from an uncreated database: {}'.format(database)
+        raise(KmerCounterError(msg))
+
     env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
     with env.begin(write=False) as txn:
         arrays = []
         for index, value in enumerate(db_keys):
-            current = env.open_db(value.encode(), txn=txn)
-            results = txn.get(name.encode(), db=current)
+
+            try:
+                current = env.open_db(value.encode(), txn=txn, create=False)
+            except Exception as e:
+                print(e)
+                msg = 'Attempted to get counts for potentially uncounted genome:'
+                msg += ' {} in DB: {}'.format(value, database)
+                raise(KmerCounterError(msg))
+
+            try:
+                results = txn.get(name.encode(), db=current)
+            except Exception as e:
+                print(e)
+                msg = 'Attempted to get counts for potentially invalid filter method:'
+                msg += ' {} for genome: {} in DB: {}'.format(name, value, database)
+                raise(KmerCounterError(msg))
+
             results = np.fromstring(results, dtype='float64')
             arrays.append(results)
         output = np.vstack(arrays)
     env.close()
     return output
 
-def get_kmer_names(k, database, name='results'):
+
+def get_kmer_names(database, name='results'):
     env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
     with env.begin(write=False) as txn:
         output = txn.get(name.encode())
     env.close()
     return np.fromstring(output, dtype=str)
+
 
