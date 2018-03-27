@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from threading import Thread
 import tempfile
+import shutil
 
 def count_file(input_file, output_file, k, verbose):
     handle, temp_file = tempfile.mkstemp()
@@ -19,18 +20,10 @@ def count_file(input_file, output_file, k, verbose):
     p.communicate()
 
     os.remove(temp_file)
-    print('Counted kmers for {}'.format(input_file))
+    if verbose:
+        print('Counted kmers for {}'.format(input_file))
 
-def count_files(infiles, outfiles,  k, verbose):
-    threads = []
-    for i, v in enumerate(infiles):
-        threads.append(Thread(target=count_file, args=(v, outfiles[i], k, verbose)))
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
-
-def add_file(input_file, key, env, global_counts, file_counts):
+def add_file(input_file, key, env, global_counts, file_counts, verbose):
     current = env.open_db(key.encode())
     with env.begin(write=True, db=current) as txn:
         with open(input_file, 'r') as f:
@@ -46,38 +39,96 @@ def add_file(input_file, key, env, global_counts, file_counts):
                 curr_file_count = txn.get(kmer, default=0, db=file_counts)
                 new_file_count = str(1 + int(curr_file_count)).encode()
                 txn.put(kmer, new_file_count, db=file_counts)
-    print('Added {} to DB'.format(key))
+    if verbose:
+        print('Added {} to DB'.format(key))
 
-def backfill_file(db_key, env, global_counts):
+def backfill_file(db_key, env, global_counts, verbose):
     current = env.open_db(db_key.encode())
     with env.begin(write=True, db=current) as txn:
         with txn.cursor(db=global_counts) as cursor:
             for key, value in cursor:
                 if not txn.get(key, default=False, db=current):
                     txn.put(key, '0'.encode(), db=current)
-    print('Backfilled {}'.format(db_key))
+    if verbose:
+        print('Backfilled {}'.format(db_key))
 
-def make_output(db_key, env):
-    current = env.open_db(db_key.encode())
-    with env.begin(write=True, db=current) as txn:
-        num_kmers = txn.stat(current)['entries']
-        output = np.zeros(num_kmers, dtype='float64')
-        with txn.cursor(db=current) as cursor:
-            for index, (key, value) in enumerate(cursor):
-                output[index] = float(value)
-        txn.put('complete'.encode(), output.tostring(), db=current)
-    print('Made output key for {}'.format(db_key))
+def make_output(key, valid_kmers, env, name, verbose):
+    db = env.open_db(key.encode())
+    with env.begin(write=True, db=db) as txn:
+        output = np.zeros(len(valid_kmers), dtype=int)
+            for index, kmer in enumerate(valid_kmers):
+                output[index] = int(txn.get(kmer, default=0, db=db))
+        txn.put(name.encode(), output.tostring(), db=current)
+    if verbose:
+        print('Made output key for {}'.format(db_key))
 
-def make_db(files, db_keys, database, verbose):
+def make_db_keys(input_files):
+    output = [x.split('/')[-1] for x in input_files]
+    output = [x.split('.')[:-1] for x in output]
+    output = ['.'.join(x) for x in output]
+    return output
+
+def count_kmers(k, fasta_files, database, verbose, output_db=None,
+                min_global_count=0, max_global_count=None, min_file_count=0,
+                max_file_count=None, output_name='results'):
+    """
+    Args:
+        k (int):                The length of k-mer to count.
+        fasta_files (list):     The paths to each fasta file to count kmers from
+        database (str):         Path to the database where the complete results
+                                from the kmer count will be stored.
+        verbose (bool):         If Ture status messages will be output.
+        output_db (str):        Path to a second database to store the a smaller
+                                version of the output in, usefull for counting
+                                large k-mers and storing the complete db on a
+                                slower to access drive.
+        min_global_count (int): The minimum number of a times a kemr must appear
+                                in the entire database in order to be output.
+        max_global_count (int): The maximum number of times a kmer can appear
+                                in the entire database in order to be output.
+        min_file_count (int):   The minimum number a fasta files that a kmer
+                                must appear in inorder to be output.
+        max_file_count (int):   The maximum number of fasta files that a kmer
+                                can appear in inorder to be outoput.
+        output_name (str):      The name for the key whose value will contain
+                                the complete output for a fasta file. User can
+                                specify so that multiple filter results can be
+                                stored in one DB.
+    Returns:
+        None
+    """
+    max_file_count = max_file_count or len(fasta_files)
+    max_global_count = max_global_count or (4**k)
+
+    db_keys = make_db_keys(fasta_files)
+    temp_dir = tempfile.mkdtemp()
+    temp_files = [temp_dir + '/' + x for x in db_keys]
+
     env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
     global_counts = env.open_db('global_counts'.encode())
     file_counts = env.open_db('file_counts'.encode())
 
+    # Count kmers of length k for each file in fasta_files
+    # Store results in coresponding file in temp_files
+    # Don't count kmers for fasta file if corresponding csv file already exists
     threads = []
-    for i, f in enumerate(files):
+    for i, v in enumerate(fasta_files):
+        if not os.path.exists(temp_files[i]):
+            args = [v, temp_files[i], k, verbose]
+            threads.append(Thread(target=count_file, args=args))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    # Add kmer counts from each csv file to DB
+    # Don't add kmer counts if the db_key corresponding to the csv_file 
+    # already exists as a named database in the DB
+    threads = []
+    for i, f in enumerate(temp_files):
         with env.begin(write=False) as txn:
             if not txn.get(db_keys[i].encode(), default=False)
-                args = [f, db_keys[i], env, global_counts, file_counts]
+                args = [f, db_keys[i], env, global_counts, file_counts, verbose]
                 threads.append(Thread(target=add_file, args=args))
     for t in threads:
         t.start()
@@ -87,110 +138,81 @@ def make_db(files, db_keys, database, verbose):
     with env.begin(write=False, db=global_counts) as txn:
         total_kmers = txn.stat()['entries']
 
+    # Backfill missing kmers in DB
+    # For each db_key add a count of 0 for each kmer that exists in the DB
+    # but not in the current genome.
+    # Don't backfill a file if it already has equal number of keys as total
+    # kmers in the DB
     threads = []
     for k in db_keys:
         curr_db = env.open_db(k.encode())
         with env.begin(write=False, db=curr_db) as txn:
             curr_kmers = txn.stat()['entries']
         if curr_kmers < total_kmers:
-            args = [k, env, global_counts]
+            args = [k, env, global_counts, verbose]
             threads.append(Thread(target=backfill_file, args=args))
     for t in threads:
         t.start()
     for t in threads:
         t.join()
 
-    threads = []
-    for k in db_keys:
-        curr_db = env.open_db(k.encode())
-        with env.begin(write=False, db=curr_db) as txn:
-            curr_kmers = txn.stat()['entries']
-        if curr_kmers <= total_kmers:
-            threads.append(Thread(target=make_output, args=[k, env]))
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    if output_db:
+        output_env = lmdb.open(output_db, map_size=160e10, max_dbs=4000)
+    else:
+        output_env = env
 
-    env.close()
-
-def get_output_files(input_files, directory, k):
-    db_keys = [x.split('/')[-1].split('.')[0] for x in input_files]
-    output_files = [directory + x + '_k{}.csv'.format(k) for x in db_keys]
-    database = directory + 'complete_{}-mer_DB'.format(k)
-    return output_files, db_keys, database
-
-def count_kmers(k, files, directory, verbose):
-    output_files, db_keys, database = get_output_files(files, directory, k)
-    needs_counting_in = []
-    needs_counting_out = []
-    for i, v in enumerate(output_files):
-        if not os.path.exists(v):
-            needs_counting_out.append(v)
-            needs_counting_in.append(files[i])
-    count_files(needs_counting_in, needs_counting_out, k, verbose)
-    make_db(output_files, db_keys, database, verbose)
-
-def filter_kmers(input_db, output_db, files, k, min_global_count=0,
-                 max_global_count=None, min_file_count=0,
-                 max_file_count=None):
-    max_file_count = max_file_count or len(files)
-    max_global_count = max_global_count or (4**k)
-
-    input_env = lmdb.open(input_db, map_size=int(160e10), max_dbs=4000))
-    output_env = lmdb.open(output_db, map_size=int(160e10), max_dbs=4000))
-
-    global_counts = input_env.open_db('gloabl_counts'.encode())
-    file_counts = input_env.open_db('file_counts'.encode())
+    # Ensure that only kmers whose file/global counts are within the given
+    # min/max range are added to the output db
+    global_counts = env.open_db('gloabl_counts'.encode())
+    file_counts = env.open_db('file_counts'.encode())
     valid_kmers = []
-    with input_env.begin(write=False, db=global_counts) as global_txn:
+    with env.begin(write=False, db=global_counts) as global_txn:
         with global_txn.cursor() as global_cursor:
             for key, global_value in global_cursor:
                 if global_value <= max_global_count and global_value >= min_global_count:
                     valid_kmers.append(key)
-    with input_env.begin(write=False, db=file_counts) as file_txn:
+    with env.begin(write=False, db=file_counts) as file_txn:
         for index, key in enumerate(valid_kmers):
             file_value = file_txn.get(key)
                 if not (file_value <= max_file_count and file_value >= min_file_count):
                     valid_kmers.pop(index)
+
+    valid_kmer_array = np.asarray(valid_kmers, dtype=str)
+    with output_env.begin(write=True) as txn:
+        txn.put(output_name.encode(), valid_kmer_array.tostring())
+
+    # Add all valid kmers to the output DB
     threads = []
     for f in files:
-        args = [f, valid_kmers, output_env]
+        args = [f, valid_kmers, output_env, output_name, verbose]
         threads.append(Thread(target=make_output, args=args))
     for t in threads:
         t.start()
     for t in threads:
         t.join()
 
-def get_counts(k, files, directory):
-    output_files, db_keys, database = get_output_files(files, directory, k)
-    env = lmdb.open(str(database), map_size=int(160e10), max_dbs=4000)
-    global_counts = env.open_db('global_counts'.encode(), create=False)
-    with env.begin(write=False, db=global_counts) as txn:
+    shutil.rmtree(temp_dir)
+
+    env.close()
+
+def get_counts(k, files, database, name='results'):
+    db_keys = make_db_keys(files)
+    env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
+    with env.begin(write=False) as txn:
         arrays = []
         for index, value in enumerate(db_keys):
             current = env.open_db(value.encode(), txn=txn)
-            complete = txn.get('complete'.encode(), db=current)
-            complete = np.fromstring(complete, dtype='float64')
-            arrays.append(complete)
+            results = txn.get(name.encode(), db=current)
+            results = np.fromstring(results, dtype='float64')
+            arrays.append(results)
         output = np.vstack(arrays)
     env.close()
     return output
 
-def get_kmer_names(k, directory):
-    temp, db_keys, database = get_output_files([], directory, k)
-    env = lmdb.open(str(database), map_size=int(160e10), max_dbs=4000)
-
-    global_counts = env.open_db('global_counts'.encode(), create=False)
-    with env.begin(write=False, db=global_counts) as txn:
-        kmer_list = []
-        with txn.cursor(db=global_counts) as cursor:
-            for item in cursor:
-                kmer_list.append(item[0].decode())
+def get_kmer_names(k, database, name='results'):
+    env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
+    with env.begin(write=False) as txn:
+        output = txn.get(name.encode())
     env.close()
-    return np.asarray(kmer_list)
-
-
-
-
+    return np.fromstring(output, dtype=str)
 
