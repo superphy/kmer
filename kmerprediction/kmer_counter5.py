@@ -30,69 +30,87 @@ def count_files(infiles, outfiles,  k, verbose):
     for t in threads:
         t.join()
 
-def print_status(s1, t1, s2, t2, verbose=True):
-    sys.stdout.write('\r')
-    sys.stdout.write("{}/{} kmers counted \t {}/{} files done".format(s1, t1, s2, t2))
-    sys.stdout.flush()
-    if s1 == t1 and s2 == t2:
-        print("\n")
+def add_file(input_file, key, env, global_counts, file_counts):
+    current = env.open_db(key.encode())
+    with env.begin(write=True, db=current) as txn:
+        with open(input_file, 'r') as f:
+            for line in f:
+                kmer = line.split()[0].encode()
+                count = str(line.split()[1]).encode()
+                txn.put(kmer, count, db=current)
+
+                curr_global_count = txn.get(kmer, default=0, db=global_counts)
+                new_global_count = str(int(curr_global_count) + int (count)).encode()
+                txn.put(kmer, new_global_count, db=global_counts)
+
+                curr_file_count = txn.get(kmer, default=0, db=file_counts)
+                new_file_count = str(1 + int(curr_file_count)).encode()
+                txn.put(kmer, new_file_count, db=file_counts)
+    print('Added {} to DB'.format(key))
+
+def backfill_file(db_key, env, global_counts):
+    current = env.open_db(db_key.encode())
+    with env.begin(write=True, db=current) as txn:
+        with txn.cursor(db=global_counts) as cursor:
+            for key, value in cursor:
+                if not txn.get(key, default=False, db=current):
+                    txn.put(key, '0'.encode(), db=current)
+    print('Backfilled {}'.format(db_key))
+
+def make_output(db_key, env):
+    current = env.open_db(db_key.encode())
+    with env.begin(write=True, db=current) as txn:
+        num_kmers = txn.stat(current)['entries']
+        output = np.zeros(num_kmers, dtype='float64')
+        with txn.cursor(db=current) as cursor:
+            for index, (key, value) in enumerate(cursor):
+                output[index] = float(value)
+        txn.put('complete'.encode(), output.tostring(), db=current)
+    print('Made output key for {}'.format(db_key))
 
 def make_db(files, db_keys, database, verbose):
-    outer_total = len(files)
-
-    env = lmdb.open(database, map_size=int(160e9), max_dbs=4000)
+    env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
     global_counts = env.open_db('global_counts'.encode())
     file_counts = env.open_db('file_counts'.encode())
 
-    with env.begin(write=True, db=global_counts) as txn:
-        print('Adding counts to DB')
-        for i, f in enumerate(files):
-            current = env.open_db(db_keys[i].encode(), txn=txn)
-            data = pd.read_csv(f, sep='\t', names=['kmer', 'count'])
-            inner_total = data.shape[0]
-            counter = 0
-            print_status(counter, inner_total, i, outer_total, verbose)
-            for value in data.itertuples():
-                txn.put(value.kmer.encode(), str(value.count).encode(), db=current)
+    threads = []
+    for i, f in enumerate(files):
+        with env.begin(write=False) as txn:
+            if not txn.get(db_keys[i].encode(), default=False)
+                args = [f, db_keys[i], env, global_counts, file_counts]
+                threads.append(Thread(target=add_file, args=args))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
 
-                curr_global_count = txn.get(value.kmer.encode(), default=0, db=global_counts)
-                new_global_count = str(value.count + int(curr_global_count))
-                txn.put(value.kmer.encode(), new_global_count.encode(), db=global_counts)
+    with env.begin(write=False, db=global_counts) as txn:
+        total_kmers = txn.stat()['entries']
 
-                curr_file_count = txn.get(value.kmer.encode(), default=0, db=file_counts)
-                new_file_count = str(1 + int(curr_file_count))
-                txn.put(value.kmer.encode(), new_file_count.encode(), db=file_counts)
+    threads = []
+    for k in db_keys:
+        curr_db = env.open_db(k.encode())
+        with env.begin(write=False, db=curr_db) as txn:
+            curr_kmers = txn.stat()['entries']
+        if curr_kmers < total_kmers:
+            args = [k, env, global_counts]
+            threads.append(Thread(target=backfill_file, args=args))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
 
-                print_status(counter, inner_total, i+1, outer_total, verbose)
-                counter += 1
-            print_status(inner_total, inner_total, i+1, outer_total, verbose)
-
-        print('Backfilling missing values in DB')
-        for i, db in enumerate(db_keys):
-            current = env.open_db(db.encode(), txn=txn)
-            with txn.cursor(db=global_counts) as cursor:
-                num_kmers = txn.stat(global_counts)['entries']
-                counter = 0
-                print_status(counter, num_kmers, i, outer_total, verbose)
-                for key, value in cursor:
-                    if not txn.get(key, default=False, db=current):
-                        txn.put(key, '0'.encode(), db=current)
-                    print_status(counter, num_kmers, i+1, outer_total, verbose)
-                    counter += 1
-                print_status(num_kmers, num_kmers, i+1, outer_total, verbose)
-
-        print('Preparing output')
-        num_keys = txn.stat(global_counts)['entries']
-        for index, value in enumerate(db_keys):
-            current = env.open_db(value.encode(), txn=txn)
-            output = np.zeros(num_keys, dtype='float64')
-            with txn.cursor(db=current) as cursor:
-                print_status(0, num_keys, index+1, len(files), verbose)
-                for i, v in enumerate(cursor):
-                    output[i] = float(v[1])
-                    print_status(i, num_keys, index+1, len(files), verbose)
-            print_status(num_keys, num_keys, index+1, len(files), verbose)
-            txn.put('complete'.encode(), output.tostring(), db=current)
+    threads = []
+    for k in db_keys:
+        curr_db = env.open_db(k.encode())
+        with env.begin(write=False, db=curr_db) as txn:
+            curr_kmers = txn.stat()['entries']
+        if curr_kmers <= total_kmers:
+            threads.append(Thread(target=make_output, args=[k, env]))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
 
     env.close()
 
@@ -113,9 +131,40 @@ def count_kmers(k, files, directory, verbose):
     count_files(needs_counting_in, needs_counting_out, k, verbose)
     make_db(output_files, db_keys, database, verbose)
 
+def filter_kmers(input_db, output_db, files, k, min_global_count=0,
+                 max_global_count=None, min_file_count=0,
+                 max_file_count=None):
+    max_file_count = max_file_count or len(files)
+    max_global_count = max_global_count or (4**k)
+
+    input_env = lmdb.open(input_db, map_size=int(160e10), max_dbs=4000))
+    output_env = lmdb.open(output_db, map_size=int(160e10), max_dbs=4000))
+
+    global_counts = input_env.open_db('gloabl_counts'.encode())
+    file_counts = input_env.open_db('file_counts'.encode())
+    valid_kmers = []
+    with input_env.begin(write=False, db=global_counts) as global_txn:
+        with global_txn.cursor() as global_cursor:
+            for key, global_value in global_cursor:
+                if global_value <= max_global_count and global_value >= min_global_count:
+                    valid_kmers.append(key)
+    with input_env.begin(write=False, db=file_counts) as file_txn:
+        for index, key in enumerate(valid_kmers):
+            file_value = file_txn.get(key)
+                if not (file_value <= max_file_count and file_value >= min_file_count):
+                    valid_kmers.pop(index)
+    threads = []
+    for f in files:
+        args = [f, valid_kmers, output_env]
+        threads.append(Thread(target=make_output, args=args))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
 def get_counts(k, files, directory):
     output_files, db_keys, database = get_output_files(files, directory, k)
-    env = lmdb.open(str(database), map_size=int(160e9), max_dbs=4000)
+    env = lmdb.open(str(database), map_size=int(160e10), max_dbs=4000)
     global_counts = env.open_db('global_counts'.encode(), create=False)
     with env.begin(write=False, db=global_counts) as txn:
         arrays = []
@@ -130,7 +179,7 @@ def get_counts(k, files, directory):
 
 def get_kmer_names(k, directory):
     temp, db_keys, database = get_output_files([], directory, k)
-    env = lmdb.open(str(database), map_size=int(160e9), max_dbs=4000)
+    env = lmdb.open(str(database), map_size=int(160e10), max_dbs=4000)
 
     global_counts = env.open_db('global_counts'.encode(), create=False)
     with env.begin(write=False, db=global_counts) as txn:
