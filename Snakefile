@@ -5,12 +5,12 @@ configfile: 'config.yml'
 
 rule generate_us_uk_config: # Generate the input config files for the US/UK e. Coli analysis
     output:
-        expand('config_files/US_UK/{model}_{data}_{split}_{k}_{N}.yml',
-               model=['neural_network', 'support_vector_machine', 'random_forest'],
+        expand('config_files/US_UK/{model}_{data}_{split}_{k}_{selection}.yml',
+               model=config['model'],
                data=['kmer'],
                split=['split', 'mixed'],
                k=config['k_vals'],
-               N=config['N_vals'])
+               selection=config['selection'])
     script:
         'scripts/us_uk_config.py'
 
@@ -24,12 +24,12 @@ rule run_single: # Run kmerprediction.run.main on the specified input and ouput 
 
 rule make_us_uk_data_frame:
     input:
-        expand('results/US_UK/yaml/{model}_{data}_{split}_{k}_{N}.yml',
-               model=['neural_network', 'support_vector_machine', 'random_forest'],
+        expand('results/US_UK/yaml/{model}_{data}_{split}_{k}_{selection}.yml',
+               model=config['models'],
                data=['kmer'],
                split=['split', 'mixed'],
                k=config['k_vals'],
-               N=config['N_vals'])
+               selection=config['selection'])
     output:
         'results/US_UK/DataFrames/results.csv'
     script:
@@ -45,12 +45,12 @@ rule plot_us_uk:
 
 rule make_us_uk_table:
     input:
-        expand('results/US_UK/yaml/{model}_{data}_{split}_{k}_{N}.yml',
-               model=['neural_network', 'support_vector_machine', 'random_forest'],
+        expand('results/US_UK/yaml/{model}_{data}_{split}_{k}_{selection}.yml',
+               model=config['selection'],
                data=['kmer'],
                split=['split', 'mixed'],
                k=config['k_vals'],
-               N=config['N_vals'])
+               selection=config['selection'])
     output:
         'results/US_UK/Tables/complete_results.md'
     script:
