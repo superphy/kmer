@@ -7,7 +7,7 @@ import pandas as pd
 from threading import Thread
 import tempfile
 import shutil
-
+from kmerprediction import constants
 
 class KmerCounterError(Exception):
     """Raise for errors in kmer_counter module"""
@@ -64,9 +64,9 @@ def make_output(key, valid_kmers, env, name, verbose):
     db = env.open_db(key.encode())
     with env.begin(write=True, db=db) as txn:
         output = np.zeros(len(valid_kmers), dtype=int)
-            for index, kmer in enumerate(valid_kmers):
-                output[index] = int(txn.get(kmer, default=0, db=db))
-        txn.put(name.encode(), output.tostring(), db=current)
+        for index, kmer in enumerate(valid_kmers):
+            output[index] = int(txn.get(kmer, default=0, db=db))
+        txn.put(name.encode(), output.tostring(), db=db)
     if verbose:
         print('Made output key for {}'.format(db_key))
 
@@ -124,7 +124,7 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
     threads = []
     for i, v in enumerate(fasta_files):
         with env.begin(write=False) as txn:
-            if not txn.get(db_keys[i].encode(), default=False)
+            if not txn.get(db_keys[i].encode(), default=False):
                 args = [v, temp_files[i], k, verbose]
                 threads.append(Thread(target=count_file, args=args))
     for t in threads:
@@ -138,7 +138,7 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
     threads = []
     for i, f in enumerate(temp_files):
         with env.begin(write=False) as txn:
-            if not txn.get(db_keys[i].encode(), default=False)
+            if not txn.get(db_keys[i].encode(), default=False):
                 args = [f, db_keys[i], env, global_counts, file_counts, verbose]
                 threads.append(Thread(target=add_file, args=args))
     for t in threads:
@@ -185,8 +185,8 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
     with env.begin(write=False, db=file_counts) as file_txn:
         for index, key in enumerate(valid_kmers):
             file_value = file_txn.get(key)
-                if not (file_value <= max_file_count and file_value >= min_file_count):
-                    valid_kmers.pop(index)
+            if not (file_value <= max_file_count and file_value >= min_file_count):
+                valid_kmers.pop(index)
 
     valid_kmer_array = np.asarray(valid_kmers, dtype=str)
     with output_env.begin(write=True) as txn:
@@ -229,10 +229,8 @@ def get_counts(files, database, name=constants.DEFAULT_NAME):
                 msg += ' {} in DB: {}'.format(value, database)
                 raise(KmerCounterError(msg))
 
-            try:
-                results = txn.get(name.encode(), db=current)
-            except Exception as e:
-                print(e)
+            results = txn.get(name.encode(), db=current)
+            if results is None:
                 msg = 'Attempted to get counts for potentially invalid filter method:'
                 msg += ' {} for genome: {} in DB: {}'.format(name, value, database)
                 raise(KmerCounterError(msg))
@@ -244,7 +242,7 @@ def get_counts(files, database, name=constants.DEFAULT_NAME):
     return output
 
 
-def get_kmer_names(database, name=constants.DEAULT_NAME):
+def get_kmer_names(database, name=constants.DEFAULT_NAME):
     env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
     with env.begin(write=False) as txn:
         output = txn.get(name.encode())

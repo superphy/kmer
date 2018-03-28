@@ -39,7 +39,7 @@ with open(directory + 'neural_network_Host_omni_all.yml', 'w') as f:
 
 #Generate base config for kmer data
 base_yaml['data_method'] = 'get_kmer'
-base_yaml['data_args']['database'] = constants.DB
+base_yaml['data_args']['database'] = constants.DEFAULT_DB
 base_yaml['data_args']['kwargs']['prefix'] = constants.OMNILOG_FASTA
 base_yaml['data_args']['kwargs']['suffix'] = '.fasta'
 base_yaml['data_args']['kwargs']['extra_header'] = 'WGS'

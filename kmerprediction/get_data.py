@@ -22,7 +22,7 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 from builtins import str
 import os
 from sklearn.preprocessing import Imputer
-from kmerprediction.kmer_counter5 import count_kmers, get_counts, get_kmer_names
+from kmerprediction.complete_kmer_counter import count_kmers, get_counts, get_kmer_names
 from kmerprediction.utils import shuffle, setup_files, parse_metadata, parse_json
 from kmerprediction.utils import encode_labels
 import numpy as np
@@ -67,25 +67,25 @@ def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
     else:
         output_db = database
 
-    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+    (x_train, y_train, x_test, y_test) = parse_metadata(**metadata_kwargs)
 
     test_files = [str(x) for x in x_test]
     all_files = x_train + x_test
 
     if recount:
-        count_kmers(k, all_files, database, output_db, kmer_kwargs)
+        count_kmers(all_files, database, **kmer_kwargs)
     else:
         try:
-            temp = get_counts(x_train, output_db name)
+            temp = get_counts(x_train, output_db, name)
         except Exception as e:
             print(e)
             print('KmerCounterWarning: get_counts failed, attempting recount')
-            count_kmers(k, all_files, complete_db, output_db, kmer_kwargs)
+            count_kmers(all_files, database, **kmer_kwargs)
 
-    x_train = get_counts(x_train, output_db name)
-    x_test = get_counts(x_test, output_db name)
+    x_train = get_counts(x_train, output_db, name)
+    x_test = get_counts(x_test, output_db, name)
 
-    feature_names = get_kmer_names(output_db name)
+    feature_names = get_kmer_names(output_db, name)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
@@ -614,7 +614,7 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
     return (output_data, feature_names, test_label, le)
 
 
-def get_kmer_from_json(train, test, database=constants.DB,
+def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
                        recount=False, k=7, L=13, kwargs=None, verbose=True,
                        validate=True):
     """
@@ -666,7 +666,7 @@ def get_kmer_from_json(train, test, database=constants.DB,
     return (output_data, feature_names, test_files, le)
 
 
-def get_kmer_from_directory(train_dir, test_dir, database=constants.DB,
+def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
                             recount=False, k=7, L=13, validate=True,
                             verbose=True):
     """

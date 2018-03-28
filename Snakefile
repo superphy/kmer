@@ -25,7 +25,7 @@ rule run_single: # Run kmerprediction.run.main on the specified input and ouput 
 rule make_us_uk_data_frame:
     input:
         expand('results/US_UK/yaml/{model}_{data}_{split}_{k}_{selection}.yml',
-               model=config['models'],
+               model=config['model'],
                data=['kmer'],
                split=['split', 'mixed'],
                k=config['k_vals'],
@@ -46,7 +46,7 @@ rule plot_us_uk:
 rule make_us_uk_table:
     input:
         expand('results/US_UK/yaml/{model}_{data}_{split}_{k}_{selection}.yml',
-               model=config['selection'],
+               model=config['model'],
                data=['kmer'],
                split=['split', 'mixed'],
                k=config['k_vals'],

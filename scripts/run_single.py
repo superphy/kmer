@@ -30,6 +30,7 @@ try:
     a = get_counts(fasta_files, output_db)
 except Exception as e:
     print(e)
+    print('RunSingleWarning: get_counts failed, attempting recount')
     count_kmers(k, fasta_files, complete_db, output_db)
 
 main(snakemake.input[0], snakemake.output[0], snakemake.input[0])

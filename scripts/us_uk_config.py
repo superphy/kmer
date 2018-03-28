@@ -9,7 +9,7 @@ if not os.path.exists(directory):
 
 base_yaml = {'augment': False,
              'augment_args': {},
-             'data_args': {},
+             'data_args': {'kmer_kwargs': {}},
              'scaler': 'scale_to_range',
              'scaler_args': {'high': 1, 'low': -1},
              'selection': 'f_test_threshold',
