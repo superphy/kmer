@@ -1,0 +1,404 @@
+==> ECI-0008.fasta <==
+>lcl|ECI-8_contigs|NODE_166_length_459_cov_62.151_ID_331
+
+==> ECI-0015.fasta <==
+>lcl|ECI-15_contigs|NODE_133_length_2495_cov_154.314_ID_265
+
+==> ECI-0123.fasta <==
+>lcl|ECI-123_contigs|NODE_886_length_105_cov_24.08_ID_1795
+
+==> ECI-0132.fasta <==
+>lcl|ECI-132_contigs|NODE_119_length_4436_cov_52.5029_ID_237
+
+==> ECI-0217.fasta <==
+>lcl|ECI-217_contigs|NODE_107_length_1621_cov_56.3554_ID_213
+
+==> ECI-0249.fasta <==
+>lcl|ECI-249_contigs|NODE_264_length_397_cov_0.896296_ID_527
+
+==> ECI-0258.fasta <==
+>lcl|ECI-258|NODE_79_length_3924_cov_89.7583_ID_157
+
+==> ECI-0270.fasta <==
+>lcl|ECI-270_contigs|NODE_226_length_464_cov_112.748_ID_451
+
+==> ECI-0272.fasta <==
+>lcl|ECI-0272||ref|EC_71074_|contig00001length=1332numreads=523
+
+==> ECI-0351.fasta <==
+>lcl|ECI-351_contigs|NODE_3_length_356365_cov_22.8055_ID_5
+
+==> ECI-0357.fasta <==
+>lcl|ECI-357_contigs|NODE_280_length_403_cov_0.887681_ID_559
+
+==> ECI-0497.fasta <==
+>lcl|ECI-497|NODE_241_length_259_cov_48.9608_ID_481
+
+==> ECI-0504.fasta <==
+>lcl|ECI-504|NODE_64_length_9345_cov_113.396_ID_127
+
+==> ECI-0715.fasta <==
+>lcl|ECI-715_contigs|NODE_443_length_496_cov_159.522_ID_885
+
+==> ECI-0855.fasta <==
+>lcl|ECI-855_contigs|NODE_248_length_342_cov_49.6279_ID_1283392
+
+==> ECI-0857.fasta <==
+>lcl|ECI-857|NODE_42_length_31184_cov_77.1566_ID_85
+
+==> ECI-0882.fasta <==
+>lcl|ECI-882|NODE_288_length_167_cov_73.25_ID_575
+
+==> ECI-0887.fasta <==
+>lcl|ECI-887_contigs|NODE_73_length_3438_cov_38.1936_ID_145
+
+==> ECI-1146.fasta <==
+>lcl|ECI-1146_contigs|NODE_109_length_1961_cov_60.5382_ID_2432058
+
+==> ECI-1156.fasta <==
+>lcl|ECI-1156_contigs|NODE_76_length_3747_cov_23.2395_ID_151
+
+==> ECI-1364.fasta <==
+>lcl|ECI-1364_contigs|NODE_534_length_229_cov_37.5805_ID_1067
+
+==> ECI-1437.fasta <==
+>lcl|ECI-1437_contigs|NODE_287_length_392_cov_0.920755_ID_573
+
+==> ECI-1618.fasta <==
+>lcl|ECI-1618_contigs|NODE_137_length_1108_cov_29.3894_ID_1766488
+
+==> ECI-1717.fasta <==
+>lcl|ECI-1717|ref|EC_970520contig00001 length=9983   numreads=469
+
+==> ECI-1718.fasta <==
+>lcl|ECI-1718_contigs|NODE_233_length_222_cov_24.4421_ID_1946306
+
+==> ECI-1830.fasta <==
+>lcl|ECI-1830_contigs|NODE_299_length_300_cov_25.902_ID_597
+
+==> ECI-1839.fasta <==
+>lcl|ECI-1839_contigs|NODE_11_length_119793_cov_68.8726_ID_21
+
+==> ECI-1842.fasta <==
+>lcl|FWS_EC_0047|NODE_84_length_1929_cov_9.97049_ID_10989318
+
+==> ECI-1848.fasta <==
+>lcl|ECI-1848_contigs|NODE_77_length_4079_cov_65.0823_ID_153
+
+==> ECI-1853.fasta <==
+>lcl|ECI-1853_contigs|NODE_414_length_248_cov_263.098_ID_827
+
+==> ECI-1854.fasta <==
+>lcl|ECI-1854_contigs|NODE_162_length_1546_cov_114.329_ID_323
+
+==> ECI-1856.fasta <==
+>lcl|ECI-1856_contigs|NODE_336_length_107_cov_30.3077_ID_671
+
+==> ECI-1858.fasta <==
+>lcl|ECI-1858_contigs|NODE_25_length_64617_cov_184.407_ID_49
+
+==> ECI-1862.fasta <==
+>lcl|ECI-1862_contigs|NODE_476_length_106_cov_24.098_ID_959
+
+==> ECI-1864.fasta <==
+>lcl|ECI-1864|NODE_82_length_4334_cov_123.048_ID_163
+
+==> ECI-1871.fasta <==
+>lcl|ECI-1871_contigs|NODE_529_length_99_cov_1.34091_ID_1057
+
+==> ECI-1907.fasta <==
+>lcl|ECI-1907|NODE_139_length_956_cov_78.374_ID_281
+
+==> ECI-1908.fasta <==
+>lcl|ECI-1908|NODE_10_length_168705_cov_70.9456_ID_19
+
+==> ECI-1909.fasta <==
+>lcl|ECI-1909|NODE_337_length_89_cov_117.971_ID_673
+
+==> ECI-1910.fasta <==
+>lcl|ECI-1910|NODE_241_length_241_cov_64.6183_ID_481
+
+==> ECI-1911.fasta <==
+>lcl|ECI-1911|NODE_213_length_505_cov_42.5422_ID_429
+
+==> ECI-1912.fasta <==
+>lcl|ECI-1912|NODE_270_length_153_cov_54.7449_ID_539
+
+==> ECI-1914.fasta <==
+>lcl|ECI-1914|NODE_75_length_3943_cov_171.285_ID_149
+
+==> ECI-2121.fasta <==
+>lcl|ECI-2121_contigs|NODE_80_length_2644_cov_26.6003_ID_159
+
+==> ECI-2223.fasta <==
+>lcl|ECI-2223_contigs|NODE_56_length_8419_cov_7.19814_ID_111
+
+==> ECI-2297.fasta <==
+>lcl|FWS_EC_0006|NODE_185_length_671_cov_16.5315_ID_5517252
+
+==> ECI-2298.fasta <==
+>lcl|FWS_EC_0007|NODE_39_length_43660_cov_4.3783_ID_2118808
+
+==> ECI-2303.fasta <==
+>lcl|FWS_EC_0003|NODE_524_length_318_cov_3.28767_ID_5484098
+
+==> ECI-2306.fasta <==
+>lcl|FWS_EC_0002|NODE_186_length_1070_cov_6.53347_ID_4765872
+
+==> ECI-2307.fasta <==
+>lcl|ECI-2307_contigs|NODE_13_length_113680_cov_31.6005_ID_25
+
+==> ECI-2309.fasta <==
+>lcl|ECI-2309_contigs|NODE_529_length_108_cov_27.4151_ID_1057
+
+==> ECI-2315.fasta <==
+>lcl|ECI-2315_contigs|NODE_688_length_87_cov_23.5312_ID_1375
+
+==> ECI-2324.fasta <==
+>lcl|ECI-2324_contigs|NODE_9_length_160929_cov_21.8753_ID_17
+
+==> ECI-2355.fasta <==
+>lcl|ECI-2355_contigs|NODE_187_length_405_cov_31.8417_ID_373
+
+==> ECI-2358.fasta <==
+>lcl|ECI-2358_contigs|NODE_178_length_540_cov_77.184_ID_355
+
+==> ECI-2359.fasta <==
+>lcl|ECI-2359_contigs|NODE_46_length_14938_cov_11.7016_ID_91
+
+==> ECI-2386.fasta <==
+>lcl|ECI-2386_contigs|NODE_232_length_516_cov_13.7018_ID_463
+
+==> ECI-2403.fasta <==
+>lcl|ECI-2403_contigs|NODE_114_length_1385_cov_12.7854_ID_1155838
+
+==> ECI-2570.fasta <==
+>lcl|FWS_EC_0033|NODE_25_length_80216_cov_11.5727_ID_10458500
+
+==> ECI-2571.fasta <==
+>lcl|ECI_2571_Sorted_contigs|ECI_2571-Contig_1 length=151478
+
+==> ECI-2572.fasta <==
+>lcl|ECI-2572_contigs|NODE_288_length_452_cov_160.516_ID_575
+
+==> ECI-2573.fasta <==
+>lcl|FWS_EC_0034|NODE_247_length_251_cov_2.15132_ID_8798032
+
+==> ECI-2577.fasta <==
+>lcl|ECI-2577_contigs|NODE_159_length_1327_cov_84.261_ID_317
+
+==> ECI-2578.fasta <==
+>lcl|ECI-2578_contigs|NODE_315_length_56_cov_100_ID_629
+
+==> ECI-2579.fasta <==
+>lcl|ECI-2579_contigs|NODE_224_length_704_cov_99.4453_ID_447
+
+==> ECI-2580.fasta <==
+>lcl|FWS_EC_0037|NODE_80_length_5469_cov_27.6093_ID_13467424
+
+==> ECI-2583.fasta <==
+>lcl|FWS_EC_0040|NODE_98_length_4590_cov_18.7936_ID_13030246
+
+==> ECI-2585.fasta <==
+>lcl|ECI-2585_contigs|NODE_594_length_106_cov_14.549_ID_1203
+
+==> ECI-2586.fasta <==
+>lcl|FWS_EC_0041|NODE_21_length_74686_cov_9.37721_ID_11816248
+
+==> ECI-2587.fasta <==
+>lcl|FWS_EC_0042|NODE_82_length_8054_cov_6.35173_ID_9683658
+
+==> ECI-2588.fasta <==
+>lcl|FWS_EC_0043|NODE_91_length_3890_cov_11.0926_ID_9780700
+
+==> ECI-2591.fasta <==
+>lcl|ECI-2591_contigs|NODE_248_length_713_cov_160.447_ID_495
+
+==> ECI-2592.fasta <==
+>lcl|ECI-2592_contigs|NODE_241_length_804_cov_2.22029_ID_481
+
+==> ECI-2593.fasta <==
+>lcl|FWS_EC_0049|NODE_152_length_1222_cov_136.181_ID_12160730
+
+==> ECI-2595.fasta <==
+>lcl|ECI-2595_contigs|NODE_1021_length_56_cov_592_ID_2041
+
+==> ECI-2597.fasta <==
+>lcl|ECI-2597_contigs|NODE_465_length_107_cov_11.2692_ID_933
+
+==> ECI-2599.fasta <==
+>lcl|ECI-2599_contigs|NODE_87_length_758_cov_0.500792_ID_173
+
+==> ECI-2600.fasta <==
+>lcl|ECI-2600_contigs|NODE_103_length_1297_cov_32.1433_ID_207
+
+==> ECI-2601.fasta <==
+>lcl|FWS_EC_0010|NODE_123_length_393_cov_17.1905_ID_14021576
+
+==> ECI-2602.fasta <==
+>lcl|ECI-2602_contigs|NODE_93_length_2359_cov_51.1062_ID_185
+
+==> ECI-2603.fasta <==
+>lcl|ECI-2603_contigs|NODE_829_length_1643_cov_6.91562_ID_1663
+
+==> ECI-2604.fasta <==
+>lcl|ECI-2604_contigs|NODE_1408_length_263_cov_2.88942_ID_2815
+
+==> ECI-2605.fasta <==
+>lcl|ECI-2605_contigs|NODE_140_length_8844_cov_7.04881_ID_287
+
+==> ECI-2606.fasta <==
+>lcl|ECI-2606_contigs|NODE_1325_length_281_cov_3.42035_ID_2651
+
+==> ECI-2607.fasta <==
+>lcl|ECI-2607_contigs|NODE_283_length_4314_cov_15.3442_ID_423
+
+==> ECI-2608.fasta <==
+>lcl|ECI-2608_contigs|NODE_587_length_2017_cov_8.11213_ID_1177
+
+==> ECI-2609.fasta <==
+>lcl|ECI-2609_contigs|NODE_427_length_1910_cov_12.1019_ID_857
+
+==> ECI-2610.fasta <==
+>lcl|FWS_EC_0045|NODE_119_length_6009_cov_11.4019_ID_9185914
+
+==> ECI-2611.fasta <==
+>lcl|FWS_EC_0046|NODE_138_length_3874_cov_14.1584_ID_10188576
+
+==> ECI-2614.fasta <==
+>lcl|FWS_EC_0048|NODE_14_length_113852_cov_8.93936_ID_8675086
+
+==> ECI-2615.fasta <==
+>lcl|ECI-2615_contigs|NODE_1999_length_431_cov_3.4867_ID_4005
+
+==> ECI-2616.fasta <==
+>lcl|ECI-2616_contigs|NODE_1759_length_784_cov_2.32647_ID_3517
+
+==> ECI-2617.fasta <==
+>lcl|ECI-2617_contigs|NODE_3893_length_306_cov_1.94821_ID_7787
+
+==> ECI-2618.fasta <==
+>lcl|ECI-2618_contigs|NODE_3786_length_246_cov_2.03141_ID_7573
+
+==> ECI-2619.fasta <==
+>lcl|FWS_EC_0022|NODE_291_length_321_cov_0.779279_ID_3649894
+
+==> ECI-2622.fasta <==
+>lcl|FWS_EC_0024|NODE_165_length_2447_cov_6.30579_ID_3174930
+
+==> ECI-2626.fasta <==
+>lcl|ECI-2626_contigs|NODE_1277_length_101_cov_44.5652_ID_2561
+
+==> ECI-2627.fasta <==
+>lcl|FWS_EC_0029|NODE_73_length_15933_cov_14.3722_ID_13303044
+
+==> ECI-2628.fasta <==
+>lcl|FWS_EC_0030|NODE_185_length_284_cov_5.96216_ID_10682898
+
+==> ECI-2629.fasta <==
+>lcl|FWS_EC_0031|NODE_178_length_461_cov_27.721_ID_10905810
+
+==> ECI-2630.fasta <==
+>lcl|FWS_EC_0032|NODE_24_length_72810_cov_9.2834_ID_10329190
+
+==> ECI-2632.fasta <==
+>lcl|ECI-2632_contigs|NODE_123_length_2590_cov_23.071_ID_245
+
+==> ECI-2633.fasta <==
+>lcl|FWS_EC_0025|NODE_243_length_261_cov_9.59877_ID_2044050
+
+==> ECI-2634.fasta <==
+>lcl|ECI-2634_contigs|NODE_587_length_110_cov_141.927_ID_1173
+
+==> ECI-2637.fasta <==
+>lcl|ECI-2637_contigs|NODE_460_length_299_cov_14.1475_ID_919
+
+==> ECI-2638.fasta <==
+>lcl|ECI-2638_contigs|NODE_316_length_397_cov_389.822_ID_631
+
+==> ECI-2639.fasta <==
+>lcl|FWS_EC_0027|NODE_231_length_1106_cov_3.4717_ID_3881458
+
+==> ECI-2640.fasta <==
+>lcl|ECI-2640_contigs|NODE_69_length_16281_cov_71.2903_ID_139
+
+==> ECI-2642.fasta <==
+>lcl|ECI-2642_contigs|NODE_418_length_669_cov_15.3925_ID_835
+
+==> ECI-2644.fasta <==
+>lcl|ECI-2644_contigs|NODE_60_length_2528_cov_16.0308_ID_119
+
+==> ECI-2681.fasta <==
+>lcl|ECI-2681_contigs|NODE_172_length_392_cov_0.928302_ID_343
+
+==> ECI-2688.fasta <==
+>lcl|ECI-2688|FWS_EC_0530_1 length_500488_cov_25.5262
+
+==> ECI-2699.fasta <==
+>lcl|ECI-2699_contigs|NODE_200_length_1855_cov_29.9511_ID_399
+
+==> ECI-2701.fasta <==
+>lcl|ECI-2701_contigs|NODE_958_length_103_cov_74.7083_ID_1915
+
+==> ECI-2754.fasta <==
+>lcl|ECI-2754|FWS_EC_0556_1 length_296800_cov_34.2591
+
+==> ECI-2795.fasta <==
+>lcl|ECI-2795|FWS_EC_0563_1 length_260423_cov_47.2284
+
+==> ECI-2836.fasta <==
+>lcl|ECI-2836_contigs|NODE_36_length_26402_cov_13.8894_ID_71
+
+==> ECI-2856.fasta <==
+>lcl|ECI-2856_contigs|NODE_32_length_50579_cov_17.5746_ID_63
+
+==> ECI-2859.fasta <==
+>lcl|ECI-2859_contigs|NODE_1_length_792398_cov_12.2708_ID_1
+
+==> ECI-2895.fasta <==
+>lcl|ECI-2895|FWS_EC_0589_1 length_483709_cov_43.9738
+
+==> ECI-2969.fasta <==
+>lcl|ECI-2969|FWS_EC_0608_1 length_413762_cov_20.7029
+
+==> ECI-2978.fasta <==
+>lcl|ECI-2978_contigs|NODE_107_length_2369_cov_18.5214_ID_213
+
+==> ECI-2979.fasta <==
+>lcl|ECI-2979|NODE_117_length_1503_cov_40.0211_ID_1689192
+
+==> ECI-2980.fasta <==
+>lcl|ECI-2980_contigs|NODE_175_length_869_cov_63.4717_ID_349
+
+==> ECI-2995.fasta <==
+>lcl|ECI-2995|FWS_EC_0615_1 length_712105_cov_44.1852
+
+==> ECI-3004.fasta <==
+>lcl|ECI-3004_contigs|NODE_62_length_7544_cov_21.3967_ID_123
+
+==> ECI-3005.fasta <==
+>lcl|ECI-3005_contigs|NODE_178_length_709_cov_23.3643_ID_355
+
+==> ECI-3006.fasta <==
+>lcl|ECI-3006_contigs|NODE_314_length_227_cov_33.13_ID_627
+
+==> ECI-3033.fasta <==
+>lcl|ECI-3033_contigs|NODE_221_length_532_cov_16.1383_ID_441
+
+==> ECI-3034.fasta <==
+>lcl|ECI-3034_contigs|NODE_234_length_513_cov_121.259_ID_467
+
+==> ECI-3035.fasta <==
+>lcl|ECI-3035_contigs|NODE_154_length_1077_cov_25.8884_ID_2361498
+
+==> ECI-3065.fasta <==
+>lcl|ECI-3065_contigs|NODE_338_length_411_cov_0.855634_ID_284470
+
+==> EDL933.fasta <==
+>lcl|EDL933|gi|56384585|gb|AE005174.2| Escherichia coli O157:H7 EDL933, complete genome
+
+==> ON-2011.fasta <==
+>lcl|ON-2011|scaffold00001
+
+==> Sakai.fasta <==
+>lcl|Sakai|gi|4589704|dbj|AB011548.2| Escherichia coli O157:H7 str. Sakai plasmid pOSAK1 DNA, complete sequence
