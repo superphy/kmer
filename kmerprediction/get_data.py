@@ -30,8 +30,8 @@ import pandas as pd
 from kmerprediction import constants
 
 
-def get_kmer(kwargs=None, directory='./', recount=False, k=7, L=13,
-             validate=True, verbose=True):
+def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
+             database=constants.DEFAULT_DB, validate=True, verbose=True):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
     utils.parse_metadata
@@ -53,28 +53,39 @@ def get_kmer(kwargs=None, directory='./', recount=False, k=7, L=13,
                 LabelEncoder
     """
 
-    kwargs = kwargs or {}
-    kwargs['validate'] = validate
+    metadata_kwargs = metadata_kwargs or {}
+    metadata_kwargs['validate'] = validate
+    kmer_kwargs = kmer_kwargs or {}
+    kmer_kwargs['verbose'] = verbose
+
+    if 'name' in kmer_kwargs:
+        name = kmer_kwargs['name']
+    else:
+        name = constants.DEFAULT_NAME
+    if 'output_db' in kmer_kwargs:
+        output_db = kmer_kwargs['output_db']
+    else:
+        output_db = database
 
     (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
 
     test_files = [str(x) for x in x_test]
+    all_files = x_train + x_test
 
     if recount:
-        count_kmers(k, x_train + x_test, directory, verbose)
+        count_kmers(k, all_files, database, output_db, kmer_kwargs)
     else:
         try:
-            train = get_counts(k, x_train, directory)
-        except:
-            count_kmers(k, x_train + x_test, directory, verbose)
+            temp = get_counts(x_train, output_db name)
+        except Exception as e:
+            print(e)
+            print('KmerCounterWarning: get_counts failed, attempting recount')
+            count_kmers(k, all_files, complete_db, output_db, kmer_kwargs)
 
-    x_train = get_counts(k, list(x_train), directory)
-    x_train = np.asarray(x_train, dtype='float64')
+    x_train = get_counts(x_train, output_db name)
+    x_test = get_counts(x_test, output_db name)
 
-    x_test = get_counts(k, list(x_test), directory)
-    x_test = np.asarray(x_test, dtype='float64')
-
-    feature_names = get_kmer_names(k, directory)
+    feature_names = get_kmer_names(output_db name)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
@@ -130,8 +141,8 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
     return (output_data, feature_names, test_label, le)
 
 
-def get_kmer_us_uk_split(directory='./', recount=False, k=7, L=13,
-                         validate=True, verbose=True):
+def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
+                         recount=False, validate=True, verbose=True):
     """
     Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -150,15 +161,16 @@ def get_kmer_us_uk_split(directory='./', recount=False, k=7, L=13,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    kwargs = {'prefix': constants.ECOLI,
-              'suffix': '.fasta',
-              'validate': True}
-    return get_kmer(kwargs, directory, recount, k, L, validate=True,
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'validate': validate}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
                     verbose=verbose)
 
 
-def get_kmer_us_uk_mixed(directory='./', recount=False, k=7, L=13,
-                         validate=True, verbose=True):
+def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
+                         recount=False, validate=True, verbose=True):
     """
     Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -177,16 +189,18 @@ def get_kmer_us_uk_mixed(directory='./', recount=False, k=7, L=13,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    kwargs = {'prefix': constants.ECOLI,
-              'suffix': '.fasta',
-              'train_header': None,
-              'validate': True}
-    return get_kmer(kwargs, directory, recount, k, L, validate=True,
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'train_header': None,
+                       'validate': validate}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
                     verbose=verbose)
 
 
-def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
-                        recount=False, k=7, L=13, validate=True, verbose=True):
+def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
+                        database=constants.DEFAULT_DB, recount=False,
+                        validate=True, verbose=True):
     """
     Wraps get_kmer to get salmonella amr data.
 
@@ -205,16 +219,17 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    kwargs = {'metadata': constants.SALMONELLA_METADATA,
-              'fasta_header': 'Fasta',
-              'label_header': 'AMR',
-              'train_header': None,
-              'extra_header': 'Antibiotic',
-              'extra_label': antibiotic,
-              'prefix': constants.SALMONELLA,
-              'suffix': '.fna',
-              'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True,
+    metadata_kwargs = {'metadata': constants.SALMONELLA_METADATA,
+                       'fasta_header': 'Fasta',
+                       'label_header': 'AMR',
+                       'train_header': None,
+                       'extra_header': 'Antibiotic',
+                       'extra_label': antibiotic,
+                       'prefix': constants.SALMONELLA,
+                       'suffix': '.fna',
+                       'validate': True}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
                     verbose=verbose)
 
 

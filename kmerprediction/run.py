@@ -27,7 +27,7 @@ def run(model=models.support_vector_machine, model_args=None,
         data_method=get_data.get_kmer_us_uk_split, data_args=None,
         scaler=do_nothing, scaler_args=None, selection=do_nothing,
         selection_args=None, augment=do_nothing, augment_args=None,
-        validate=False, reps=10, collect_features=True):
+        validate=False, reps=10, collect_features=True, verbose=False):
     """
     Chains a data gathering method, data preprocessing methods, and a machine
     learning model together. Stores the settings for all the methods and the
