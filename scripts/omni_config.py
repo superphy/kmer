@@ -30,7 +30,7 @@ base_yaml = {'augment': False,
              },
              'model': 'neural_network',
              'model_args': {},
-             'reps': constants.DEFAULT_REPITITIONS,
+             'reps': snakemake.config['reps'],
              'validate': True
             }
 

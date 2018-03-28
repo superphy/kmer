@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from kmerprediction import constants
 
-num_rows = constants.DEFAULT_REPITITIONS * len(snakemake.input)
+num_rows = snakemake.config['reps'] * len(snakemake.input)
 output_df = pd.DataFrame(columns=['Model Type', 'Data Type',
                                   'Prediction', 'Accuracy'],
                          index=np.arange(num_rows))

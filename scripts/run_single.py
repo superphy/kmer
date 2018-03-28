@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from kmerprediction import constants
 from kmerprediction.run import main
-from kmerprediction.kmer_counter5 import count_kmers, get_counts
+from kmerprediction.complete_kmer_counter import count_kmers, get_counts
 from kmerprediction.utils import parse_metadata
 
 if snakemake.wildcards.dir == 'US_UK':
@@ -27,9 +27,9 @@ name = snakemake.input[0].split('/')[-1].split('_')
 k = int(name[-2])
 
 try:
-    a = get_counts(k, fasta_files, constants.OUTPUT_DIR)
+    a = get_counts(fasta_files, output_db)
 except Exception as e:
     print(e)
-    count_kmers(k, fasta_files, constants.OUTPUT_DIR, True)
+    count_kmers(k, fasta_files, complete_db, output_db)
 
 main(snakemake.input[0], snakemake.output[0], snakemake.input[0])

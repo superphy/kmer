@@ -1,2 +1,4 @@
-k_vals: [31]
-N_vals: ['kbest', 'pthreshold']
+k_vals: [7, 15, 31]
+models: ['neural_network', 'support_vector_machine', 'random_forest']
+selection: ['pthreshold', 'kbest']
+reps: 10
