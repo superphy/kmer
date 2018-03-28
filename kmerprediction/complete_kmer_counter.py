@@ -78,9 +78,10 @@ def make_db_keys(input_files):
     return output
 
 
-def count_kmers(k, fasta_files, database, verbose, output_db=None,
-                min_global_count=0, max_global_count=None, min_file_count=0,
-                max_file_count=None, output_name='results'):
+def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
+                output_db=None, min_global_count=0, max_global_count=None,
+                min_file_count=0, max_file_count=None,
+                name=constants.DEFAULT_NAME):
     """
     Args:
         k (int):                The length of k-mer to count.
@@ -100,7 +101,7 @@ def count_kmers(k, fasta_files, database, verbose, output_db=None,
                                 must appear in inorder to be output.
         max_file_count (int):   The maximum number of fasta files that a kmer
                                 can appear in inorder to be outoput.
-        output_name (str):      The name for the key whose value will contain
+        name (str):             The name for the key whose value will contain
                                 the complete output for a fasta file. User can
                                 specify so that multiple filter results can be
                                 stored in one DB.
@@ -189,13 +190,15 @@ def count_kmers(k, fasta_files, database, verbose, output_db=None,
 
     valid_kmer_array = np.asarray(valid_kmers, dtype=str)
     with output_env.begin(write=True) as txn:
-        txn.put(output_name.encode(), valid_kmer_array.tostring())
+        txn.put(name.encode(), valid_kmer_array.tostring())
 
     # Add all valid kmers to the output DB
     threads = []
-    for f in files:
-        args = [f, valid_kmers, output_env, output_name, verbose]
-        threads.append(Thread(target=make_output, args=args))
+    for k in db_keys:
+        with output_env.begin(write=False) as txn:
+            if not txn.get(k.encode(), default=False):
+                args = [k, valid_kmers, output_env, name, verbose]
+                threads.append(Thread(target=make_output, args=args))
     for t in threads:
         t.start()
     for t in threads:
@@ -206,7 +209,7 @@ def count_kmers(k, fasta_files, database, verbose, output_db=None,
     env.close()
 
 
-def get_counts(files, database, name='results'):
+def get_counts(files, database, name=constants.DEFAULT_NAME):
     db_keys = make_db_keys(files)
 
     if not os.path.exists(database):
@@ -241,7 +244,7 @@ def get_counts(files, database, name='results'):
     return output
 
 
-def get_kmer_names(database, name='results'):
+def get_kmer_names(database, name=constants.DEAULT_NAME):
     env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
     with env.begin(write=False) as txn:
         output = txn.get(name.encode())
