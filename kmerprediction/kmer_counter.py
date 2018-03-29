@@ -14,7 +14,7 @@ import sys
 import os
 import lmdb
 import numpy as np
-
+from kmerprediction import constants
 
 def start(filename, k, limit, env, txn, data):
     """
@@ -282,7 +282,8 @@ def add_to_database(files, k, env, txn, verbose):
     print_status(counter, total, verbose)
 
 
-def count_kmers(k, limit, files, database, verbose):
+def count_kmers(files, database, k=constants.DEFAULT_K,
+                limit=constants.DEFAULT_LIMIT, verbose=True):
     """
     Counts all kmers of length "k" in the fasta files "files", removing any
     that appear fewer than "limit" times. Stores the output in a lmdb database
@@ -308,7 +309,7 @@ def count_kmers(k, limit, files, database, verbose):
     env.close()
 
 
-def get_counts(files, database):
+def get_counts(files, database, name=None):
     """
     Returns (as an array) the kmer counts of each fasta file in "files"
     contained in the lmdb database named "database". The length and lower limit
@@ -320,6 +321,7 @@ def get_counts(files, database):
                            retrieve. The kmer counts must already have been
                            calculated using count_kmers.
         database (str):    The databse where the kmer counts are stored.
+        name:              Not used, here for compatability.
 
     Returns:
         list(list): The kmer counts for each genome in files.
@@ -347,13 +349,14 @@ def get_counts(files, database):
     return output
 
 
-def get_kmer_names(database):
+def get_kmer_names(database, name=None):
     """
     Returns (as a numpy 1D array) every key in the databse, this should be an
     alphabetical list of all the kmers in the database.
 
     Args:
         database (str): The name of the database to get the keys from.
+        name:           Not used, here for compatability.
 
     Returns:
         list(str): Every kmer in the database sorted alphabetically.
