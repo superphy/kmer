@@ -20,8 +20,8 @@ base_yaml = {'augment': False,
 
 models = ['support_vector_machine', 'random_forest', 'neural_network']
 data_methods = ['get_kmer_us_uk_split', 'get_kmer_us_uk_mixed']
-selection_methods = [('kbest', 'select_k_best', {'threshold': 0.2}),
-                     ('pthreshold', 'f_test_threshold', {'score_func': 'f_classif', 'k': 270})]
+selection_methods = [('kbest', 'select_k_best', {'score_func': 'f_classif', 'k': 270}),
+                     ('pthreshold', 'f_test_threshold', {'threshold': 0.2})]
 
 base_path = '/home/rylan/miniconda3/envs/kmer/lib/python3.6/site-packages/kmerprediction/kmer_data/'
 complete_dbs = {7: base_path + 'complete_7-mer_DB/',
