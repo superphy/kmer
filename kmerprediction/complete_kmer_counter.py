@@ -8,12 +8,13 @@ from threading import Thread
 import tempfile
 import shutil
 from kmerprediction import constants
+import logging
 
 class KmerCounterError(Exception):
     """Raise for errors in kmer_counter module"""
 
 
-def count_file(input_file, output_file, k, verbose):
+def count_file(input_file, output_file, k):
     handle, temp_file = tempfile.mkstemp()
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
             '-C', str(input_file), '-o', str(temp_file)]
@@ -25,11 +26,32 @@ def count_file(input_file, output_file, k, verbose):
     p.communicate()
 
     os.remove(temp_file)
-    if verbose:
-        print('Counted kmers for {}'.format(input_file))
+    logging.info('Counted kmers for {}'.format(input_file))
 
 
-def add_file(input_file, key, env, global_counts, file_counts, verbose):
+def count_all(fasta_files, temp_files, db_keys, k, env, force):
+    logging.info('Begin Counting kmers')
+    threads = []
+    recounts = []
+    if force:
+        logging.info('Force set to True, recounting all genomes')
+    for i, v in enumerate(fasta_files):
+        with env.begin(write=False) as txn:
+            if force or not txn.get(db_keys[i].encode(), default=False):
+                args = [v, temp_files[i], k]
+                threads.append(Thread(target=count_file, args=args))
+                recounts.append(db_keys[i])
+    if not force:
+        logging.info('Force set to False, Recounting {}'.format(recounts))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    logging.info('Done counting kmers')
+    return recounts
+
+
+def add_file(input_file, key, env, global_counts, file_counts):
     current = env.open_db(key.encode())
     with env.begin(write=True, db=current) as txn:
         with open(input_file, 'r') as f:
@@ -39,36 +61,126 @@ def add_file(input_file, key, env, global_counts, file_counts, verbose):
                 txn.put(kmer, count, db=current)
 
                 curr_global_count = txn.get(kmer, default=0, db=global_counts)
-                new_global_count = str(int(curr_global_count) + int (count)).encode()
+                new_global_count = str(int(curr_global_count) + int(count)).encode()
                 txn.put(kmer, new_global_count, db=global_counts)
 
                 curr_file_count = txn.get(kmer, default=0, db=file_counts)
                 new_file_count = str(1 + int(curr_file_count)).encode()
                 txn.put(kmer, new_file_count, db=file_counts)
-    if verbose:
-        print('Added {} to DB'.format(key))
+    logging.info('Added {} to DB'.format(key))
 
 
-def backfill_file(db_key, env, global_counts, verbose):
+def add_all(temp_files, db_keys, env, force, recounts):
+    logging.info('Begin adding genomes to database')
+    threads = []
+    if force:
+        logging.info('Force set to True, adding all genomes to database')
+    for i, f in enumerate(temp_files):
+        with env.begin(write=False) as txn:
+            if force or not txn.get(db_keys[i].encode(), default=False) or db_keys[i] in recounts:
+                args = [f, db_keys[i], env, global_counts, file_counts]
+                threads.append(Thread(target=add_file, args=args))
+                if db_keys[i] not in recounts:
+                    recounts.append(db_keys[i])
+    if not force:
+        logging.info('Force set to False, Adding {} to the DB'.format(recounts))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    logging.info('Done adding genomes to database')
+    return recounts
+
+
+def backfill_file(db_key, env, global_counts):
     current = env.open_db(db_key.encode())
     with env.begin(write=True, db=current) as txn:
         with txn.cursor(db=global_counts) as cursor:
             for key, value in cursor:
                 if not txn.get(key, default=False, db=current):
                     txn.put(key, '0'.encode(), db=current)
-    if verbose:
-        print('Backfilled {}'.format(db_key))
+    logging.info('Backfilled {}'.format(db_key))
 
 
-def make_output(key, valid_kmers, env, name, verbose):
-    db = env.open_db(key.encode())
-    with env.begin(write=True, db=db) as txn:
-        output = np.zeros(len(valid_kmers), dtype=int)
+def backfill_all(db_keys, global_counts, file_counts, env, force, recounts):
+    logging.info('Begin backfilling genomes')
+    threads = []
+    if force:
+        logging.info('Force set to True, backfilling all genomes')
+    for k in db_keys:
+        curr_db = env.open_db(k.encode())
+        with env.begin(write=False, db=curr_db) as txn:
+            curr_kmers = txn.stat()['entries']
+        if force or curr_kmers < total_kmers or k in recounts:
+            args = [k, env, global_counts]
+            threads.append(Thread(target=backfill_file, args=args))
+            if k not in recounts:
+                recounts.append(k)
+    if not force:
+        logging.info('Force set to False, Backfilling {}'.format(recounts))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    logging.info('Done backfilling genomes')
+    return bool(recounts)
+
+
+def filter_kmers(global_counts, file_counts, env, max_global_count,
+                 min_global_count, max_file_count, min_file_count):
+    global_kmers = []
+    valid_kmers = []
+    with env.begin(write=False, db=global_counts) as global_txn:
+        with global_txn.cursor() as global_cursor:
+            for key, global_value in global_cursor:
+                global_value = int(global_value)
+                if max_global_count:
+                    if global_value <= max_global_count and global_value >= min_global_count:
+                        valid_kmers.append(key)
+                else:
+                    if global_value >= min_global_count:
+                        valid_kmers.append(key)
+    with env.begin(write=False, db=file_counts) as file_txn:
+        for kmer in global_kmers:
+            file_value = file_txn.get(kmer)
+            if int(file_value) <= max_file_count and int(file_value) >= min_file_count:
+                valid_kmers.append(kmer)
+
+    return valid_kmers
+
+
+def output_file(key, valid_kmers, input_env, output_env, name):
+    db = input_env.open_db(key.encode())
+    output = np.zeros(len(valid_kmers), dtype=int)
+    with input_env.begin(write=False, db=db) as txn:
         for index, kmer in enumerate(valid_kmers):
-            output[index] = int(txn.get(kmer, default=0, db=db))
+            output[index] = int(txn.get(kmer, db=db))
+    db = output_env.open_db(key.encode())
+    with output_env.begin(write=True, db=db) as txn:
         txn.put(name.encode(), output.tostring(), db=db)
-    if verbose:
-        print('Made output key for {}'.format(db_key))
+    logging.info('Made output key for {}'.format(key))
+
+
+def output_all(db_keys, valid_kmers, env, output_env, name, force, recounts):
+    logging.info('Begin making output')
+    threads = []
+    if force:
+        logging.info('Force set to True, creating all outputs')
+    for k in db_keys:
+        curr_db = env.open_db(k)
+        with env.begin(write=False, db=curr_db) as txn:
+            if force or not txn.get(k, default=False, db=curr_db) or k in recounts:
+                args = [k, valid_kmers, env, output_env, name]
+                threads.append(Thread(target=output_file, args=args))
+                if k not in recounts:
+                    k.append(recounts)
+    if not force:
+        logging.info('Force set to False, creating outputs for {}'.format(recounts))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    logging.info('Done making output')
 
 
 def make_db_keys(input_files):
@@ -108,105 +220,44 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
     Returns:
         None
     """
-    max_file_count = max_file_count or len(fasta_files)
-    max_global_count = max_global_count or (4**k)
+    logging.info('Begin complete_kmer_counter.count_kmers')
+    max_file_count = max_file_count or len(fasta_files) + 1
 
     db_keys = make_db_keys(fasta_files)
     temp_dir = tempfile.mkdtemp()
     temp_files = [temp_dir + '/' + x for x in db_keys]
 
-    env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
+    env = lmdb.open(database, map_size=160e10, max_dbs=4000, max_readers=1e7)
     global_counts = env.open_db('global_counts'.encode())
     file_counts = env.open_db('file_counts'.encode())
 
-    # Count kmers of length k for each file in fasta_files
-    # Store results in coresponding file in temp_files
-    threads = []
-    for i, v in enumerate(fasta_files):
-        with env.begin(write=False) as txn:
-            if not txn.get(db_keys[i].encode(), default=False):
-                args = [v, temp_files[i], k, verbose]
-                threads.append(Thread(target=count_file, args=args))
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    recounts = count_all(fasta_files, temp_files, db_keys, k, env, force)
 
-    # Add kmer counts from each csv file to DB
-    # Don't add kmer counts if the db_key corresponding to the csv_file 
-    # already exists as a named database in the DB
-    threads = []
-    for i, f in enumerate(temp_files):
-        with env.begin(write=False) as txn:
-            if not txn.get(db_keys[i].encode(), default=False):
-                args = [f, db_keys[i], env, global_counts, file_counts, verbose]
-                threads.append(Thread(target=add_file, args=args))
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    recounts = add_all(temp_files, db_keys, env, force, recounts)
 
     with env.begin(write=False, db=global_counts) as txn:
         total_kmers = txn.stat()['entries']
 
-    # Backfill missing kmers in DB
-    # For each db_key add a count of 0 for each kmer that exists in the DB
-    # but not in the current genome.
-    # Don't backfill a file if it already has equal number of keys as total
-    # kmers in the DB
-    threads = []
-    for k in db_keys:
-        curr_db = env.open_db(k.encode())
-        with env.begin(write=False, db=curr_db) as txn:
-            curr_kmers = txn.stat()['entries']
-        if curr_kmers < total_kmers:
-            args = [k, env, global_counts, verbose]
-            threads.append(Thread(target=backfill_file, args=args))
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    recounts = backfill_all(db_keys, global_counts, file_counts, env, force, recounts)
 
     if output_db:
-        output_env = lmdb.open(output_db, map_size=160e10, max_dbs=4000)
+        output_env = lmdb.open(output_db, map_size=160e10, max_dbs=4000, max_readers=1e7)
     else:
         output_env = env
 
-    # Ensure that only kmers whose file/global counts are within the given
-    # min/max range are added to the output db
-    global_counts = env.open_db('gloabl_counts'.encode())
-    file_counts = env.open_db('file_counts'.encode())
-    valid_kmers = []
-    with env.begin(write=False, db=global_counts) as global_txn:
-        with global_txn.cursor() as global_cursor:
-            for key, global_value in global_cursor:
-                if global_value <= max_global_count and global_value >= min_global_count:
-                    valid_kmers.append(key)
-    with env.begin(write=False, db=file_counts) as file_txn:
-        for index, key in enumerate(valid_kmers):
-            file_value = file_txn.get(key)
-            if not (file_value <= max_file_count and file_value >= min_file_count):
-                valid_kmers.pop(index)
+    valid_kmers = filter_kmers(global_counts, file_counts, env, max_global_count,
+                               min_global_count, max_file_count, min_file_count)
 
-    valid_kmer_array = np.asarray(valid_kmers, dtype=str)
+    valid_kmer_array = np.asarray(valid_kmers, dtype='<U8')
     with output_env.begin(write=True) as txn:
         txn.put(name.encode(), valid_kmer_array.tostring())
 
-    # Add all valid kmers to the output DB
-    threads = []
-    for k in db_keys:
-        with output_env.begin(write=False) as txn:
-            if not txn.get(k.encode(), default=False):
-                args = [k, valid_kmers, output_env, name, verbose]
-                threads.append(Thread(target=make_output, args=args))
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    output_all(db_keys, valid_kmers, env, output_env, name, force, recounts)
 
     shutil.rmtree(temp_dir)
 
     env.close()
+    logging.info('Done complete_kmer_counter.count_kmers')
 
 
 def get_counts(files, database, name=constants.DEFAULT_NAME):
@@ -216,7 +267,7 @@ def get_counts(files, database, name=constants.DEFAULT_NAME):
         msg = 'Attempted to get counts from an uncreated database: {}'.format(database)
         raise(KmerCounterError(msg))
 
-    env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
+    env = lmdb.open(database, map_size=160e10, max_dbs=4000, max_readers=1e7)
     with env.begin(write=False) as txn:
         arrays = []
         for index, value in enumerate(db_keys):
@@ -225,17 +276,20 @@ def get_counts(files, database, name=constants.DEFAULT_NAME):
                 current = env.open_db(value.encode(), txn=txn, create=False)
             except Exception as e:
                 print(e)
+                logging.warning(e)
                 msg = 'Attempted to get counts for potentially uncounted genome:'
                 msg += ' {} in DB: {}'.format(value, database)
+                logging.warning(msg)
                 raise(KmerCounterError(msg))
 
-            results = txn.get(name.encode(), db=current)
+            results = txn.get(name.encode(), default=None, db=current)
             if results is None:
                 msg = 'Attempted to get counts for potentially invalid filter method:'
                 msg += ' {} for genome: {} in DB: {}'.format(name, value, database)
+                logging.warning(msg)
                 raise(KmerCounterError(msg))
 
-            results = np.fromstring(results, dtype='float64')
+            results = np.fromstring(results, dtype='int')
             arrays.append(results)
         output = np.vstack(arrays)
     env.close()
@@ -243,10 +297,10 @@ def get_counts(files, database, name=constants.DEFAULT_NAME):
 
 
 def get_kmer_names(database, name=constants.DEFAULT_NAME):
-    env = lmdb.open(database, map_size=int(160e10), max_dbs=4000)
+    env = lmdb.open(database, map_size=160e10, max_dbs=4000, max_readers=1e7)
     with env.begin(write=False) as txn:
         output = txn.get(name.encode())
     env.close()
-    return np.fromstring(output, dtype=str)
+    return np.fromstring(output, dtype='<U8')
 
 
