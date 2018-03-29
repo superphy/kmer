@@ -18,9 +18,11 @@ from kmerprediction import get_data
 from kmerprediction import feature_scaling
 from kmerprediction import feature_selection
 from kmerprediction import data_augmentation
+from kmerprediction import constants
 import numpy as np
 import yaml
 from kmerprediction.utils import do_nothing
+import logging
 
 
 def run(model=models.support_vector_machine, model_args=None,
@@ -85,19 +87,19 @@ def run(model=models.support_vector_machine, model_args=None,
     model_args['validate'] = validate
 
     feature_importances = []
-    num_features_before_selection = []
-    num_features_after_selection = []
+    num_features_before_selection = np.zeros(reps, dtype=int)
+    num_features_after_selection = np.zeros(reps, dtype=int)
     for i in range(reps):
         start = time.time()
         # Get input data
         data, features, files, le = data_method(**data_args)
-        num_features_before_selection.append(data[0].shape[1])
+        num_features_before_selection[i] = data[0].shape[1]
 
         # Perform feature selection on input_data
         selection_args['feature_names'] = features
         data, features = selection(data, **selection_args)
         selection_args.pop('feature_names', None)
-        num_feature_after_selection.append(data[0].shape[1])
+        num_features_after_selection[i] = data[0].shape[1]
 
         # Scale input data
         data = scaler(data, **scaler_args)
@@ -261,6 +263,23 @@ def create_arg_parser():
     return parser.parse_args()
 
 
+def set_up_logging(verbose):
+    ch = logging.StreamHandler(sys.stdout)
+    if verbose:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.ERROR)
+
+    fh = logging.FileHandle(constants.LOGFILE, mode='w')
+    fh.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s - %(relativeCreated)6d ' +
+                                  '- %(threadName)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    logging.basicConfig([fh, ch])
+
+
 def main(input_yaml, output_yaml, name):
     """
     Reads config from a yaml file, performs the run, and saves the results and
@@ -276,6 +295,14 @@ def main(input_yaml, output_yaml, name):
         None
     """
     args = convert_yaml(input_yaml)
+
+    if 'verbose' in args:
+        verbose = args['verbose']
+    else:
+        verbose = False
+
+    set_up_logging(verbose)
+    logging.info('Begin run. Input file: {}. Output file: {}'.format(input_yaml, output_yaml))
     run_output = run(**args)
     document = {'name': name, 'output': run_output}
     with open(output_yaml, 'a') as output_file:
@@ -283,6 +310,7 @@ def main(input_yaml, output_yaml, name):
                   explicit_end=True, default_flow_style=False,
                   allow_unicode=True)
         output_file.write('\n\n\n')
+    logging.shutdown()
 
 
 if __name__ == "__main__":
