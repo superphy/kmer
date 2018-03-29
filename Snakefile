@@ -19,8 +19,9 @@ rule run_single: # Run kmerprediction.run.main on the specified input and ouput 
         'config_files/{dir}/{analysis}.yml'
     output:
         'results/{dir}/yaml/{analysis}.yml'
-    script:
-        'scripts/run_single.py'
+    run:
+        from kmerprediction.run import main
+        main(input[0], output[0], input[0])
 
 rule make_us_uk_data_frame:
     input:
