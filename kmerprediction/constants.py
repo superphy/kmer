@@ -62,3 +62,7 @@ host, count = np.unique(metadata['Host'].values, return_counts=True)
 VALID_HOSTS = [host[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
 
 DEFAULT_NAME = 'complete_results'
+DEFAULT_K = 7
+DEFAULT_LIMIT = 13
+
+LOGFILE = SOURCE + 'Data/logfile'
