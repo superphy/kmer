@@ -22,7 +22,7 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 from builtins import str
 import os
 from sklearn.preprocessing import Imputer
-from kmerprediction.complete_kmer_counter import count_kmers, get_counts, get_kmer_names
+from kmerprediction import complete_kmer_counter, kmer_counter
 from kmerprediction.utils import shuffle, setup_files, parse_metadata, parse_json
 from kmerprediction.utils import encode_labels
 import numpy as np
@@ -31,7 +31,8 @@ from kmerprediction import constants
 
 
 def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
-             database=constants.DEFAULT_DB, validate=True, verbose=True):
+             database=constants.DEFAULT_DB, validate=True, verbose=True,
+             count_method='complete'):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
     utils.parse_metadata
@@ -52,6 +53,10 @@ def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
+    if count_method == 'complete':
+        counter = complete_kmer_counter
+    else:
+        counter = kmer_counter
 
     metadata_kwargs = metadata_kwargs or {}
     metadata_kwargs['validate'] = validate
@@ -73,19 +78,19 @@ def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
     all_files = x_train + x_test
 
     if recount:
-        count_kmers(all_files, database, **kmer_kwargs)
+        counter.count_kmers(all_files, database, **kmer_kwargs)
     else:
         try:
-            temp = get_counts(x_train, output_db, name)
+            temp = counter.get_counts(x_train, output_db, name)
         except Exception as e:
             print(e)
-            print('KmerCounterWarning: get_counts failed, attempting recount')
-            count_kmers(all_files, database, **kmer_kwargs)
+            print('Warning: get_counts failed, attempting a recount')
+            counter.count_kmers(all_files, database, **kmer_kwargs)
 
-    x_train = get_counts(x_train, output_db, name)
-    x_test = get_counts(x_test, output_db, name)
+    x_train = counter.get_counts(x_train, output_db, name)
+    x_test = counter.get_counts(x_test, output_db, name)
 
-    feature_names = get_kmer_names(output_db, name)
+    feature_names = counter.get_kmer_names(output_db, name)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
@@ -142,7 +147,8 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
 
 
 def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
-                         recount=False, validate=True, verbose=True):
+                         recount=False, validate=True, verbose=True,
+                         count_method='complete'):
     """
     Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -166,11 +172,12 @@ def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
                        'validate': validate}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    verbose=verbose)
+                    verbose=verbose, count_method=count_method)
 
 
 def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
-                         recount=False, validate=True, verbose=True):
+                         recount=False, validate=True, verbose=True,
+                         count_method='complete'):
     """
     Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -195,12 +202,12 @@ def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
                        'validate': validate}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    verbose=verbose)
+                    verbose=verbose, count_method=count_method)
 
 
 def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
                         database=constants.DEFAULT_DB, recount=False,
-                        validate=True, verbose=True):
+                        validate=True, verbose=True, count_method='complete'):
     """
     Wraps get_kmer to get salmonella amr data.
 
@@ -230,7 +237,7 @@ def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
                        'validate': True}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    verbose=verbose)
+                    verbose=verbose, count_method=count_method)
 
 
 def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE, sep=None,
