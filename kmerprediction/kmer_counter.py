@@ -67,7 +67,7 @@ def start(input_file, k, limit, env, txn, master):
             kmer = line.split()[0].encode()
             count = str(line.split()[1]).encode()
             txn.put(kmer, count, db=current)
-            txn.put(kmer, count, db=master)
+            txn.put(kmer, '-1'.encode(), db=master)
     os.remove(temp_file)
 
 
