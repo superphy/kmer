@@ -102,13 +102,13 @@ def firstpass(filename, k, limit, env, txn, master):
             count = str(line.split()[1]).encode()
             if txn.get(kmer, default=False, db=master):
                 txn.put(kmer, count, db=master)
+                txn.put(kmer, count, db=current)
 
-    with txn.cursor() as cursor:
+    with txn.cursor(db=master) as cursor:
         for key, value in cursor:
             if value == '-1'.encode():
                 txn.delete(key)
             else:
-                txn.put(key, value, db=current)
                 txn.put(key, '-1'.encode())
     os.remove(temp_file)
     logging.info('Counted kmers for {}'.format(filename))
@@ -179,7 +179,7 @@ def add(filename, k, env, txn):
 
 
 def count_kmers(files, database, k=constants.DEFAULT_K,
-                limit=constants.DEFAULT_LIMIT, verbose=True, force=False):
+                limit=constants.DEFAULT_LIMIT, force=False):
     """
     Counts all kmers of length "k" in the fasta files "files", removing any
     that appear fewer than "limit" times. Stores the output in a lmdb database
@@ -190,7 +190,9 @@ def count_kmers(files, database, k=constants.DEFAULT_K,
         limit (int):        Minimum frequency for a kmer to be output.
         files (list(str)):  The fasta files to count kmers from.
         database (str):     Name of database where the counts will be stored.
-        verbose (bool):     If True display a status bar.
+        force (bool):       If True all files are recounted, if False only
+                            that do not already appear in the database are
+                            recounted.
 
     Returns:
         None
@@ -204,9 +206,13 @@ def count_kmers(files, database, k=constants.DEFAULT_K,
         logging.info('Begin counting kmers')
         start(files[0], k, limit, env, txn, master)
         threads = []
+        recounts = []
         for filename in files[1:]:
-            args = [filename, k, limit, env, txn, master]
-            threads.append(Thread(target=firstpass, args=args))
+            with env.begin(write=False) as txn:
+                if force or not txn.get(filename, default=False):
+                    args = [filename, k, limit, env, txn, master]
+                    threads.append(Thread(target=firstpass, args=args))
+                    recounts.append(filename)
         for t in threads:
             t.start()
         for t in threads:
@@ -216,8 +222,10 @@ def count_kmers(files, database, k=constants.DEFAULT_K,
         logging.info('Begin backfilling kmers')
         threads = []
         for filename in files:
-            args = [filename, env, txn, master]
-            threads.append(Thread(target=secondpass, args=args))
+            with env.begin(write=False) as txn:
+                if force or filename in recounts:
+                    args = [filename, env, txn, master]
+                    threads.append(Thread(target=secondpass, args=args))
         for t in threads:
             t.start()
         for t in threads:
@@ -303,7 +311,7 @@ def get_kmer_names(database, name=None):
     return np.asarray(kmer_list)
 
 
-def add_counts(files, database, verbose):
+def add_counts(files, database):
     """
     Counts kmers in the fasta files "files" removing any that do not already
     appear in "database". If a kmer in "files" has a count less than "limit",
@@ -317,7 +325,6 @@ def add_counts(files, database, verbose):
         files (list(str)): The fasta files containing the genomes whose kmer
                            counts you want added to the database.
         database (str):    The name of the database to add the kmer counts to.
-        verbose (bool):    If True display a status bar.
 
     Returns:
         None
