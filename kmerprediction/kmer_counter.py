@@ -15,8 +15,28 @@ import os
 import lmdb
 import numpy as np
 from kmerprediction import constants
+from kmerprediction.complete_kmer_counter import KmerCounterError
+import logging
+import tempfile
+import threading
 
-def start(filename, k, limit, env, txn, data):
+
+def count_file(input_file, output_file, k, limit):
+    handle, jf_file = tempfile.mkstemp()
+    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
+            '-C', str(filename), '-o', str(jf_file), '-L', '%d' % limit]
+    p = subprocess.Popen(args, bufsize=-1)
+    p.communicate()
+
+    args = ['jellyfish', 'dump', '-c', '-t', str(jf_file), '-o', str(output_file)]
+    p = subprocess.Popen(args, bufsize=-1)
+    p.communicate()
+
+    os.remove(jf_file)
+    logging.info('Counted kmers for {}'.format(input_file))
+
+
+def start(input_file, k, limit, env, txn, master):
     """
     Performs a kmer count on filename, counting kmers with a length of k and
     removing any kmer that has a count less than limit. Resets the master
@@ -36,28 +56,22 @@ def start(filename, k, limit, env, txn, data):
     Returns:
         None
     """
-    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
-            '-C', str(filename), '-o', 'counts.jf', '-L', '%d' % limit]
-    p = subprocess.Popen(args, bufsize=-1)
-    p.communicate()
-    # Get results from kmer count
-    args = ['jellyfish', 'dump', '-c', 'counts.jf']
-    p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
-                         universal_newlines=True)
-    out, err = p.communicate()
-    os.remove('counts.jf')
-    # Transform results into usable format
-    arr = [x.split(' ') for x in out.split('\n') if x]
+    handle, temp_file = tempfile.mkstemp()
+    count_file(input_file, temp_file, k, limit)
 
-    txn.drop(data, delete=False)
     current = env.open_db(filename.encode(), txn=txn)
+    txn.drop(master, delete=False)
 
-    for line in arr:
-        txn.put(line[0].encode(), line[1].encode())
-        txn.put(line[0].encode(), line[1].encode(), db=current)
+    with open(temp_file, 'r') as f:
+        for line in f:
+            kmer = line.split()[0].encode()
+            count = str(line.split()[1]).encode()
+            txn.put(kmer, count, db=current)
+            txn.put(kmer, count, db=master)
+    os.remove(temp_file)
 
 
-def firstpass(filename, k, limit, env, txn):
+def firstpass(filename, k, limit, env, txn, master):
     """
     Performs a kmer count on filename, counting kmers with a length of k and
     removing any kmer that has a count less than limit. Creates a new database
@@ -76,26 +90,18 @@ def firstpass(filename, k, limit, env, txn):
     Returns:
         None
     """
-    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
-            '-C', str(filename), '-o', 'counts.jf', '-L', '%d' % limit]
-    p = subprocess.Popen(args, bufsize=-1)
-    p.communicate()
-
-    # Get results from kmer count
-    args = ['jellyfish', 'dump', '-c', 'counts.jf']
-    p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
-                         universal_newlines=True)
-    out, err = p.communicate()
-    os.remove('counts.jf')
-    # Transform results into usable format
-    arr = [x.split(' ') for x in out.split('\n') if x]
+    handle, temp_file = tempfile.mkstemp()
+    count_file(input_file, temp_file, k, limit)
 
     current = env.open_db(filename.encode(), txn=txn)
     txn.drop(current, delete=False)
 
-    for line in arr:
-        if txn.get(line[0].encode(), default=False):
-            txn.put(line[0].encode(), line[1].encode(), overwrite=True, dupdata=False)
+    with open(temp_file, 'r') as f:
+        for line in f:
+            kmer = line.split()[0].encode()
+            count = str(line.split()[1]).encode()
+            if txn.get(kmer, default=False, db=master):
+                txn.put(kmer, count, db=master)
 
     with txn.cursor() as cursor:
         for key, value in cursor:
@@ -104,30 +110,11 @@ def firstpass(filename, k, limit, env, txn):
             else:
                 txn.put(key, value, db=current)
                 txn.put(key, '-1'.encode())
+    os.remove(temp_file)
+    logging.info('Counted kmers for {}'.format(filename))
 
 
-def secondstart(filename, env, txn, data):
-    """
-    Resets the master database so that it matches the database named filename.
-
-    Args:
-        filename (str):             Fasta file to perform a kmer count on.
-        k (int):                    Length of kmer to count.
-        env (lmdb.Environment):
-        txn (lmdb.Transaction):
-        data (Environment handle):
-
-    Returns:
-        None
-    """
-    current = env.open_db(filename.encode(), txn=txn)
-    txn.drop(data, delete=False)
-    with txn.cursor(db=current) as cursor:
-        for key, val in cursor:
-            txn.put(key, val)
-
-
-def secondpass(filename, env, txn):
+def secondpass(filename, env, txn, master):
     """
     Removes every kmer from the database named filename that is not present in
     the master database.
@@ -144,76 +131,9 @@ def secondpass(filename, env, txn):
     current = env.open_db(filename.encode(), txn=txn)
     with txn.cursor(db=current) as cursor:
         for key, val in cursor:
-            if not txn.get(key, default=False):
+            if not txn.get(key, default=False, db=master):
                 txn.delete(key, val, db=current)
-
-
-def print_status(counter, total, verbose):
-    """
-    Outputs a progress bar.
-
-    Args:
-        counter (int):  Numer of steps completed.
-        total (int):    Total number of steps.
-        verbose (bool): If False the status bar is not displayed.
-
-    Returns:
-        None
-    """
-    if verbose:
-        p = old_div((counter * 100), total)
-        sys.stdout.write('\r')
-        sys.stdout.write("[%-44s] %d%%" % ('=' * (old_div((p * 44), 100)), p))
-        sys.stdout.flush()
-        if p == 100:
-            print("\n")
-    else:
-        pass
-
-
-def setup_data(files, k, limit, env, txn, data, verbose):
-    """
-    Takes a list of paths to fasta files, a kmer length, a lower limit on how
-    many times a kmer needs to occur in order for it to be output, and an lmdb
-    environment, transaction and database.
-
-    Args:
-        files (list(str)):          The fasta files to count kmers from.
-        k (int):                    Length of kmer to count.
-        limit (int):                Minimum frequency for a kmer to be output.
-        env (lmdb.Environment):
-        txn (lmdb.Transaction):
-        data (environment handle):
-        verbose (bool):             If True display a status bar.
-
-    Returns:
-        None
-    """
-    counter = 0
-    total = len(files)
-
-    start(files[0], k, limit, env, txn, data)
-    temp = files.pop(0)
-    counter += 1
-    for filename in files:
-        print_status(counter, total, verbose)
-        firstpass(filename, k, limit, env, txn)
-        counter += 1
-
-    files.insert(0, temp)
-
-    print_status(counter, total, verbose)
-    counter = 0
-    secondstart(files[-1], env, txn, data)
-    counter += 1
-    i = len(files) - 2
-    while i >= 0:
-        print_status(counter, total, verbose)
-        secondpass(files[i], env, txn)
-        i -= 1
-        counter += 1
-
-    print_status(counter, total, verbose)
+    logging.info('Backfilled kmers for {}'.format(filename))
 
 
 def add(filename, k, env, txn):
@@ -258,32 +178,8 @@ def add(filename, k, env, txn):
                 txn.put(item[0], '0'.encode(), overwrite=True, db=current)
 
 
-def add_to_database(files, k, env, txn, verbose):
-    """
-    Adds the kmer counts in files to an already created database, does not
-    remove any kmer counts from the data base.
-
-    Args:
-        files (list(str)):      The fasta files to count kmers from.
-        k (int):                The length of kmer to count.
-        env (lmdb.Environment):
-        txn (lmdb.Transaction):
-        verbose (bool):         If True display a status bar.
-
-    Returns:
-        None
-    """
-    counter = 0
-    total = len(files)
-    for f in files:
-        print_status(counter, total, verbose)
-        add(f, k, env, txn)
-        counter += 1
-    print_status(counter, total, verbose)
-
-
 def count_kmers(files, database, k=constants.DEFAULT_K,
-                limit=constants.DEFAULT_LIMIT, verbose=True):
+                limit=constants.DEFAULT_LIMIT, verbose=True, force=False):
     """
     Counts all kmers of length "k" in the fasta files "files", removing any
     that appear fewer than "limit" times. Stores the output in a lmdb database
@@ -299,14 +195,37 @@ def count_kmers(files, database, k=constants.DEFAULT_K,
     Returns:
         None
     """
+    logging.info('Begin kmer_counter.count_kmers')
     env = lmdb.open(str(database), map_size=int(160e9), max_dbs=4000)
-    data = env.open_db('master'.encode(), dupsort=False)
+    master = env.open_db('master'.encode(), dupsort=False)
 
-    with env.begin(write=True, db=data) as txn:
+    with env.begin(write=True, db=master) as txn:
 
-        setup_data(files, k, limit, env, txn, data, verbose)
+        logging.info('Begin counting kmers')
+        start(files[0], k, limit, env, txn, master)
+        threads = []
+        for filename in files[1:]:
+            args = [filename, k, limit, env, txn, master]
+            threads.append(Thread(target=firstpass, args=args))
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        logging.info('Done counting kmers')
+
+        logging.info('Begin backfilling kmers')
+        threads = []
+        for filename in files:
+            args = [filename, env, txn, master]
+            threads.append(Thread(target=secondpass, args=args))
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        logging.info('Done backfilling kmers')
 
     env.close()
+    logging.info('Done kmer_counter.count_kmers')
 
 
 def get_counts(files, database, name=None):
@@ -326,24 +245,32 @@ def get_counts(files, database, name=None):
     Returns:
         list(list): The kmer counts for each genome in files.
     """
-    env = lmdb.open(str(database), map_size=int(160e9), max_dbs=4000)
-    data = env.open_db('master'.encode(), dupsort=False)
+    if not os.path.exists(database):
+        msg = 'Attempted to get counts from an uncreated database: {}'.format(database)
+        raise(KmerCounterError(msg))
 
-    with env.begin(write=False, db=data) as txn:
-        if files:
-            first = env.open_db(files[0].encode(), txn=txn)
-        else:
-            return np.array([], dtype='float64')
-        num_keys = txn.stat(first)['entries']
-        output = np.zeros((len(files), num_keys), dtype='float64')
+    env = lmdb.open(database, map_size=int(160e9), max_dbs=4000)
+    master = env.open_db('master'.encode(), dupsort=False)
 
-        for index, value in enumerate(files):
-            current = env.open_db(value.encode(), txn=txn)
-            cursor = txn.cursor(db=current)
-            counter = 0
-            for item in cursor:
-                output[index, counter] = float(item[1])
-                counter += 1
+    if not files:
+        output = np.array([], dtype='float64')
+    else:
+        with env.begin(write=False, db=master) as txn:
+            num_keys = txn.stat(master)['entries']
+            output = np.zeros((len(files), num_keys), dtype='float64')
+
+            for index, value in enumerate(files):
+                try:
+                    current = env.open_db(value.encode(), txn=txn)
+                except lmdb.NotFoundError:
+                    msg = 'Attempted to get counts for a potentially uncounted genome:'
+                    msg += ' {} in DB: {}'.format(value, database)
+                    logging.exception(msg)
+                    raise(KmerCounterError(msg))
+
+                cursor = txn.cursor(db=current)
+                for i, (key, value) in enumerate(cursor):
+                    output[index, i] = float(value)
 
     env.close()
     return output
@@ -404,6 +331,7 @@ def add_counts(files, database, verbose):
             item = cursor.item()
             k = len(item[0].decode())
 
-        add_to_database(files, k, env, txn, verbose)
+        for f in files:
+            add(f, k, env, txn)
 
     env.close()
