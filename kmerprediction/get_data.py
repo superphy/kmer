@@ -22,7 +22,8 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 from builtins import str
 import os
 from sklearn.preprocessing import Imputer
-from kmerprediction import complete_kmer_counter, kmer_counter
+import kmerprediction.complete_kmer_counter as complete_kmer_counter
+import kmerprediction.kmer_counter as kmer_counter
 from kmerprediction.utils import shuffle, setup_files, parse_metadata, parse_json
 from kmerprediction.utils import encode_labels
 import numpy as np
@@ -31,7 +32,7 @@ from kmerprediction import constants
 
 
 def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
-             database=constants.DEFAULT_DB, validate=True, verbose=True,
+             database=constants.DEFAULT_DB, validate=True,
              count_method='complete'):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
@@ -46,8 +47,6 @@ def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
         L (int):         kmer cutoff value. Ignored if recount is false
         validate (bool): If True y_test is created, if False y_test is
                          an empty ndarray.
-        verbose (bool):  If True and recount is also True a status bar is
-                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -61,7 +60,6 @@ def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
     metadata_kwargs = metadata_kwargs or {}
     metadata_kwargs['validate'] = validate
     kmer_kwargs = kmer_kwargs or {}
-    kmer_kwargs['verbose'] = verbose
 
     if 'name' in kmer_kwargs:
         name = kmer_kwargs['name']
@@ -147,7 +145,7 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
 
 
 def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
-                         recount=False, validate=True, verbose=True,
+                         recount=False, validate=True,
                          count_method='complete'):
     """
     Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et
@@ -160,8 +158,6 @@ def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
                          False.
         L (int):         kmer cutoff value. Ignored if recount is false.
         validate (bool): Ignored, here for compatability.
-        verbose (bool):  If True and recount is also True a status bar is
-                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -172,11 +168,11 @@ def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
                        'validate': validate}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    verbose=verbose, count_method=count_method)
+                    count_method=count_method)
 
 
 def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
-                         recount=False, validate=True, verbose=True,
+                         recount=False, validate=True,
                          count_method='complete'):
     """
     Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et
@@ -189,8 +185,6 @@ def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
                          False.
         L (int):         kmer cutoff value. Ignored if recount is false.
         validate (bool): Ignored, here for compatability.
-        verbose (bool):  If True and recount is also True a status bar is
-                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -202,12 +196,12 @@ def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
                        'validate': validate}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    verbose=verbose, count_method=count_method)
+                    count_method=count_method)
 
 
 def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
                         database=constants.DEFAULT_DB, recount=False,
-                        validate=True, verbose=True, count_method='complete'):
+                        validate=True, count_method='complete'):
     """
     Wraps get_kmer to get salmonella amr data.
 
@@ -219,8 +213,6 @@ def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
                           false.
         L (int):          kmer cutoff value. Ignored if recount is false.
         validate (bool):  Ignored, here for compatability.
-        verbose (bool):  If True and recount is also True a status bar is
-                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -237,7 +229,7 @@ def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
                        'validate': True}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    verbose=verbose, count_method=count_method)
+                    count_method=count_method)
 
 
 def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE, sep=None,
@@ -622,7 +614,7 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
 
 
 def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
-                       recount=False, k=7, L=13, kwargs=None, verbose=True,
+                       recount=False, k=7, L=13, kwargs=None,
                        validate=True):
     """
     Gets kmer data for the genomes specified in the json files. Divides genomes
@@ -639,8 +631,6 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
                             false
         L (int):            kmer cutoff value. Ignored if recount is false.
         kwargs (dict):      The arguments to pass to parse_json.
-        verbose (bool):     If True and recount is also True a status bar is
-                            displayed to show the kmer count progress.
         validate (bool):    If True and the kmers are being recounter a status
                             bar displaying the kmer count progress is output.
 
@@ -656,7 +646,7 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
     test_files = [str(x) for x in x_test]
 
     if recount:
-        count_kmers(k, L, x_train + x_test, database, verbose)
+        count_kmers(k, L, x_train + x_test, database)
 
     x_train = get_counts(x_train, database)
     x_train = np.asarray(x_train, dtype='float64')
@@ -674,8 +664,7 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
 
 
 def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
-                            recount=False, k=7, L=13, validate=True,
-                            verbose=True):
+                            recount=False, k=7, L=13, validate=True):
     """
     Organizes fasta files into train/test splits and classifies them based
     on their location in a directory structure rather than a metadata sheet.
@@ -724,8 +713,6 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
         L (int):            kmer cutoff value. Ignored if recount is false.
         validate (bool):    If True y_test is created, if False y_test is an
                             empty ndarray.
-        verbose (bool):     If True and recount is also True a status bar is
-                            displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
@@ -751,7 +738,7 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
     if recount:
         all_files = train_files + test_files
         all_files = [x for l in all_files for x in l]
-        count_kmers(k, L, all_files, database, verbose)
+        count_kmers(k, L, all_files, database)
 
     train_counts = []
     for group in train_files:
@@ -766,7 +753,7 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
         test_counts.append(temp)
 
     test_files = [x for l in test_files for x in l]
-    
+
     x_train, y_train = shuffle(train_counts, train_classes)
     x_test, y_test = shuffle(test_counts, test_classes)
 
