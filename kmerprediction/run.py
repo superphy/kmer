@@ -312,7 +312,13 @@ def main(input_yaml, output_yaml, name):
 
     set_up_logging(verbose)
     logging.info('Input file: {}. Output file: {}'.format(input_yaml, output_yaml))
-    run_output = run(**args)
+
+    try:
+        run_output = run(**args)
+    except Exception as E:
+        logging.exception('Run Failed')
+        raise E
+
     document = {'name': name, 'output': run_output}
     with open(output_yaml, 'a') as output_file:
         yaml.dump(document, output_file, explicit_start=True,
