@@ -1,9 +1,9 @@
 *.jf
 *.pyc
 database
-results/omni/
-results/US_UK/
+results/
 config_files/
 build/
 .snakemake/
 *.swp
+kmerprediction_logs/*.log
