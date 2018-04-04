@@ -23,6 +23,7 @@ from builtins import str
 import os
 from sklearn.preprocessing import Imputer
 import kmerprediction.complete_kmer_counter as complete_kmer_counter
+from kmerprediction.complete_kmer_counter import KmerCounterError
 import kmerprediction.kmer_counter as kmer_counter
 from kmerprediction.utils import shuffle, setup_files, parse_metadata, parse_json
 from kmerprediction.utils import encode_labels
@@ -80,9 +81,9 @@ def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
     else:
         try:
             temp = counter.get_counts(x_train, output_db, name)
-        except Exception as e:
-            print(e)
-            print('Warning: get_counts failed, attempting a recount')
+        except KmerCounterError as e:
+            msg = 'Warning: get_counts failed, attempting a recount'
+            logging.exception(msg)
             counter.count_kmers(all_files, database, **kmer_kwargs)
 
     x_train = counter.get_counts(x_train, output_db, name)
@@ -615,7 +616,7 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
 
 def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
                        recount=False, k=7, L=13, kwargs=None,
-                       validate=True):
+                       validate=True, count_method='complete'):
     """
     Gets kmer data for the genomes specified in the json files. Divides genomes
     into train/test sets and classifies them with utils.parse_json.
@@ -638,6 +639,10 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
+    if count_method == 'complete':
+        counter = complete_kmer_counter
+    else:
+        counter = kmer_counter
     kwargs = kwargs or {}
     kwargs['validate'] = validate
 
@@ -646,15 +651,12 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
     test_files = [str(x) for x in x_test]
 
     if recount:
-        count_kmers(k, L, x_train + x_test, database)
+        counter.count_kmers(k, L, x_train + x_test, database)
 
-    x_train = get_counts(x_train, database)
-    x_train = np.asarray(x_train, dtype='float64')
+    x_train = counter.get_counts(x_train, database)
+    x_test = counter.get_counts(x_test, database)
 
-    x_test = get_counts(x_test, database)
-    x_test = np.asarray(x_test, dtype='float64')
-
-    feature_names = get_kmer_names(database)
+    feature_names = counter.get_kmer_names(database)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
@@ -664,7 +666,8 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
 
 
 def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
-                            recount=False, k=7, L=13, validate=True):
+                            recount=False, k=7, L=13, validate=True,
+                            count_method='complete'):
     """
     Organizes fasta files into train/test splits and classifies them based
     on their location in a directory structure rather than a metadata sheet.
@@ -718,6 +721,11 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
+    if count_method == 'complete':
+        counter = complete_kmer_counter
+    else:
+        counter = kmer_counter
+
     train_directories = [train_dir + x for x in os.listdir(train_dir)]
     test_directories = [test_dir + x for x in os.listdir(test_dir)]
 
@@ -738,17 +746,17 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
     if recount:
         all_files = train_files + test_files
         all_files = [x for l in all_files for x in l]
-        count_kmers(k, L, all_files, database)
+        counter.count_kmers(k, L, all_files, database)
 
     train_counts = []
     for group in train_files:
-        temp = get_counts(group, database)
+        temp = counter.get_counts(group, database)
         temp = np.asarray(temp, dtype='float64')
         train_counts.append(temp)
 
     test_counts = []
     for group in test_files:
-        temp = get_counts(group, database)
+        temp = counter.get_counts(group, database)
         temp = np.asarray(temp, dtype='float64')
         test_counts.append(temp)
 
@@ -760,7 +768,7 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
     if not validate:
         y_test = np.array([], dtype='float64')
 
-    feature_names = get_kmer_names(database)
+    feature_names = counter.get_kmer_names(database)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
