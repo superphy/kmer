@@ -23,7 +23,7 @@ def create_temp_files():
 class CountKmers(unittest.TestCase):
     def setUp(self):
         self.dir, self.db, self.files = create_temp_files()
-        count_kmers(2, 1, self.files, self.db, verbose=False)
+        count_kmers(self.files, self.db, k=2, limit=1)
 
     def tearDown(self):
         shutil.rmtree(self.dir)
@@ -98,7 +98,7 @@ class CountKmers(unittest.TestCase):
 class GetCounts(unittest.TestCase):
     def setUp(self):
         self.dir, self.db, self.files = create_temp_files()
-        count_kmers(2, 1, self.files, self.db, verbose=False)
+        count_kmers(self.files, self.db, k=2, limit=1)
         self.counts = get_counts(self.files, self.db)
 
     def tearDown(self):
@@ -118,11 +118,11 @@ class GetCounts(unittest.TestCase):
 class AddCounts(unittest.TestCase):
     def setUp(self):
         self.dir, self.db, self.files = create_temp_files()
-        count_kmers(2, 1, self.files, self.db, verbose=False)
+        count_kmers(self.files, self.db, k=2, limit=1)
         self.new_file = self.dir + '/B2'
         with open(self.new_file, 'w') as f:
             f.write('>\nAAAAAAT')
-        add_counts([self.new_file], self.db, verbose=False)
+        add_counts([self.new_file], self.db)
         output_files = self.files + [self.new_file]
         self.counts = get_counts(output_files, self.db)
 
@@ -148,7 +148,7 @@ class GetKmerNames(unittest.TestCase):
         self.db = self.dir + 'TEMPDB'
         with open(self.fasta, 'w') as f:
             f.write('>l1\nATAT\n>l2\nCGCG\n>l3\nAAAA\n>l4\nAGGA\n>l5\nCGCG')
-        count_kmers(4, 0, [self.fasta], self.db, False)
+        count_kmers([self.fasta], self.db, k=4, limit=0)
         self.names = get_kmer_names(self.db)
 
     def tearDown(self):
