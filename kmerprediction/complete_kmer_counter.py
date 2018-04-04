@@ -506,6 +506,7 @@ def get_kmer_names(database, name=constants.DEFAULT_NAME):
     with env.begin(write=False) as txn:
         output = txn.get(name.encode())
     env.close()
-    return np.fromstring(output, dtype='<U64')
+    # TODO: Change <U8 to <U64; recreate output databases.
+    return np.fromstring(output, dtype='<U8')
 
 

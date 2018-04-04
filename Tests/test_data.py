@@ -25,12 +25,14 @@ class GetKmer(unittest.TestCase):
             f.write('>\nAACCCCAA')
         with open(self.dir + '/B1', 'w') as f:
             f.write('>\nAACCAACC')
-        kwargs = {'metadata': self.metadata, 'prefix': self.dir + '/'}
-        self.data, self.features, self.files, self.le = get_kmer(kwargs,
-                                                                 self.db,
-                                                                 recount=True,
-                                                                 k=2, L=1,
-                                                                 verbose=False)
+        metadata_kwargs = {'metadata': self.metadata, 'prefix': self.dir + '/'}
+        kmer_kwargs = {'k':2, 'limit':1}
+        args = {'metadata_kwargs': metadata_kwargs,
+                'kmer_kwargs': kmer_kwargs,
+                'recount': True,
+                'database': self.db,
+                'complete_count': False}
+        self.data, self.features, self.files, self.le = get_kmer(**args)
         self.correct_x_train = np.array([[3, 1, 1, 3], [2, 2, 1, 2]])
         self.correct_y_train = np.array(['A', 'B'])
         self.correct_x_test = np.array([[2, 1, 1, 3]])
@@ -242,10 +244,16 @@ class ExtractFeaturesKmer(unittest.TestCase):
         with open(self.fasta, 'w') as f:
             out = '>label1\nAAAA\n>label2\nCCCC\n>label3\nATAT\n>label4\nACGT'
             f.write(out)
-        kwargs = {'metadata': self.metadata, 'prefix': self.dir,
-                  'validate': False}
-        self.data = get_kmer(kwargs, self.db, recount=True, k=4, L=0,
-                             validate=False, verbose=False)
+        metadata_kwargs = {'metadata': self.metadata, 'prefix': self.dir,
+                           'validate': False}
+        kmer_kwargs = {'k':4, 'limit':0}
+        args = {'metadata_kwargs': metadata_kwargs,
+                'kmer_kwargs': kmer_kwargs,
+                'database': self.db,
+                'recount': True,
+                'validate': False,
+                'complete_count': False}
+        self.data = get_kmer(**args)
         self.correct_features = np.array(['AAAA', 'ACGT', 'ATAT', 'CCCC'])
 
     def tearDown(self):
@@ -387,8 +395,8 @@ class Directory(unittest.TestCase):
         os.makedirs(self.test + 'Class1')
         os.makedirs(self.test + 'Class2')
         self.args = {'train_dir': self.train, 'test_dir': self.test,
-                     'database': self.db, 'recount': True, 'k': 3, 'L': 1,
-                     'verbose': False}
+                     'database': self.db, 'recount': True, 'k': 3,
+                     'L': 1, 'complete_count': False}
         with open(self.train + 'Class1/one', 'w') as f:
             f.write('>\nAAACCCCAA')
         with open(self.train + 'Class1/two', 'w') as f:
@@ -486,19 +494,19 @@ class GetKmerFromJson(unittest.TestCase):
                                 {"class": 1, "name": 'six', 'garbage': 654},
                                 {'class': 2, "name": 'seven', 'garbage': 4}]))
         with open(self.dir + 'one', 'w') as f:
-            f.write('>\nAAACCCCAA')
+            f.write('>\nAAACCCCAAAAACCCCAAAAACCCCAAAAACCCCAA')
         with open(self.dir + 'two', 'w') as f:
-            f.write('>\nACAAAACCA')
+            f.write('>\nACAAAACCAACAAAACCAACAAAACCAACAAAACCA')
         with open(self.dir + 'three', 'w') as f:
-            f.write('>\nAAAAAAACC')
+            f.write('>\nAAAAAAACCACAAAACCAACAAAACCAACAAAACCA')
         with open(self.dir + 'four', 'w') as f:
-            f.write('>\nCCCCACCAC')
+            f.write('>\nCCCCACCACCCCCACCACCCCCACCACCCCCACCAC')
         with open(self.dir + 'five', 'w') as f:
-            f.write('>\nCCCCACCCC')
+            f.write('>\nCCCCACCCCCCCCACCCCCCCCACCCCCCCCACCCC')
         with open(self.dir + 'six', 'w') as f:
-            f.write('>\nAAACCAACC')
+            f.write('>\nAAACCAACCAAACCAACCAAACCAACCAAACCAACC')
         with open(self.dir + 'seven', 'w') as f:
-            f.write('>\nAAACCAACA')
+            f.write('>\nAAACCAACAAAACCAACAAAACCAACAAAACCAACA')
         kwargs = {'prefix': self.dir, 'suffix': '', 'fasta_key': "name",
                   'label_key': "class"}
         self.data, fe, self.fi, self.le = get_kmer_from_json(self.json1,
@@ -506,8 +514,8 @@ class GetKmerFromJson(unittest.TestCase):
                                                              recount=True,
                                                              k=3, L=1,
                                                              kwargs=kwargs,
-                                                             verbose=False,
-                                                             validate=False)
+                                                             validate=False,
+                                                             complete_count=False)
 
     def tearDown(self):
         shutil.rmtree(self.dir)
@@ -541,7 +549,7 @@ class GetKmerFromJson(unittest.TestCase):
                 count2 += 1
         self.assertEqual(count1, count2)
 
-    def test_y_tes(self):
+    def test_y_test(self):
         val = bool(self.data[3].shape == (0,))
         self.assertTrue(val)
 

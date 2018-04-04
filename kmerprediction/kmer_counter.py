@@ -18,13 +18,12 @@ from kmerprediction import constants
 from kmerprediction.complete_kmer_counter import KmerCounterError
 import logging
 import tempfile
-import threading
-
+from threading import Thread
 
 def count_file(input_file, output_file, k, limit):
     handle, jf_file = tempfile.mkstemp()
     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
-            '-C', str(filename), '-o', str(jf_file), '-L', '%d' % limit]
+            '-C', str(input_file), '-o', str(jf_file), '-L', '%d' % limit]
     p = subprocess.Popen(args, bufsize=-1)
     p.communicate()
 
@@ -59,7 +58,7 @@ def start(input_file, k, limit, env, txn, master):
     handle, temp_file = tempfile.mkstemp()
     count_file(input_file, temp_file, k, limit)
 
-    current = env.open_db(filename.encode(), txn=txn)
+    current = env.open_db(input_file.encode(), txn=txn)
     txn.drop(master, delete=False)
 
     with open(temp_file, 'r') as f:
@@ -71,7 +70,7 @@ def start(input_file, k, limit, env, txn, master):
     os.remove(temp_file)
 
 
-def firstpass(filename, k, limit, env, txn, master):
+def firstpass(filename, k, limit, env, master):
     """
     Performs a kmer count on filename, counting kmers with a length of k and
     removing any kmer that has a count less than limit. Creates a new database
@@ -91,30 +90,32 @@ def firstpass(filename, k, limit, env, txn, master):
         None
     """
     handle, temp_file = tempfile.mkstemp()
-    count_file(input_file, temp_file, k, limit)
+    count_file(filename, temp_file, k, limit)
 
-    current = env.open_db(filename.encode(), txn=txn)
-    txn.drop(current, delete=False)
+    current = env.open_db(filename.encode())
 
-    with open(temp_file, 'r') as f:
-        for line in f:
-            kmer = line.split()[0].encode()
-            count = str(line.split()[1]).encode()
-            if txn.get(kmer, default=False, db=master):
-                txn.put(kmer, count, db=master)
-                txn.put(kmer, count, db=current)
+    with env.begin(write=True, db=master) as txn:
+        txn.drop(current, delete=False)
+        with open(temp_file, 'r') as f:
+            for line in f:
+                kmer = line.split()[0].encode()
+                count = str(line.split()[1]).encode()
+                if txn.get(kmer, default=False, db=master):
+                    txn.put(kmer, count, db=master)
+                    txn.put(kmer, count, db=current)
 
-    with txn.cursor(db=master) as cursor:
-        for key, value in cursor:
-            if value == '-1'.encode():
-                txn.delete(key)
-            else:
-                txn.put(key, '-1'.encode())
+        with txn.cursor(db=master) as cursor:
+            for key, value in cursor:
+                if value == '-1'.encode():
+                    txn.delete(key)
+                else:
+                    txn.put(key, '-1'.encode())
+
     os.remove(temp_file)
     logging.info('Counted kmers for {}'.format(filename))
 
 
-def secondpass(filename, env, txn, master):
+def secondpass(filename, env, master):
     """
     Removes every kmer from the database named filename that is not present in
     the master database.
@@ -128,54 +129,13 @@ def secondpass(filename, env, txn, master):
     Returns:
         None
     """
-    current = env.open_db(filename.encode(), txn=txn)
-    with txn.cursor(db=current) as cursor:
-        for key, val in cursor:
-            if not txn.get(key, default=False, db=master):
-                txn.delete(key, val, db=current)
+    current = env.open_db(filename.encode())
+    with env.begin(write=True, db=master) as txn:
+        with txn.cursor(db=current) as cursor:
+            for key, val in cursor:
+                if not txn.get(key, default=False, db=master):
+                    txn.delete(key, val, db=current)
     logging.info('Backfilled kmers for {}'.format(filename))
-
-
-def add(filename, k, env, txn):
-    """
-    Counts kmers in filename and adds them to the database pointed to by env.
-    Only counts kmers that already exists in env.
-
-    Args:
-        filename (str):         Fasta file to perform a kmer count on.
-        k (int):                Length of kmer to count.
-        env (lmdb.Environment):
-        txn (lmdb.Transaction):
-
-    Returns:
-        None
-    """
-    args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
-            '-C', str(filename), '-o', 'counts.jf']
-    p = subprocess.Popen(args, bufsize=-1)
-    p.communicate()
-
-    # Get results from kmer count
-    args = ['jellyfish', 'dump', '-c', 'counts.jf']
-    p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
-                         universal_newlines=True)
-    out, err = p.communicate()
-    os.remove('counts.jf')
-    # Transform results into usable format
-    arr = [x.split(' ') for x in out.split('\n') if x]
-
-    current = env.open_db(filename.encode(), txn=txn)
-    txn.drop(current, delete=False)
-
-    for line in arr:
-        if txn.get(line[0].encode(), default=False):
-            txn.put(line[0].encode(), line[1].encode(), overwrite=True,
-                    dupdata=False, db=current)
-
-    with txn.cursor() as cursor:
-        for item in cursor:
-            if not txn.get(item[0], default=False, db=current):
-                txn.put(item[0], '0'.encode(), overwrite=True, db=current)
 
 
 def count_kmers(files, database, k=constants.DEFAULT_K,
@@ -202,35 +162,35 @@ def count_kmers(files, database, k=constants.DEFAULT_K,
     master = env.open_db('master'.encode(), dupsort=False)
 
     with env.begin(write=True, db=master) as txn:
-
         logging.info('Begin counting kmers')
         start(files[0], k, limit, env, txn, master)
-        threads = []
-        recounts = []
-        for filename in files[1:]:
-            with env.begin(write=False) as txn:
-                if force or not txn.get(filename, default=False):
-                    args = [filename, k, limit, env, txn, master]
-                    threads.append(Thread(target=firstpass, args=args))
-                    recounts.append(filename)
-        for t in threads:
-            t.start()
-        for t in threads:
-            t.join()
-        logging.info('Done counting kmers')
 
-        logging.info('Begin backfilling kmers')
-        threads = []
-        for filename in files:
-            with env.begin(write=False) as txn:
-                if force or filename in recounts:
-                    args = [filename, env, txn, master]
-                    threads.append(Thread(target=secondpass, args=args))
-        for t in threads:
-            t.start()
-        for t in threads:
-            t.join()
-        logging.info('Done backfilling kmers')
+    threads = []
+    recounts = []
+    for filename in files[1:]:
+        with env.begin(write=False) as txn:
+            if force or not txn.get(filename.encode(), default=False):
+                args = [filename, k, limit, env, master]
+                threads.append(Thread(target=firstpass, args=args))
+                recounts.append(filename)
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    logging.info('Done counting kmers')
+
+    logging.info('Begin removing missing kmers')
+    threads = []
+    for filename in files:
+        with env.begin(write=False) as txn:
+            if force or filename in recounts:
+                args = [filename, env, master]
+                threads.append(Thread(target=secondpass, args=args))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    logging.info('Done removing missing kmers')
 
     env.close()
     logging.info('Done kmer_counter.count_kmers')
@@ -254,7 +214,8 @@ def get_counts(files, database, name=None):
         list(list): The kmer counts for each genome in files.
     """
     if not os.path.exists(database):
-        msg = 'Attempted to get counts from an uncreated database: {}'.format(database)
+        msg = 'Attempted to get counts from an uncreated database:'
+        msg += ' {}'.format(database)
         raise(KmerCounterError(msg))
 
     env = lmdb.open(database, map_size=int(160e9), max_dbs=4000)
@@ -271,8 +232,8 @@ def get_counts(files, database, name=None):
                 try:
                     current = env.open_db(value.encode(), txn=txn)
                 except lmdb.NotFoundError:
-                    msg = 'Attempted to get counts for a potentially uncounted genome:'
-                    msg += ' {} in DB: {}'.format(value, database)
+                    msg = 'Attempted to get counts for a potentially uncounted'
+                    msg += ' genome: {} in DB: {}'.format(value, database)
                     logging.exception(msg)
                     raise(KmerCounterError(msg))
 
@@ -311,34 +272,98 @@ def get_kmer_names(database, name=None):
     return np.asarray(kmer_list)
 
 
-def add_counts(files, database):
-    """
-    Counts kmers in the fasta files "files" removing any that do not already
-    appear in "database". If a kmer in "files" has a count less than "limit",
-    but the kmer appears in database the count will appear in database.
-    This function is useful for counting kmers in a new data set that
-    you want to make predictions on using an already trained machine learning
-    model. The kmer size and cutoff used here will match the kmer size and
-    cutoff used when the database was originally created.
 
-    Args:
-        files (list(str)): The fasta files containing the genomes whose kmer
-                           counts you want added to the database.
-        database (str):    The name of the database to add the kmer counts to.
 
-    Returns:
-        None
-    """
-    env = lmdb.open(str(database), map_size=int(160e9), max_dbs=100000)
-    master = env.open_db('master'.encode(), dupsort=False)
 
-    with env.begin(write=True, db=master) as txn:
-        with txn.cursor() as cursor:
-            cursor.first()
-            item = cursor.item()
-            k = len(item[0].decode())
 
-        for f in files:
-            add(f, k, env, txn)
 
-    env.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def add(filename, k, env, txn):
+#     """
+#     Counts kmers in filename and adds them to the database pointed to by env.
+#     Only counts kmers that already exists in env.
+# 
+#     Args:
+#         filename (str):         Fasta file to perform a kmer count on.
+#         k (int):                Length of kmer to count.
+#         env (lmdb.Environment):
+#         txn (lmdb.Transaction):
+# 
+#     Returns:
+#         None
+#     """
+#     args = ['jellyfish', 'count', '-m', '%d' % k, '-s', '10M', '-t', '30',
+#             '-C', str(filename), '-o', 'counts.jf']
+#     p = subprocess.Popen(args, bufsize=-1)
+#     p.communicate()
+# 
+#     # Get results from kmer count
+#     args = ['jellyfish', 'dump', '-c', 'counts.jf']
+#     p = subprocess.Popen(args, bufsize=-1, stdout=subprocess.PIPE,
+#                          universal_newlines=True)
+#     out, err = p.communicate()
+#     os.remove('counts.jf')
+#     # Transform results into usable format
+#     arr = [x.split(' ') for x in out.split('\n') if x]
+# 
+#     current = env.open_db(filename.encode(), txn=txn)
+#     txn.drop(current, delete=False)
+# 
+#     for line in arr:
+#         if txn.get(line[0].encode(), default=False):
+#             txn.put(line[0].encode(), line[1].encode(), overwrite=True,
+#                     dupdata=False, db=current)
+# 
+#     with txn.cursor() as cursor:
+#         for item in cursor:
+#             if not txn.get(item[0], default=False, db=current):
+#                 txn.put(item[0], '0'.encode(), overwrite=True, db=current)
+
+# def add_counts(files, database):
+#     """
+#     Counts kmers in the fasta files "files" removing any that do not already
+#     appear in "database". If a kmer in "files" has a count less than "limit",
+#     but the kmer appears in database the count will appear in database.
+#     This function is useful for counting kmers in a new data set that
+#     you want to make predictions on using an already trained machine learning
+#     model. The kmer size and cutoff used here will match the kmer size and
+#     cutoff used when the database was originally created.
+# 
+#     Args:
+#         files (list(str)): The fasta files containing the genomes whose kmer
+#                            counts you want added to the database.
+#         database (str):    The name of the database to add the kmer counts to.
+# 
+#     Returns:
+#         None
+#     """
+#     env = lmdb.open(str(database), map_size=int(160e9), max_dbs=100000)
+#     master = env.open_db('master'.encode(), dupsort=False)
+# 
+#     with env.begin(write=True, db=master) as txn:
+#         with txn.cursor() as cursor:
+#             cursor.first()
+#             item = cursor.item()
+#             k = len(item[0].decode())
+# 
+#         for f in files:
+#             add(f, k, env, txn)
+# 
+#     env.close()

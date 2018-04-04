@@ -34,7 +34,7 @@ from kmerprediction import constants
 
 def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
              database=constants.DEFAULT_DB, validate=True,
-             count_method='complete'):
+             complete_count=True):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
     utils.parse_metadata
@@ -53,7 +53,7 @@ def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    if count_method == 'complete':
+    if complete_count:
         counter = complete_kmer_counter
     else:
         counter = kmer_counter
@@ -77,7 +77,7 @@ def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
     all_files = x_train + x_test
 
     if recount:
-        counter.count_kmers(all_files, database, **kmer_kwargs)
+        counter.count_kmers(all_files, database, **kmer_kwargs, force=True)
     else:
         try:
             temp = counter.get_counts(x_train, output_db, name)
@@ -147,7 +147,7 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
 
 def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
                          recount=False, validate=True,
-                         count_method='complete'):
+                         complete_count=True):
     """
     Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -169,12 +169,12 @@ def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
                        'validate': validate}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    count_method=count_method)
+                    complete_count=complete_count)
 
 
 def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
                          recount=False, validate=True,
-                         count_method='complete'):
+                         complete_count=True):
     """
     Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -197,12 +197,12 @@ def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
                        'validate': validate}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    count_method=count_method)
+                    complete_count=complete_count)
 
 
 def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
                         database=constants.DEFAULT_DB, recount=False,
-                        validate=True, count_method='complete'):
+                        validate=True, complete_count=True):
     """
     Wraps get_kmer to get salmonella amr data.
 
@@ -230,7 +230,7 @@ def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
                        'validate': True}
     return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
                     database=database, recount=recount, validate=validate,
-                    count_method=count_method)
+                    complete_count=complete_count)
 
 
 def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE, sep=None,
@@ -616,7 +616,7 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
 
 def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
                        recount=False, k=7, L=13, kwargs=None,
-                       validate=True, count_method='complete'):
+                       validate=True, complete_count=True):
     """
     Gets kmer data for the genomes specified in the json files. Divides genomes
     into train/test sets and classifies them with utils.parse_json.
@@ -639,7 +639,7 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    if count_method == 'complete':
+    if complete_count:
         counter = complete_kmer_counter
     else:
         counter = kmer_counter
@@ -651,7 +651,7 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
     test_files = [str(x) for x in x_test]
 
     if recount:
-        counter.count_kmers(k, L, x_train + x_test, database)
+        counter.count_kmers(x_train + x_test, database, k=k, limit=L, force=True)
 
     x_train = counter.get_counts(x_train, database)
     x_test = counter.get_counts(x_test, database)
@@ -667,7 +667,7 @@ def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
 
 def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
                             recount=False, k=7, L=13, validate=True,
-                            count_method='complete'):
+                            complete_count=True):
     """
     Organizes fasta files into train/test splits and classifies them based
     on their location in a directory structure rather than a metadata sheet.
@@ -721,7 +721,7 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    if count_method == 'complete':
+    if complete_count:
         counter = complete_kmer_counter
     else:
         counter = kmer_counter
@@ -746,7 +746,7 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
     if recount:
         all_files = train_files + test_files
         all_files = [x for l in all_files for x in l]
-        counter.count_kmers(k, L, all_files, database)
+        counter.count_kmers(all_files, database, k=k, limit=L, force=True)
 
     train_counts = []
     for group in train_files:
