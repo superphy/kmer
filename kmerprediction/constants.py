@@ -65,4 +65,4 @@ DEFAULT_NAME = 'complete_results'
 DEFAULT_K = 7
 DEFAULT_LIMIT = 13
 
-LOGFILE = SOURCE + 'Data/logfile'
+LOG_DIRECTORY = './kmerprediction_logs/'

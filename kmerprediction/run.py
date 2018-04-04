@@ -24,6 +24,7 @@ import yaml
 from kmerprediction.utils import do_nothing
 import logging
 import sys
+import os
 
 
 def run(model=models.support_vector_machine, model_args=None,
@@ -278,7 +279,11 @@ def set_up_logging(verbose):
     else:
         sh.setLevel(logging.WARNING)
 
-    fh = logging.FileHandler(constants.LOGFILE, mode='w')
+    if not os.path.exists(constants.LOG_DIRECTORY):
+        os.makedirs(constants.LOG_DIRECTORY)
+    logfile = constants.LOG_DIRECTORY + time.strftime('%Y-%m-%d-%H:%M:%S') + '.log'
+
+    fh = logging.FileHandler(logfile, mode='w')
     fh.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -306,7 +311,7 @@ def main(input_yaml, output_yaml, name):
     verbose = args.pop('verbose', False)
 
     set_up_logging(verbose)
-    logging.info('Begin run. Input file: {}. Output file: {}'.format(input_yaml, output_yaml))
+    logging.info('Input file: {}. Output file: {}'.format(input_yaml, output_yaml))
     run_output = run(**args)
     document = {'name': name, 'output': run_output}
     with open(output_yaml, 'a') as output_file:
