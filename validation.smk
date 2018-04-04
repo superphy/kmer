@@ -8,6 +8,7 @@ rule all:
         'manuscript/images/validation_results.pdf',
         'manuscript/validation_results.tex'
 
+
 # Generate the input config files for the Lupolova e. Coli analysis
 rule config:
     output:
@@ -20,6 +21,7 @@ rule config:
     script:
         'scripts/validation_config.py'
 
+
 # Run kmerprediction.run.main on the specified input and ouput yaml
 rule run:
     input:
@@ -29,6 +31,7 @@ rule run:
     run:
         from kmerprediction.run import main
         main(input[0], output[0], input[0])
+
 
 # Convert yaml output by run into pandas dataframes
 rule data_frames:
@@ -44,6 +47,7 @@ rule data_frames:
     script:
         'scripts/validation_data_frames.py'
 
+
 # Make figures for manuscript
 rule figures:
     input:
@@ -52,6 +56,7 @@ rule figures:
         'manuscript/images/validation_results.pdf'
     script:
         'scripts/validation_figures.py'
+
 
 # Make markdown tables for manuscript
 rule tables:
@@ -67,6 +72,7 @@ rule tables:
     script:
         'scripts/validation_tables.py'
 
+
 # Make LaTeX macros to expand validation results in manuscript
 rule macros:
     input:
@@ -74,4 +80,5 @@ rule macros:
     output:
         'manuscript/validation_results.tex'
     script:
-        'validation_results.py'
+        'scripts/validation_results.py'
+

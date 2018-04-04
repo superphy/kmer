@@ -1,9 +1,5 @@
-k_vals: [7]
-model: 
-    - neural_network
-    - support_vector_machine
-    - random_forest
-selection: 
-    - pthreshold
-    - kbest
-reps: 2
+k_vals: [7, 15, 31]
+model: ['neural_network', 'support_vector_machine', 'random_forest']
+selection: ['pthreshold', 'kbest']
+important_features_models: ['support_vector_machine', 'random_forest']
+reps: 25
