@@ -277,7 +277,7 @@ def filter_kmers(global_counts, file_counts, env, max_global_count,
         for kmer in global_kmers:
             file_value = file_txn.get(kmer)
             if int(file_value) <= max_file_count and int(file_value) >= min_file_count:
-                valid_kmers.append(kmer)
+                valid_kmers.append(kmer.decode())
 
     return valid_kmers
 
@@ -433,7 +433,7 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
                                max_global_count, min_global_count,
                                max_file_count, min_file_count)
 
-    valid_kmer_array = np.asarray(valid_kmers, dtype='<U8')
+    valid_kmer_array = np.asarray(valid_kmers, dtype='<U64')
     with output_env.begin(write=True) as txn:
         txn.put(name.encode(), valid_kmer_array.tostring())
 
@@ -506,6 +506,6 @@ def get_kmer_names(database, name=constants.DEFAULT_NAME):
     with env.begin(write=False) as txn:
         output = txn.get(name.encode())
     env.close()
-    return np.fromstring(output, dtype='<U8')
+    return np.fromstring(output, dtype='<U64')
 
 
