@@ -120,7 +120,7 @@ def add_file(input_file, key, env, global_counts, file_counts):
     logging.info('Added {} to DB'.format(key))
 
 
-def add_all(temp_files, db_keys, env, force, recounts):
+def add_all(temp_files, db_keys, global_counts, file_counts, env, force, recounts):
     """
     Add all kmer counts from each file in temp_files to the database
     contained in env under the identifiers contianed in db_keys.
@@ -282,7 +282,7 @@ def filter_kmers(global_counts, file_counts, env, max_global_count,
     return valid_kmers
 
 
-def output_file(key, valid_kmers, input_env, output_env, name):
+def output_file(key, valid_kmers, input_env, output_env, name, write_kmers):
     """
     Convert the key, value pairs in input_env under key to a numpy string
     representation of a 1D array in output_env under key[name].
@@ -300,14 +300,21 @@ def output_file(key, valid_kmers, input_env, output_env, name):
         name (str):                     The key to store the output value
                                         under. Usefull when using multiple
                                         kmer filter methods.
+        write_kmers (bool):             If True the kmer names are written as
+                                        to the output_env under a database
+                                        named name.
     Returns:
         None
     """
     db = input_env.open_db(key.encode())
     output = np.zeros(len(valid_kmers), dtype=int)
-    with input_env.begin(write=False, db=db) as txn:
-        for index, kmer in enumerate(valid_kmers):
-            output[index] = int(txn.get(kmer, db=db))
+    kmer_name_db = output_env.open_db(name.encode())
+    with input_env.begin(write=False, db=db) as txn_in:
+        with output_env.begin(write=True, db=kmer_name_db) as txn_out:
+            for index, kmer in enumerate(valid_kmers):
+                output[index] = int(txn_in.get(kmer.encode(), db=db))
+                if write_kmers:
+                    txn_out.put(kmer.encode(), '1'.encode())
     db = output_env.open_db(key.encode())
     with output_env.begin(write=True, db=db) as txn:
         txn.put(name.encode(), output.tostring(), db=db)
@@ -342,12 +349,14 @@ def output_all(db_keys, valid_kmers, env, output_env, name, force, recounts):
     threads = []
     if force:
         logging.info('Force set to True, creating all outputs')
+    write_kmers = True
     for k in db_keys:
         curr_db = env.open_db(k.encode())
         with env.begin(write=False, db=curr_db) as txn:
             if force or not txn.get(k.encode(), default=False, db=curr_db) or k in recounts:
-                args = [k, valid_kmers, env, output_env, name]
+                args = [k, valid_kmers, env, output_env, name, write_kmers]
                 threads.append(Thread(target=output_file, args=args))
+                write_kmers = False
                 if k not in recounts:
                     recounts.append(k)
     if not force:
@@ -420,7 +429,7 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
     file_counts = env.open_db('file_counts'.encode())
 
     recounts = count_all(fasta_files, temp_files, db_keys, k, env, force)
-    recounts = add_all(temp_files, db_keys, env, force, recounts)
+    recounts = add_all(temp_files, db_keys, global_counts, file_counts, env, force, recounts)
     recounts = backfill_all(db_keys, global_counts, env, force, recounts)
 
     if output_db:
@@ -432,10 +441,6 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
     valid_kmers = filter_kmers(global_counts, file_counts, env,
                                max_global_count, min_global_count,
                                max_file_count, min_file_count)
-
-    valid_kmer_array = np.asarray(valid_kmers, dtype='<U64')
-    with output_env.begin(write=True) as txn:
-        txn.put(name.encode(), valid_kmer_array.tostring())
 
     output_all(db_keys, valid_kmers, env, output_env, name, force, recounts)
 
@@ -503,10 +508,21 @@ def get_kmer_names(database, name=constants.DEFAULT_NAME):
                             every kmer in the output.
     """
     env = lmdb.open(database, map_size=160e10, max_dbs=4000, max_readers=1e7)
-    with env.begin(write=False) as txn:
-        output = txn.get(name.encode())
+
+    try:
+        db = env.open_db(name.encode(), create=False)
+    except lmdb.NotFoundError:
+        msg = 'Attempted to get kmer names from a potentially uncreated'
+        msg += ' database: {} in {}'.format(name, database)
+        logging.exception(msg)
+        raise(KmerCounterError(msg))
+
+    with env.begin(write=False, db=db) as txn:
+        output = np.zeros(txn.stat()['entries'], dtype='<U64')
+        with txn.cursor() as cursor:
+            for index, (key, value) in enumerate(cursor):
+                output[index] = key.decode()
     env.close()
-    # TODO: Change <U8 to <U64; recreate output databases.
-    return np.fromstring(output, dtype='<U8')
+    return output
 
 
