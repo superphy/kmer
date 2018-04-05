@@ -20,6 +20,7 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 """
 
 from builtins import str
+import logging
 import os
 from sklearn.preprocessing import Imputer
 import kmerprediction.complete_kmer_counter as complete_kmer_counter
@@ -145,7 +146,7 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
     return (output_data, feature_names, test_label, le)
 
 
-def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
+def get_kmer_us_uk_split(kmer_kwargs=None, database=constants.DEFAULT_DB,
                          recount=False, validate=True,
                          complete_count=True):
     """
@@ -172,7 +173,7 @@ def get_kmer_us_uk_split(kmer_kwargs, database=constants.DEFAULT_DB,
                     complete_count=complete_count)
 
 
-def get_kmer_us_uk_mixed(kmer_kwargs, database=constants.DEFAULT_DB,
+def get_kmer_us_uk_mixed(kmer_kwargs=None, database=constants.DEFAULT_DB,
                          recount=False, validate=True,
                          complete_count=True):
     """
