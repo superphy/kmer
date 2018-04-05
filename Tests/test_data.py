@@ -14,25 +14,26 @@ class GetKmer(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
         self.db = self.dir + '/TEMPdatabase'
+        self.db_complete = self.dir + '/COMPdatabase'
         self.metadata = self.dir + '/TEMPmetadata'
         file_header = 'Fasta,Class,Dataset\n'
         file_contents = 'A1,A,Train\nA2,A,Test\nB1,B,Train'
         with open(self.metadata, 'w') as f:
             f.write('%s%s' % (file_header, file_contents))
-        with open(self.dir + '/A1', 'w') as f:
+        with open(self.dir + '/A1.fasta', 'w') as f:
             f.write('>\nAAACCCCAA')
-        with open(self.dir + '/A2', 'w') as f:
+        with open(self.dir + '/A2.fasta', 'w') as f:
             f.write('>\nAACCCCAA')
-        with open(self.dir + '/B1', 'w') as f:
+        with open(self.dir + '/B1.fasta', 'w') as f:
             f.write('>\nAACCAACC')
-        metadata_kwargs = {'metadata': self.metadata, 'prefix': self.dir + '/'}
+        metadata_kwargs = {'metadata': self.metadata, 'prefix': self.dir + '/',
+                           'suffix': '.fasta'}
         kmer_kwargs = {'k':2, 'limit':1}
-        args = {'metadata_kwargs': metadata_kwargs,
-                'kmer_kwargs': kmer_kwargs,
-                'recount': True,
-                'database': self.db,
-                'complete_count': False}
-        self.data, self.features, self.files, self.le = get_kmer(**args)
+        self.args = {'metadata_kwargs': metadata_kwargs,
+                     'kmer_kwargs': kmer_kwargs,
+                     'recount': True,
+                     'database': self.db,
+                     'complete_count': False}
         self.correct_x_train = np.array([[3, 1, 1, 3], [2, 2, 1, 2]])
         self.correct_y_train = np.array(['A', 'B'])
         self.correct_x_test = np.array([[2, 1, 1, 3]])
@@ -42,41 +43,98 @@ class GetKmer(unittest.TestCase):
         shutil.rmtree(self.dir)
 
     def test_x_train(self):
+        data, features, files, le = get_kmer(**self.args)
         count1 = 0
         count2 = 0
         for elem in self.correct_x_train:
             count2 += 1
-            if elem in self.data[0]:
+            if elem in data[0]:
                 count1 += 1
-        for elem in self.data[0]:
+        for elem in data[0]:
             count2 += 1
             if elem in self.correct_x_train:
                 count1 += 1
         self.assertEqual(count1, count2)
 
     def test_y_train(self):
+        data, features, files, le = get_kmer(**self.args)
         count1 = 0
         count2 = 0
         for elem in self.correct_y_train:
             count2 += 1
-            if elem in self.le.inverse_transform(self.data[1]):
+            if elem in le.inverse_transform(data[1]):
                 count1 += 1
-        for elem in self.le.inverse_transform(self.data[1]):
+        for elem in le.inverse_transform(data[1]):
             count2 += 1
             if elem in self.correct_y_train:
                 count1 += 1
         self.assertEqual(count1, count2)
 
     def test_x_test(self):
+        data, features, files, le = get_kmer(**self.args)
         val = False
-        if np.array_equal(self.data[2], self.correct_x_test):
+        if np.array_equal(data[2], self.correct_x_test):
             val = True
         self.assertTrue(val)
 
     def test_y_test(self):
+        data, features, files, le = get_kmer(**self.args)
         val = False
-        if np.array_equal(self.le.inverse_transform(self.data[3]),
-                          self.correct_y_test):
+        if np.array_equal(le.inverse_transform(data[3]), self.correct_y_test):
+            val = True
+        self.assertTrue(val)
+
+    def test_x_train_complete(self):
+        self.args['complete_count'] = True
+        self.args['database'] = self.db_complete
+        self.args['kmer_kwargs'] = {'k': 2}
+        data, features, files, le = get_kmer(**self.args)
+        count1 = 0
+        count2 = 0
+        for elem in self.correct_x_train:
+            count2 += 1
+            if elem in data[0]:
+                count1 += 1
+        for elem in data[0]:
+            count2 += 1
+            if elem in self.correct_x_train:
+                count1 += 1
+        self.assertEqual(count1, count2)
+
+    def test_y_train_complete(self):
+        self.args['complete_count'] = True
+        self.args['database'] = self.db_complete
+        self.args['kmer_kwargs'] = {'k': 2}
+        data, features, files, le = get_kmer(**self.args)
+        count1 = 0
+        count2 = 0
+        for elem in self.correct_y_train:
+            count2 += 1
+            if elem in le.inverse_transform(data[1]):
+                count1 += 1
+        for elem in le.inverse_transform(data[1]):
+            count2 += 1
+            if elem in self.correct_y_train:
+                count1 += 1
+        self.assertEqual(count1, count2)
+
+    def test_x_test_complete(self):
+        self.args['complete_count'] = True
+        self.args['database'] = self.db_complete
+        self.args['kmer_kwargs'] = {'k': 2}
+        data, features, files, le = get_kmer(**self.args)
+        val = False
+        if np.array_equal(data[2], self.correct_x_test):
+            val = True
+        self.assertTrue(val)
+
+    def test_y_test_complete(self):
+        self.args['complete_count'] = True
+        self.args['database'] = self.db_complete
+        self.args['kmer_kwargs'] = {'k': 2}
+        data, features, files, le = get_kmer(**self.args)
+        val = False
+        if np.array_equal(le.inverse_transform(data[3]), self.correct_y_test):
             val = True
         self.assertTrue(val)
 
