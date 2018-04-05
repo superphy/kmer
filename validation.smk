@@ -12,10 +12,11 @@ rule all:
 # Generate the input config files for the Lupolova e. Coli analysis
 rule config:
     output:
-        expand('config_files/validation/{model}_{data}_{split}_{k}_{selection}.yml',
+        expand('config_files/validation/{model}_{data}_{kmers}_{split}_{k}_{selection}.yml',
                model=config['model'],
                data=['kmer'],
                split=['split', 'mixed'],
+               kmers=['complete'],
                k=config['k_vals'],
                selection=config['selection'])
     script:
@@ -36,10 +37,11 @@ rule run:
 # Convert yaml output by run into pandas dataframes
 rule data_frames:
     input:
-        expand('results/validation/yaml/{model}_{data}_{split}_{k}_{selection}.yml',
+        expand('results/validation/yaml/{model}_{data}_{kmers}_{split}_{k}_{selection}.yml',
                model=config['model'],
                data=['kmer'],
                split=['split', 'mixed'],
+               kmers=['complete'],
                k=config['k_vals'],
                selection=config['selection'])
     output:
@@ -61,10 +63,11 @@ rule figures:
 # Make markdown tables for manuscript
 rule tables:
     input:
-        expand('results/validation/yaml/{model}_{data}_{split}_{k}_{selection}.yml',
+        expand('results/validation/yaml/{model}_{data}_{kmers}_{split}_{k}_{selection}.yml',
                model=config['model'],
                data=['kmer'],
                split=['split', 'mixed'],
+               kmers=['complete'],
                k=config['k_vals'],
                selection=config['selection'])
     output:

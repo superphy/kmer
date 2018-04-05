@@ -2,7 +2,7 @@ from kmerprediction import constants
 import os
 import yaml
 
-directory = 'config_files/US_UK/'
+directory = 'config_files/validation/'
 
 if not os.path.exists(directory):
     os.makedirs(directory)
@@ -45,6 +45,6 @@ for m in models:
                 base_yaml['selection'] = selection_method
                 base_yaml['selection_args'] = selection_args
                 k = str(k)
-                file_name = directory+m+'_'+dm[1]+'_'+dm[-1]+'_'+k+'_'+key+'.yml'
+                file_name = directory+m+'_'+dm[1]+'_complete_'+dm[-1]+'_'+k+'_'+key+'.yml'
                 with open(file_name, 'w') as f:
                     yaml.dump(base_yaml, f)
