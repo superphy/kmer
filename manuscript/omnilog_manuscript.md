@@ -18,12 +18,16 @@ header-includes:
 
 <!---
 To compile the PDF with pandoc, use:
-  pandoc omnilog_manuscript.md -o omnilog_manuscript.pdf --csl=biomed-central.csl --filter pandoc-fignos --bibliography=omnilog_references.bib --latex-engine=xelatex
+  pandoc omnilog_manuscript.md tables/strain_data.md figure_captions.md -o omnilog_manuscript.pdf --csl=biomed-central.csl --filter pandoc-fignos --bibliography=omnilog_references.bib --pdf-engine=xelatex
 
-  This requires having installed pandoc-fignos (eg. sudo pip -H install pandoc-fignos)
+  This requires having installed pandoc-fignos (eg. pip install pandoc-fignos)
+
+  Also note that to produce a .docx, first convert to .tex, then convert the .tex to .docx. Otherwise the macros won't be expanded.
+
+  pandoc omnilog_manuscript.md tables/strain_data.md figure_captions.md -o omnilog_manuscript.tex --csl=biomed-central.csl --filter pandoc-fignos --bibliography=omnilog_references.bib; pandoc omnilog_manuscript.tex -o omnilog_manuscript.docx; rm omnilog_manuscript.tex
 -->
-\include{values}
 
+\include{values}
 
 # Abstract
 Among Shiga-toxin producing Escherichia coli (STEC) certain serotypes, and lineages within these serotypes, are more frequently associated with human disease. Despite the importance of STEC, the link between clade-specific genes and phenotypes that influence bacterial survival and virulence is still largely unknown. In this study we examined 143 STEC from 36 serotypes, using whole-genome sequencing, phenotypic microarray (PM) analyses, and machine learning (ML) models to establish these linkages.
@@ -63,7 +67,7 @@ In this study, we examined 140 genomes from 36 STEC serotypes, including all of 
 # Methods
 
 ## Bacterial strains
-As can be seen in Table @
+One-hundred forty-three _E. coli_ bacterial strains, comprised of X serotypes were used in this study (Table 1).  Sixty-five strains were isolated from human hosts, 44 from bovine hosts, and 27 from environmental water samples. Additionally there were five isolates from ovine hosts, and one each from retail meat and a goose fecal sample.
 
 ## Omnilog Phenotypic Microarray Analyses
 The experimental procedure for _E. coli_ as detailed in the Omnilog Biolog manual (Biolog, California) was followed. Briefly, frozen cultures were streak-plated for single colonies on blooad agar and grown overnight at 37C. A single colony from these initial plates were again sub-cultured and grown overnight as before. Single colonies from these second subcultures were used to inoculate the appropriate fluids for each PM plate. Three experimental replicates of each plate were conducted, and the colorimetric value for each of the 96 wells recorded every 15 minutes for 24hours. To normalize each well to a potentially different number of starting cells, despite the uniformity of the Biolog protocol, the colorimetric reading at time point 0 was subtracted from subsequent readings. The resulting kinetic bacterial growth curves were subjected to cubic spline fitting using the R package OPM [@Vaas2013], and the area under this curve was used in downstream analyses.
@@ -85,8 +89,15 @@ Bacteria were isolated from frozen glycerol stocks, streaked for single colonies
 Raw reads were assembled using Spades v2.5 [@bankevich_spades_2012]. Pan-genome analyses were conducted using Panseq with default settings [@laing_pan-genome_2010]. The phylogenetic tree was constructed using FastTree2 [@price_fasttree_2010]. Hierarchical clustering of omnilog data was performed using R. Tree similarity was computed using the Robinson-Foulds distance measure, with the ape package for R.
 
 # Results
+## Phylogeny
+### Phylogeny based on WGS data
+Using maximum likelihood analyses of SNP variation among shared genomic regions, the strains of this study clustered into phylogenetic groups that were partitioned according to serotype, as shown in Figure @fig:snp_tree. Larger clades that consisted of more than one serotype were frequently grouped by H-antigen type, as was the case for the H11 cluster that contained strains of serotypes O26:H11, O103:H11, and the H2 cluster that contained O103:H2 strains and O45:H2 strains. Conversely, a small cluster of O104 strains grouped by O-type, containing strains of O104:H2 and O104:H21. Strains of serogroup O104 were the most distributed among the tree, with O104:H7, O104:H4, O104:H21 and  O104:H2 all present in separate clades. Forty-six O157:H7 genomes were analyzed; these formed a separate cluster and additionally clustered according to the three known O157:H7 lineages.
 
-## Validation and selection of parameters
+### Phylogeny based on omnilog phenotypic microarray data
+
+
+
+## Validation and selection of machine learning parameters
 
 ### Validation with previously published data
 To validate the models used in this study, the tests performed in the Lupolova et al. (2016) [@Lupolova2016] paper were recreated. The Lupolova et al. study used protein variance cluster data as input to a support vector machine to predict isolate host. Their data set consisted of 185 _E. coli_ O157:H7 isolates from the UK and an additional 88 _E. coli_ O157:H7 isolates from the US. 91 of the UK samples came from a human host and 94 came from a bovine host, while 44 of the US samples came from a human host and the remaining 44 came from a bovine host. When using the UK isolates as the training set and the US isolates as the test set, Lupolova et al accurately predicted host 82% of the time. When training and testing on a random split of the combined UK and US data sets, Lupolva et al. accurately predicted host 78% of the time. To perform each test their "datasets were divided by 6 and cross-validated over 100 runs."
@@ -104,9 +115,6 @@ The feature selection method used in this study was chosen after testing the Sel
 
 While designing the models, various data augmentation methods (artificially creating more training samples based on the current training data) were also tested. Since none of the methods provided a significant increase in model accuracy, data augmentation was not used in the final version of the models.
 
-## Genomic vs. phenotypic clustering
-TODO: phylogeny of genomes and tree based on omnilog data
-
 
 ## Classification of genomes
 The predictive ability of the three ML models using data from both the omnilog microarray and WGS was tested for the correct classification of isolate host and serotype. Both binary (category vs. not-category) and multiclass (correct assignment to any of the possible categories) predictions were tested.
@@ -122,177 +130,10 @@ The ability to classify host-source of bacteria was tested for all hosts with mo
 ## Predictive features
 
 ### Serotype
-TODO:
 
 ### Host
-TODO:
 
 # Tables
-\renewcommand{\arraystretch}{0.5}
-Table: The 143 _E. coli_ strains used in this study, with serotype, host source, and whether WGS data were available.
-
-| Strain   | O type | H type | Host        | WGS |
-|----------|--------|--------|-------------|-----|
-| ECI-2315 | O103   | H11    | Human       |   1 |
-| ECI-2633 | O103   | H2     | Bovine      |   1 |
-| ECI-2639 | O103   | H2     | Bovine      |   1 |
-| ECI-2640 | O103   | H2     | Bovine      |   1 |
-| ECI-2642 | O103   | H2     | Bovine      |   1 |
-| ECI-1853 | O103   | H2     | Human       |   1 |
-| ECI-2298 | O103   | H2     | Human       |   1 |
-| ECI-2634 | O103   | H2     | Human       |   1 |
-| ECI-2637 | O103   | H2     | Human       |   1 |
-| ECI-2638 | O103   | H2     | Ovine       |   1 |
-| ECI-2609 | O104   | H2     | Water       |   1 |
-| ECI-1848 | O104   | H21    | Human       |   1 |
-| ECI-2608 | O104   | H21    | Human       |   1 |
-| ON-2011  | O104   | H4     | Human       |   1 |
-| ECI-2603 | O104   | H7     | Bovine      |   1 |
-| ECI-2604 | O104   | H7     | Bovine      |   1 |
-| ECI-2605 | O104   | H7     | Ovine       |   1 |
-| ECI-2606 | O104   | H7     | Ovine       |   1 |
-| ECI-2681 | O109   | H5     | Bovine      |   1 |
-| ECI-2701 | O111   | H11    | Bovine      |   1 |
-| ECI-0715 | O111   | H8     | Bovine      |   1 |
-| ECI-2570 | O111   | H8     | Bovine      |   1 |
-| ECI-2571 | O111   | H8     | Bovine      |   1 |
-| ECI-2573 | O111   | H8     | Bovine      |   1 |
-| ECI-0132 | O111   | H8     | Human       |   1 |
-| ECI-1862 | O111   | H8     | Human       |   1 |
-| ECI-2572 | O111   | H8     | Human       |   1 |
-| ECI-2577 | O111   | H8     | Human       |   1 |
-| ECI-2599 | O113   | H21    | Bovine      |   1 |
-| ECI-2602 | O113   | H21    | Bovine      |   1 |
-| ECI-1856 | O113   | H21    | Human       |   1 |
-| ECI-2595 | O113   | H21    | Human       |   1 |
-| ECI-2600 | O113   | H21    | Human       |   1 |
-| ECI-2601 | O113   | H21    | Human       |   1 |
-| ECI-1830 | O113   | H4     | Bovine      |   1 |
-| ECI-2593 | O113   | H4     | Bovine      |   1 |
-| ECI-2597 | O113   | H4     | Human       |   1 |
-| ECI-1841 | O113   | NM     | Bovine      |   0 |
-| ECI-2583 | O121   | H19    | Bovine      |   1 |
-| ECI-0015 | O121   | H19    | Human       |   1 |
-| ECI-2297 | O121   | H19    | Human       |   1 |
-| ECI-2309 | O121   | H19    | Human       |   1 |
-| ECI-2579 | O121   | H19    | Human       |   1 |
-| ECI-2580 | O121   | H19    | Human       |   1 |
-| ECI-2578 | O121   | H7     | Bovine      |   1 |
-| ECI-2584 | O121   | H7     | Water       |   0 |
-| ECI-1817 | O121   | NM     | Human       |   0 |
-| ECI-2754 | O130   | H38    | Bovine      |   1 |
-| ECI-2644 | O139   | H19    | Bovine      |   1 |
-| ECI-2587 | O145   | H25    | Human       |   1 |
-| ECI-2591 | O145   | H28    | Bovine      |   1 |
-| ECI-2592 | O145   | H28    | Bovine      |   1 |
-| ECI-1854 | O145   | H28    | Human       |   1 |
-| ECI-1871 | O145   | H28    | Human       |   1 |
-| ECI-2306 | O145   | H28    | Human       |   1 |
-| ECI-2585 | O145   | H28    | Human       |   1 |
-| ECI-2586 | O145   | H28    | Human       |   1 |
-| ECI-2588 | O145   | H28    | Human       |   1 |
-| ECI-0013 | O145   | NM     | Human       |   0 |
-| ECI-2121 | O157   | H7     | Avian.Goose |   1 |
-| ECI-1437 | O157   | H7     | Bovine      |   1 |
-| ECI-1717 | O157   | H7     | Bovine      |   1 |
-| ECI-1907 | O157   | H7     | Bovine      |   1 |
-| ECI-1908 | O157   | H7     | Bovine      |   1 |
-| ECI-1909 | O157   | H7     | Bovine      |   1 |
-| ECI-1910 | O157   | H7     | Bovine      |   1 |
-| ECI-1911 | O157   | H7     | Bovine      |   1 |
-| ECI-1912 | O157   | H7     | Bovine      |   1 |
-| ECI-0217 | O157   | H7     | Human       |   1 |
-| ECI-0249 | O157   | H7     | Human       |   1 |
-| ECI-0258 | O157   | H7     | Human       |   1 |
-| ECI-0270 | O157   | H7     | Human       |   1 |
-| ECI-0272 | O157   | H7     | Human       |   1 |
-| ECI-0351 | O157   | H7     | Human       |   1 |
-| ECI-0357 | O157   | H7     | Human       |   1 |
-| ECI-0497 | O157   | H7     | Human       |   1 |
-| ECI-0504 | O157   | H7     | Human       |   1 |
-| ECI-0855 | O157   | H7     | Human       |   1 |
-| ECI-0857 | O157   | H7     | Human       |   1 |
-| ECI-0882 | O157   | H7     | Human       |   1 |
-| ECI-1757 | O157   | H7     | Human       |   1 |
-| ECI-1768 | O157   | H7     | Human       |   1 |
-| ECI-1864 | O157   | H7     | Human       |   1 |
-| ECI-1914 | O157   | H7     | Human       |   1 |
-| ECI-2386 | O157   | H7     | Human       |   1 |
-| ECI-2403 | O157   | H7     | Meat        |   1 |
-| ECI-0887 | O157   | H7     | Water       |   1 |
-| ECI-1146 | O157   | H7     | Water       |   1 |
-| ECI-1156 | O157   | H7     | Water       |   1 |
-| ECI-1618 | O157   | H7     | Water       |   1 |
-| ECI-1718 | O157   | H7     | Water       |   1 |
-| ECI-2223 | O157   | H7     | Water       |   1 |
-| ECI-2324 | O157   | H7     | Water       |   1 |
-| ECI-2355 | O157   | H7     | Water       |   1 |
-| ECI-2358 | O157   | H7     | Water       |   1 |
-| ECI-2359 | O157   | H7     | Water       |   1 |
-| ECI-2978 | O157   | H7     | Water       |   1 |
-| ECI-2979 | O157   | H7     | Water       |   1 |
-| ECI-2980 | O157   | H7     | Water       |   1 |
-| ECI-3004 | O157   | H7     | Water       |   1 |
-| ECI-3005 | O157   | H7     | Water       |   1 |
-| ECI-3006 | O157   | H7     | Water       |   1 |
-| ECI-3033 | O157   | H7     | Water       |   1 |
-| ECI-3034 | O157   | H7     | Water       |   1 |
-| ECI-3035 | O157   | H7     | Water       |   1 |
-| ECI-2856 | O165   | H25    | Human       |   1 |
-| ECI-2836 | O185   | H7     | Water       |   1 |
-| ECI-2969 | O2     | H29    | Water       |   1 |
-| ECI-2624 | O26    | H11    | Bovine      |   0 |
-| ECI-1364 | O26    | H11    | Bovine      |   1 |
-| ECI-2617 | O26    | H11    | Bovine      |   1 |
-| ECI-2619 | O26    | H11    | Bovine      |   1 |
-| ECI-2699 | O26    | H11    | Bovine      |   1 |
-| ECI-0158 | O26    | H11    | Human       |   0 |
-| ECI-0123 | O26    | H11    | Human       |   1 |
-| ECI-2618 | O26    | H11    | Human       |   1 |
-| ECI-2622 | O26    | H11    | Human       |   1 |
-| ECI-2626 | O26    | H11    | Human       |   1 |
-| ECI-3065 | O26    | H11    | Water       |   1 |
-| ECI-2627 | O45    | H2     | Bovine      |   1 |
-| ECI-2631 | O45    | H2     | Human       |   0 |
-| ECI-2303 | O45    | H2     | Human       |   1 |
-| ECI-2628 | O45    | H2     | Human       |   1 |
-| ECI-2629 | O45    | H2     | Human       |   1 |
-| ECI-2630 | O45    | H2     | Human       |   1 |
-| ECI-2632 | O45    | H51    | Bovine      |   1 |
-| ECI-2688 | O46    | H38    | Bovine      |   1 |
-| ECI-2895 | O46    | H38    | Water       |   1 |
-| ECI-2995 | O46    | H38    | Water       |   1 |
-| ECI-2795 | O5     | H9     | Water       |   1 |
-| ECI-2859 | O73    | H2     | Human       |   1 |
-| ECI-2607 | O8     | H21    | Bovine      |   1 |
-| ECI-2610 | O91    | H14    | Ovine       |   1 |
-| ECI-2611 | O91    | H14    | Ovine       |   1 |
-| ECI-2614 | O91    | H21    | Bovine      |   1 |
-| ECI-2615 | O91    | H21    | Bovine      |   1 |
-| ECI-2616 | O91    | H21    | Bovine      |   1 |
-| ECI-0008 | O91    | H21    | Human       |   1 |
-| ECI-1839 | O91    | H21    | Human       |   1 |
-| ECI-1842 | O91    | H21    | Human       |   1 |
-| ECI-1858 | O91    | H21    | Human       |   1 |
-| ECI-2307 | O91    | H21    | Human       |   1 |
-| ECI-2654 | O93    | H28    | Bovine      |   0 |
+ \renewcommand{\arraystretch}{0.5}
 
 
-#Figures
-
-![The effect of kmer sizes 3 - 31 and kmer frequency cutoff values of 1 - 15 in the correct prediction of host-source among _E. coli_ O157:H7 using WGS from the Lupolova et al. (2016) dataset [@Lupolova2016].](./images/KmerLength.pdf){#fig:kmer}
-
-![The effect of various feature selection methods and the amount of features removed in the correct prediction of host-source amoung _E. coli_ O157:H7 using WGS from the Lupolova et al. (2016) dataset [@Lupolova2016].](./images/FeatureSelection.pdf){#fig:featureselection}
-
-![The accuracy of Neural Network, Random Forest, and Support Vector machine models in predicting serotype from whole-genome sequence and omnilog microarray data, for all serotypes with five or more bacterial isolates](./images/Serotype.pdf){#fig:serotype}
-
-![The accuracy of Neural Network, Random Forest, and Support Vector machine models in predicting O-group from whole-genome sequence and omnilog microarray data, for all O-groups with five or more bacterial isolates](./images/Otype.pdf){#fig:otype}
-
-![The accuracy of Neural Network, Random Forest, and Support Vector machine models in predicting H-group from whole-genome sequence and omnilog microarray data, for all H-groups with five or more bacterial isolates](./images/Htype.pdf){#fig:htype}
-
-![Multiclass Figure Title](./images/Multiclass.pdf){#fig:multiclass}
-
-![Host Figure Title](./images/Host.pdf){#fig:hosts}
-
-\newpage
-## References
