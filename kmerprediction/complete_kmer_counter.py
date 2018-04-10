@@ -526,3 +526,31 @@ def get_kmer_names(database, name=constants.DEFAULT_NAME):
     return output
 
 
+def get_global_counts(database):
+    """
+    Get the global count for each kmer in the database
+
+    Args:
+        database (str): path to the complete database *Not the output database*
+
+    Returns:
+        global counts (ndarray): The total number of times each kmer appears
+                                 in the database
+    """
+    env = lmdb.open(database, map_size=160e10, max_dbs=4000, max_readers=1e7)
+
+    try:
+        db = env.open_db('global_counts'.encode(), create=False)
+    except lmdb.NotFoundError:
+        msg = 'Attempted to get global counts from an lmdb database {} '
+        msg += 'that has no global_count database inside it.'
+        logging.exception(msg)
+        raise(KmerCounterError(msg))
+
+    with env.begin(write=False, db=db) as txn:
+        output = np.zeros(txn.stat()['entries'], dtype=int)
+        with txn.cursor() as cursor:
+            for index, (key, value) in enumerate(cursor):
+                output[index] = int(value.decode())
+    env.close()
+    return output
