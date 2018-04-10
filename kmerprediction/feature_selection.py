@@ -16,12 +16,62 @@ is also returned.
 
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, chi2
 from sklearn.feature_selection import SelectPercentile, f_classif, RFE, RFECV
+from sklearn.feature_selection import SelectFdr
 from sklearn.svm import SVC
 from kmerprediction.utils import flatten, make3D
 import pandas as pd
 import numpy as np
+import logging
 
-def f_test_threshold(input_data, feature_names, threshold=0.05):
+def select_fdr(input_data, feature_names=None, score_func=f_classif, alpha=0.05):
+    if score_func == f_classif:
+        input_data, feature_names, _ = remove_constant(input_data, feature_names)
+
+    x_train = input_data[0]
+    y_train = input_data[1]
+    x_test = input_data[2]
+    y_test = input_data[3]
+
+    dims = len(x_train.shape)
+    if dims == 3:
+        x_train = flatten(x_train)
+        x_test = flatten(x_test)
+
+    done = False
+    increment = alpha
+    while not done:
+        feature_selector = SelectFdr(score_func=score_func, alpha=alpha)
+        temp_x_train = feature_selector.fit_transform(x_train, y_train)
+        temp_x_test = feature_selector.transform(x_test)
+        if temp_x_train.shape[1] > 1 and temp_x_test.shape[1] > 1:
+            done = True
+            x_train = temp_x_train
+            x_test = temp_x_test
+        else:
+            msg = 'Feature selection was too aggresive, '
+            msg += 'increasing alpha from {} to {}'.format(alpha, alpha+increment)
+            alpha += increment
+            logging.warning(msg)
+
+    if dims == 3:
+        x_train = make3D(x_train)
+        x_test = make3D(x_test)
+
+    output_data = (x_train, y_train, x_test, y_test)
+    if feature_names is not None:
+        mask = feature_selector.get_support()
+        feature_names = feature_names[mask]
+
+    logging.info('Selected {} features'.format(x_train.shape[1]))
+
+    final_args = {'score_func': score_func, 'alpha': alpha}
+
+    return output_data, feature_names, final_args
+
+def f_test_threshold(input_data, feature_names=None, threshold=0.01,
+                     increment=0.01, min_keep=100):
+    input_data, feature_names, _ = remove_constant(input_data, feature_names)
+
     x_train = input_data[0]
     y_train = input_data[1]
     x_test = input_data[2]
@@ -34,17 +84,25 @@ def f_test_threshold(input_data, feature_names, threshold=0.05):
 
     F, pval = f_classif(x_train, y_train)
 
-    keep = np.where(pval <= threshold, True, False)
+    while True:
+        keep = np.where(pval <= threshold, True, False)
+        new_x_train = x_train[:, keep]
+        new_x_test = x_test[:, keep]
+        if new_x_train.shape[1] >= min_keep:
+            break
+        else:
+            threshold += increment
+    logging.info('Selected {} features'.format(new_x_train.shape[1]))
+    logging.info('Final p-value threshold: {}'.format(threshold))
 
-    x_train = x_train[:, keep]
-    x_test = x_test[:, keep]
-
-    output_data = (x_train, y_train, x_test, y_test)
+    output_data = (new_x_train, y_train, new_x_test, y_test)
 
     if feature_names is not None:
         feature_names = feature_names[keep]
 
-    return output_data, feature_names
+    args = {'threshold': threshold, 'increment': increment, 'min_keep': min_keep}
+
+    return output_data, feature_names, args
 
 def variance_threshold(input_data, feature_names, threshold=0.16):
     """
@@ -60,7 +118,7 @@ def variance_threshold(input_data, feature_names, threshold=0.16):
         threshold (float):      Lower limit of variance for a feature to be kept
 
     Returns:
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple: (x_train, y_train, x_test, y_test), feature_names, input_args
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -84,7 +142,7 @@ def variance_threshold(input_data, feature_names, threshold=0.16):
         mask = feature_selector.get_support()
         feature_names = feature_names[mask]
 
-    return output_data, feature_names
+    return output_data, feature_names, {'threshold': threshold}
 
 
 def remove_constant(input_data, feature_names):
@@ -99,7 +157,7 @@ def remove_constant(input_data, feature_names):
                                 None
 
     Returns:
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple: (x_train, y_train, x_test, y_test), feature_names, input_args
     """
     x_train = pd.DataFrame(input_data[0])
     x_train = x_train.loc[:, x_train.var() != 0.0]
@@ -112,7 +170,7 @@ def remove_constant(input_data, feature_names):
     if feature_names is not None:
         feature_names = feature_names[list(x_train)]
 
-    return output_data, feature_names
+    return output_data, feature_names, {}
 
 
 def select_k_best(input_data, feature_names, score_func=f_classif, k=500):
@@ -131,11 +189,11 @@ def select_k_best(input_data, feature_names, score_func=f_classif, k=500):
         k (int):                How many features to keep.
 
     Returns:
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple: (x_train, y_train, x_test, y_test), feature_names, input_args
     """
 
     if score_func == f_classif:
-        input_data, feature_names = remove_constant(input_data, feature_names)
+        input_data, feature_names, _ = remove_constant(input_data, feature_names)
 
     x_train = input_data[0]
     y_train = input_data[1]
@@ -158,7 +216,7 @@ def select_k_best(input_data, feature_names, score_func=f_classif, k=500):
         mask = feature_selector.get_support()
         feature_names = feature_names[mask]
 
-    return output_data, feature_names
+    return output_data, feature_names, {'score_func': score_func, 'k':k}
 
 
 def select_percentile(input_data, feature_names, score_func=chi2, percentile=5):
@@ -177,10 +235,10 @@ def select_percentile(input_data, feature_names, score_func=chi2, percentile=5):
         percentile (int):       Percentile of features to keep.
 
     Returns:
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple: (x_train, y_train, x_test, y_test), feature_names, input_args
     """
     if score_func == f_classif:
-        input_data, feature_names = remove_constant(input_data, feature_names)
+        input_data, feature_names, _ = remove_constant(input_data, feature_names)
 
     x_train = input_data[0]
     y_train = input_data[1]
@@ -205,7 +263,7 @@ def select_percentile(input_data, feature_names, score_func=chi2, percentile=5):
         mask = feature_selector.get_support()
         feature_names = feature_names[mask]
 
-    return output_data, feature_names
+    return output_data, feature_names, {'score_func': score_func, 'percentile': percentile}
 
 
 def recursive_feature_elimination(input_data, feature_names,
@@ -227,7 +285,7 @@ def recursive_feature_elimination(input_data, feature_names,
         step (int or float):                  Passed to RFE, see documentation
 
     Returns:
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple: (x_train, y_train, x_test, y_test), feature_names, input_Args
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -251,7 +309,10 @@ def recursive_feature_elimination(input_data, feature_names,
         mask = feature_selector.get_support()
         feature_names = feature_names[mask]
 
-    return output_data, feature_names
+    args = {'estimator': estimator, 'n_features_to_select': n_features_to_select,
+            'step': step}
+
+    return output_data, feature_names, args
 
 
 def recursive_feature_elimination_cv(input_data, feature_names, step=0.1, cv=3,
@@ -272,7 +333,7 @@ def recursive_feature_elimination_cv(input_data, feature_names, step=0.1, cv=3,
         cv (int):               Passed to RFECV, see documentation
 
     Returns:
-        tuple: (x_train, y_train, x_test, y_test), feature_names
+        tuple: (x_train, y_train, x_test, y_test), feature_names, input_args
     """
     x_train = input_data[0]
     y_train = input_data[1]
@@ -296,4 +357,6 @@ def recursive_feature_elimination_cv(input_data, feature_names, step=0.1, cv=3,
         mask = feature_selector.get_support()
         feature_names = feature_names[mask]
 
-    return output_data, feature_names
+    args = {'step': step, 'cv': cv, 'estimator': estimator}
+
+    return output_data, feature_names, args
