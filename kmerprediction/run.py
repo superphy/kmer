@@ -90,6 +90,7 @@ def run(model=models.support_vector_machine, model_args=None,
     model_args['validate'] = validate
 
     feature_importances = []
+    final_selection_args = []
     num_features_before_selection = np.zeros(reps, dtype=int)
     num_features_after_selection = np.zeros(reps, dtype=int)
     for i in range(reps):
@@ -103,9 +104,10 @@ def run(model=models.support_vector_machine, model_args=None,
         # Perform feature selection on input_data
         selection_args['feature_names'] = features
         logging.info('Perform feature selection using {} with args: {}'.format(selection, selection_args))
-        data, features = selection(data, **selection_args)
+        data, features, final_sel_args = selection(data, **selection_args)
         selection_args.pop('feature_names', None)
         num_features_after_selection[i] = data[0].shape[1]
+        final_selection_args.append(final_sel_args)
 
         # Scale input data
         logging.info('Scale data using {} with args: {}'.format(scaler, scaler_args))
@@ -140,6 +142,7 @@ def run(model=models.support_vector_machine, model_args=None,
     output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
     output['features_before_selection'] = num_features_before_selection.mean().tolist()
     output['features_after_selection'] = num_features_after_selection.mean().tolist()
+    output['final_selection_args'] = final_selection_args
 
     if validate:
         # Compute the mean and std dev of all the runs
