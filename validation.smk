@@ -6,19 +6,16 @@ rule all:
     input:
         'manuscript/tables/validation_results.md',
         'manuscript/images/validation_results.pdf',
-        'manuscript/validation_results.tex'
-
+        'manuscript/validation_results.tex',
+        expand('results/validation/features/{k}mer_{filter}_features.csv',
+               k=config['k'], filter=config['filter']),
+        expand('results/validation/histogram/{k}mer_histogram.csv', k=config['k']),
+        expand('results/validation/kmer_appearances/{k}mer_appearances.csv', k=config['k'])
 
 # Generate the input config files for the Lupolova e. Coli analysis
 rule config:
     output:
-        expand('config_files/validation/{model}_{data}_{kmers}_{split}_{k}_{selection}.yml',
-               model=config['model'],
-               data=['kmer'],
-               split=['split', 'mixed'],
-               kmers=['complete'],
-               k=config['k_vals'],
-               selection=config['selection'])
+        'config_files/validation/{model}/{k}mer_{filter}/{dataset}/{selection}/config.yml'
     script:
         'scripts/validation_config.py'
 
@@ -26,9 +23,9 @@ rule config:
 # Run kmerprediction.run.main on the specified input and ouput yaml
 rule run:
     input:
-        'config_files/{dir}/{analysis}.yml'
+        'config_files/validation/{model}/{k}mer_{filter}/{dataset}/{selection}/config.yml'
     output:
-        'results/{dir}/yaml/{analysis}.yml'
+        'results/validation/yaml/{model}/{k}mer_{filter}/{dataset}/{selection}/results.yml'
     run:
         from kmerprediction.run import main
         main(input[0], output[0], input[0])
@@ -37,17 +34,16 @@ rule run:
 # Convert yaml output by run into pandas dataframes
 rule data_frames:
     input:
-        expand('results/validation/yaml/{model}_{data}_{kmers}_{split}_{k}_{selection}.yml',
+        expand('results/validation/yaml/{model}/{k}mer_{filter}/{dataset}/{selection}/results.yml'
                model=config['model'],
-               data=['kmer'],
-               split=['split', 'mixed'],
-               kmers=['complete'],
-               k=config['k_vals'],
+               k=config['k'],
+               filter=config['filter'],
+               dataset=config['dataset'],
                selection=config['selection'])
     output:
         'results/validation/DataFrames/results.csv'
     script:
-        'scripts/validation_data_frames.py'
+        'scripts/validation_dfs.py'
 
 
 # Make figures for manuscript
@@ -57,18 +53,17 @@ rule figures:
     output:
         'manuscript/images/validation_results.pdf'
     script:
-        'scripts/validation_figures.py'
+        'scripts/validation_figs.py'
 
 
 # Make markdown tables for manuscript
 rule tables:
     input:
-        expand('results/validation/yaml/{model}_{data}_{kmers}_{split}_{k}_{selection}.yml',
+        expand('results/validation/yaml/{model}/{k}mer_{filter}/{dataset}/{selection}/results.yml'
                model=config['model'],
-               data=['kmer'],
-               split=['split', 'mixed'],
-               kmers=['complete'],
-               k=config['k_vals'],
+               k=config['k'],
+               filter=config['filter'],
+               dataset=config['dataset'],
                selection=config['selection'])
     output:
         'manuscript/tables/validation_results.md'
@@ -85,3 +80,37 @@ rule macros:
     script:
         'scripts/validation_results.py'
 
+
+# Make k-mer frequency distribution
+rule histogram:
+    input:
+        '/home/rylan/Data/lupolova_data/complete_database/complete_{k}-mer_DB'
+    output:
+        'results/validation/histogram/{k}mer_frequency_distribution.csv'
+    script:
+        'scripts/kmer_histogram.py'
+
+
+# compare importance of features for different models/datasets
+rule feature_importance:
+    input:
+        expand('results/validation/yaml/{model}/{k}mer_{filter}/{dataset}/{selection}/results.yml'
+               model=config['model'],
+               k=config['k'],
+               filter=config['filter'],
+               dataset=config['dataset'],
+               selection=config['selection'])
+    output:
+        'results/validation/feature_importances/{k}mer_feature_importances.csv'
+    script:
+        'scripts/validation_features.py'
+
+
+# Create histograms for file counts of different kmer lengths
+rule kmer_appearance:
+    input:
+        '/home/rylan/Data/lupolova_data/complete_database/complete_{k}-mer_DB'
+    output:
+        'results/validation/kmer_appearances/{k}mer_appearances.csv'
+    script:
+        'scripts/kmer_appearances.py'
