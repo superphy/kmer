@@ -2,6 +2,13 @@ import os
 
 configfile: 'config.yml'
 
+def get_yaml():
+    out = expand('results/validation/yaml/{model}/{k}mer_{filter}/' +
+                 '{dataset}/{selection}/results.yml',
+                 model=config['model'], k=config['k'], filter=config['filter'],
+                 dataset=config['dataset'], selection=config['selection'])
+    return out
+
 rule all:
     input:
         'manuscript/tables/validation_results.md',
@@ -34,12 +41,7 @@ rule run:
 # Convert yaml output by run into pandas dataframes
 rule data_frames:
     input:
-        expand('results/validation/yaml/{model}/{k}mer_{filter}/{dataset}/{selection}/results.yml'
-               model=config['model'],
-               k=config['k'],
-               filter=config['filter'],
-               dataset=config['dataset'],
-               selection=config['selection'])
+        get_yaml()
     output:
         'results/validation/DataFrames/results.csv'
     script:
@@ -59,12 +61,7 @@ rule figures:
 # Make markdown tables for manuscript
 rule tables:
     input:
-        expand('results/validation/yaml/{model}/{k}mer_{filter}/{dataset}/{selection}/results.yml'
-               model=config['model'],
-               k=config['k'],
-               filter=config['filter'],
-               dataset=config['dataset'],
-               selection=config['selection'])
+        get_yaml()
     output:
         'manuscript/tables/validation_results.md'
     script:
@@ -82,26 +79,24 @@ rule macros:
 
 
 # Make k-mer frequency distribution
-rule histogram:
+rule histograms:
     input:
         '/home/rylan/Data/lupolova_data/complete_database/complete_{k}-mer_DB'
     output:
-        'results/validation/histogram/{k}mer_frequency_distribution.csv'
+        'results/validation/histogram/{k}mer_histogram.csv'
     script:
         'scripts/kmer_histogram.py'
 
 
 # compare importance of features for different models/datasets
-rule feature_importance:
+rule features:
     input:
-        expand('results/validation/yaml/{model}/{k}mer_{filter}/{dataset}/{selection}/results.yml'
-               model=config['model'],
-               k=config['k'],
-               filter=config['filter'],
-               dataset=config['dataset'],
+        expand('results/validation/yaml/{model}/{{k}}mer_{{filter}}/' +
+               '{dataset}/{selection}/results.yml',
+               model=config['model'], dataset=config['dataset'],
                selection=config['selection'])
     output:
-        'results/validation/feature_importances/{k}mer_feature_importances.csv'
+        'results/validation/features/{k}mer_{filter}_features.csv'
     script:
         'scripts/validation_features.py'
 

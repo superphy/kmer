@@ -46,7 +46,7 @@ def main():
         base['data_args']['kmer_kwargs']['k'] = k
         base['data_args']['kmer_kwargs']['output_db'] = output_dbs[k]
         if 'filtered' in f:
-            base['data_args']['kmer_kwargs']['name'] = 'appears_in_every_genome'
+            base['data_args']['kmer_kwargs']['name'] = 'minFileCount273'
             base['data_args']['kmer_kwargs']['min_file_count'] = 273
     elif 'filtered' in f:
         base['data_args']['complete_count'] = False
