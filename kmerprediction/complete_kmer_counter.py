@@ -554,3 +554,31 @@ def get_global_counts(database):
                 output[index] = int(value.decode())
     env.close()
     return output
+
+def get_file_counts(database):
+    """
+    Get the number of genomes that each kmer appears in.
+
+    Args:
+        database (str): path to the complete database *Not the output*
+
+    Returns:
+        file counts (ndarray): The number of files each kmer appears in.
+    """
+    env = lmdb.open(database, map_size=160e10, max_dbs=4000, max_readers=1e7)
+
+    try:
+        db = env.open_db('file_counts'.encode(), create=False)
+    except lmdb.NotFoundError:
+        msg = 'Attempted to get file counts from an lmdb database {} '
+        msg += 'that has no file_count database inside it.'
+        logging.exception(msg)
+        raise(KmerCounterError(msg))
+
+    with env.begin(write=False, db=db) as txn:
+        output = np.zeros(txn.stat()['entries'], dtype=int)
+        with txn.cursor() as cursor:
+            for index, (key, value) in enumerate(cursor):
+                output[index] = int(value.decode())
+    env.close()
+    return output
