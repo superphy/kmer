@@ -2,49 +2,68 @@ from kmerprediction import constants
 import os
 import yaml
 
-directory = 'config_files/validation/'
+base = {'augment': False,
+        'augment_args': {},
+        'data_args': {'kmer_kwargs': {}},
+        'scaler': 'scale_to_range',
+        'scaler_args': {'high': 1, 'low': -1},
+        'validate': True,
+        'verbose': True,
+        'reps': snakemake.config['reps']}
 
-if not os.path.exists(directory):
-    os.makedirs(directory)
+data_methods = {'split': 'get_kmer_us_uk_split',
+                'mixed': 'get_kmer_us_uk_mixed'}
 
-base_yaml = {'augment': False,
-             'augment_args': {},
-             'data_args': {'kmer_kwargs': {}},
-             'scaler': 'scale_to_range',
-             'scaler_args': {'high': 1, 'low': -1},
-             'selection': 'f_test_threshold',
-             'selection_args': {'threshold': 0.2},
-             'validate': True,
-             'verbose': True,
-             'reps': snakemake.config['reps']}
+selection_methods = {'kbest': 'select_k_best', 'fdr': 'select_fdr'}
 
-models = ['support_vector_machine', 'random_forest', 'neural_network']
-data_methods = ['get_kmer_us_uk_split', 'get_kmer_us_uk_mixed']
-selection_methods = [('kbest', 'select_k_best', {'score_func': 'f_classif', 'k': 270}),
-                     ('pthreshold', 'f_test_threshold', {'threshold': 0.2})]
+selection_args = {'kbest': {'score_func': 'f_classif', 'k': 270},
+                  'fdr': {'alpha': 1e-5, 'score_func': 'f_classif'}}
 
-base_path = '/home/rylan/miniconda3/envs/kmer/lib/python3.6/site-packages/kmerprediction/kmer_data/'
-complete_dbs = {7: base_path + 'complete_7-mer_DB/',
-                15: base_path + 'complete_15-mer_DB/',
-                31: base_path + 'complete_31-mer_DB/'}
-base_path = '/home/rylan/Data/lupolova_data/database/'
-output_dbs = {7: base_path + '7-mer_output_DB/',
-              15: base_path + '15-mer_output_DB/',
-              31: base_path + '31-mer_output_DB/'}
+complete_path = '/home/rylan/Data/lupolova_data/complete_database/complete_'
+complete_dbs = lambda x: complete_path + x + '-mer_DB/'
 
-for m in models:
-    base_yaml['model'] = m
-    for dm in data_methods:
-        base_yaml['data_method'] = dm
-        dm = dm.split('_')
-        for k in snakemake.config['k_vals']:
-            base_yaml['data_args']['kmer_kwargs']['k'] = k
-            base_yaml['data_args']['database'] = complete_dbs[k]
-            base_yaml['data_args']['kmer_kwargs']['output_db'] = output_dbs[k]
-            for key, selection_method, selection_args in selection_methods:
-                base_yaml['selection'] = selection_method
-                base_yaml['selection_args'] = selection_args
-                k = str(k)
-                file_name = directory+m+'_'+dm[1]+'_complete_'+dm[-1]+'_'+k+'_'+key+'.yml'
-                with open(file_name, 'w') as f:
-                    yaml.dump(base_yaml, f)
+output_path = '/home/rylan/Data/lupolova_data/database/'
+output_dbs = lambda x: output_path + x + '-mer_output_DB/'
+
+filter_path = '/home/rylan/Data/lupolova_data/filtered_datbase/'
+filter_dbs = lambda x: output_path + x + '-mer_output_DB/'
+
+def main():
+    directory = 'config_files/validation/'
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    model = snakemake.wildcards['model']
+    k = snakemake.wildcards['k']
+    f = snakemake.wildcards['filter']
+    dataset = snakemake.wildcards['dataset']
+    selection = snakemake.wildcards['selection']
+
+    if 'complete' in f:
+        base['data_args']['complere_count'] = True
+        base['data_args']['database'] = complete_dbs[k]
+        base['data_args']['kmer_kwargs']['k'] = k
+        base['data_args']['kmer_kwargs']['output_db'] = output_dbs[k]
+        if 'filtered' in f:
+            base['data_args']['kmer_kwargs']['name'] = 'appears_in_every_genome'
+            base['data_args']['kmer_kwargs']['min_file_count'] = 273
+    elif 'filtered' in f:
+        base['data_args']['complete_count'] = False
+        base['data_args']['database'] = complete_dbs[k]
+        base['data_args']['kmer_kwargs']['k'] = k
+        try:
+            limit = int(f.replace('filtered', ''))
+        except:
+            limit = None
+        base['data_args']['kmer_kwargs']['limit'] = None
+
+    base['model'] = model
+    base['selection'] = selection_methods[selection]
+    base['selection_args'] = selection_args[selection]
+
+    with open(snakemake.output[index], 'w') as f:
+        yaml.dump(base, f)
+
+if __name__ == "__main__":
+    main()
