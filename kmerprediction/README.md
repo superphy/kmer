@@ -167,7 +167,7 @@ count_kmers(files, database, k=k, max_file_count=A, min_file_count=B,
             max_global_count=C, min_global_count=D)
 ```
 
-This will store every kmer that appears in `files` in `database` that appears in at least `B` files, but no more than `A` files, as well as appearing at least `D` time in total in all files, but no more than `C` times in total in all files.
+This will store every kmer that appears in `files` in `database` that meets the requirments of appearing in at least `B`, but no more than `A` files, as well as appearing at least `D`, but no more than `C` times in total in all the files.
 
 ## Example Configuration File
 
