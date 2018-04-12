@@ -201,6 +201,58 @@ def get_kmer_us_uk_mixed(kmer_kwargs=None, database=constants.DEFAULT_DB,
                     complete_count=complete_count)
 
 
+def get_kmer_us_uk_reverse_split(kmer_kwargs=None, recount=False,
+                                 validate=True, database=constants.DEFAULT_DB,
+                                 complete_count=True):
+    """
+    Wraps get_kmer to get the US UK train test split reversed. I.e. The US set
+    is the train set and the UK set is the test set.
+    """
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'train_header': 'Dataset',
+                       'train_label': 'Test',
+                       'test_label': 'Train',
+                       'validate': validate}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
+
+
+def get_kmer_us(kmer_kwargs=None, database=constants.DEFAULT_DB, recount=False,
+                validate=True, complete_count=True):
+    """
+    Wraps get_kmer to get a random train/test split of just the US lupolova
+    data.
+    """
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'train_header': None,
+                       'extra_header': 'Dataset',
+                       'extra_label': 'Test',
+                       'validate': True}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
+
+
+def get_kmer_uk(kmer_kwargs=None, database=constants.DEFAULT_DB, recount=False,
+                validate=True, complete_count=True):
+    """
+    Wraps get_kmer to get a random train/test split of just the UK lupolova
+    data.
+    """
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'train_header': None,
+                       'extra_header': 'Dataset',
+                       'extra_label': 'Train',
+                       'validate': True}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
+
+
 def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
                         database=constants.DEFAULT_DB, recount=False,
                         validate=True, complete_count=True):
