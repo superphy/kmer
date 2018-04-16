@@ -2,6 +2,6 @@ k: [7, 9, 11, 15, 31]
 model: ['neural_network', 'support_vector_machine', 'random_forest']
 selection: ['kbest', 'fdr']
 filter: ['complete', 'complete_filtered']
-dataset: ['split', 'mixed']
+dataset: ['split', 'mixed', 'UK', 'US', 'reverse_split']
 important_features_models: ['support_vector_machine', 'random_forest']
 reps: 25
