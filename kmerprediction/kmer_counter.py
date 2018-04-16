@@ -135,7 +135,7 @@ def secondpass(filename, env, master):
             for key, val in cursor:
                 if not txn.get(key, default=False, db=master):
                     txn.delete(key, val, db=current)
-    logging.info('Backfilled kmers for {}'.format(filename))
+    logging.info('Remove missing kmers from {}'.format(filename))
 
 
 def count_kmers(files, database, k=constants.DEFAULT_K,
@@ -161,12 +161,14 @@ def count_kmers(files, database, k=constants.DEFAULT_K,
     env = lmdb.open(str(database), map_size=int(160e9), max_dbs=4000)
     master = env.open_db('master'.encode(), dupsort=False)
 
+    recounts = []
     with env.begin(write=True, db=master) as txn:
         logging.info('Begin counting kmers')
-        start(files[0], k, limit, env, txn, master)
+        if force or not txn.get(files[0].encode(), default=False):
+            start(files[0], k, limit, env, txn, master)
+            recounts.append(files[0])
 
     threads = []
-    recounts = []
     for filename in files[1:]:
         with env.begin(write=False) as txn:
             if force or not txn.get(filename.encode(), default=False):
@@ -181,7 +183,7 @@ def count_kmers(files, database, k=constants.DEFAULT_K,
 
     logging.info('Begin removing missing kmers')
     threads = []
-    for filename in files:
+    for filename in files[::-1]:
         with env.begin(write=False) as txn:
             if force or filename in recounts:
                 args = [filename, env, master]
@@ -218,8 +220,14 @@ def get_counts(files, database, name=None):
         msg += ' {}'.format(database)
         raise(KmerCounterError(msg))
 
-    env = lmdb.open(database, map_size=int(160e9), max_dbs=4000)
-    master = env.open_db('master'.encode(), dupsort=False)
+    env = lmdb.open(database, map_size=int(160e9), max_dbs=4000, max_readers=1e7)
+    try:
+        master = env.open_db('master'.encode(), dupsort=False, create=False)
+    except lmdb.NotFoundError:
+        msg = 'Attempted to get counts from a database that does not contain master'
+        msg += ' {}'.format(database)
+        logging.exception(msg)
+        raise(KmerCounterError(msg))
 
     if not files:
         output = np.array([], dtype='float64')
@@ -230,7 +238,7 @@ def get_counts(files, database, name=None):
 
             for index, value in enumerate(files):
                 try:
-                    current = env.open_db(value.encode(), txn=txn)
+                    current = env.open_db(value.encode(), txn=txn, create=False)
                 except lmdb.NotFoundError:
                     msg = 'Attempted to get counts for a potentially uncounted'
                     msg += ' genome: {} in DB: {}'.format(value, database)
@@ -239,7 +247,11 @@ def get_counts(files, database, name=None):
 
                 cursor = txn.cursor(db=current)
                 for i, (key, value) in enumerate(cursor):
-                    output[index, i] = float(value)
+                    try:
+                        output[index, i] = float(value)
+                    except IndexError:
+                        print(key, value)
+                        raise(IndexError)
 
     env.close()
     return output
