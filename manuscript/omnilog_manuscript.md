@@ -1,5 +1,5 @@
 ---
-title: Predictive marker discovery, and phenotypic classification of Shiga-toxin producting _Escherichia coli_ using machine learning models
+title: Predictive marker discovery, and phenotypic classification of Shiga-toxin producing _Escherichia coli_ using machine learning models
 
 author:
 - Chad Laing

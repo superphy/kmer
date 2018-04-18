@@ -18,7 +18,11 @@ def run_blast():
                                    db="../data/o157",
                                    outfmt=5,
                                    out=output_xml,
-                                   word_size=7)
+                                   word_size=7,
+                                   gapopen=1,
+                                   gapextend=1,
+                                   max_hsps=1,
+                                   )
     blastn()
     return output_xml
 
@@ -44,11 +48,25 @@ def parse_blast(xml_file):
                 exit(1)
 
             for hit in r.alignments:
-                hname = hit.hit_def
+                hname = get_rosetta_name(hit.hit_def)
                 ltype = get_ltype(query, hit)
-                lspa_dict[hit][hname] = ltype
+                lspa_dict[hname][query] = ltype
 
     return lspa_dict
+
+
+def get_rosetta_name(rawname):
+    """
+    Take the raw name from blast and return a clean, standardized name, the same as used for building the tree, using the same "rosetta" file.
+    :param rawname: Fasta header name from the blast results
+    :return: The cleaned name based on the phylip_rossetta.txt file
+    """
+    m = re.match(r"lcl\|([[a-zA-Z0-9\-]+)", rawname)
+    if m:
+        return m.group(1)
+    else:
+        print("No rosetta name found")
+        exit(1)
 
 
 def get_ltype(gene, hit):
@@ -59,35 +77,42 @@ def get_ltype(gene, hit):
     :return: the 1 or 2 lineage designation for the gene
     """
 
+    lsizes = {
+        "folD": 161,
+        "Z5935": 133,
+        "yhcG": 394,
+        "rbsB": 218,
+        "rtcB": 270,
+        "arp": 315
+    }
+
     ltype = "2"
     hsp = hit.hsps[0]
-    hlength = hsp.positives
-    if gene == "folD":
-        if hlength  == 161:
-            ltype = "1"
-    elif gene == "Z5935":
-        if hlength == 133:
-            ltype = "1"
-    elif gene == "yhcG":
-        if hlength == 394:
-            ltype = "1"
-    elif gene == "rbsB":
-        if hlength == 218:
-            ltype = "1"
-    elif gene == "rtcB":
-        if hlength == 270:
-            ltype = "1"
-    elif gene == "arp":
-        if hlength == 315:
-            ltype = "1"
-    else:
-        print("Incorrect gene for LSPA6 prediction: {}".format(gene))
-        exit(1)
+    hlength = hsp.align_length
+    difference = abs(lsizes[gene] - hlength)
 
+    if difference < 1:
+        ltype = "1"
+    else:
+        print("Gene {} has a difference of {}".format(gene, difference))
     return ltype
+
+
+def get_formatted_results(res):
+    """
+    Takes in a result dictionary, returns formatted list of LSPA6 type
+    :param res: Dictionary of genome->gene->type
+    :return: A list of one line per genome with LSPA6 type
+    """
+
+    lspa6_results = []
+    for k,v in res.items():
+        lspa6_results.append(k + " " + v["folD"] + v["Z5935"] + v["yhcG"] + v["rtcB"] + v["rbsB"] + v["arp"])
+
+    return lspa6_results
 
 
 if __name__ == "__main__":
     blast_xml = run_blast()
     results = parse_blast(blast_xml)
-    print(results)
+    print(get_formatted_results(results))
