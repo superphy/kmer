@@ -14,7 +14,7 @@ SALMONELLA = '/home/rboothman/Data/salmonella_amr/'
 ECOLI = '/home/rylan/Data/ecoli/fasta/'
 OMNILOG_FASTA = '/home/rylan/Data/ecomnilog/fasta/'
 MORIA = '/home/rboothman/moria/enterobase_db/'
-GENOME_REGIONS = '/home/rboothman/Data/genome_regions/binary_tables/'
+GENOME_REGIONS = '/home/rylan/Data/ecoli/genome_regions/'
 
 # default genome_region table
 GENOME_REGION_TABLE = '/home/rylan/Data/binary_table.txt'

@@ -324,6 +324,41 @@ def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE, sep=None,
     kwargs = {'validate': True}
     return get_genome_regions(kwargs, table, sep, validate=True)
 
+def get_genome_region_us(table=constants.GENOME_REGION_TABLE, sep=None,
+                         validate=True):
+    """
+    Wraps get_genome_regions to get a random 80/20 train test split on the
+    lupolova US data.
+    """
+    kwargs = {'validate': True,
+              'train_header': None,
+              'extra_header': 'Dataset',
+              'extra_label': 'Test'}
+    return get_genome_regions(kwargs, table, sep, validate=True)
+
+def get_genome_region_uk(table=constants.GENOME_REGION_TABLE, sep=None,
+                         validate=True):
+    """
+    Wraps get_genome_regions to get a random 80/20 train test split on the
+    lupolova UK data
+    """
+    kwargs = {'validate': True,
+              'train_header': None,
+              'extra_header': 'Dataset',
+              'extra_label': 'Train'}
+    return get_genome_regions(kwargs, table, sep, validate=True)
+
+def get_genome_region_us_uk_reverse_split(table=constants.GENOME_REGION_TABLE,
+                                          sep=None, validate=True):
+    """
+    Wraps get_genome_regions to get triaing data from the US dataset and testing
+    data from the UK dataset
+    """
+    kwargs = {'validate': True,
+              'train_header': 'Dataset',
+              'train_label': 'Test',
+              'test_label': 'Train'}
+    return get_genome_regions(kwargs, table, sep, validate=True)
 
 def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
                      validate=True):
