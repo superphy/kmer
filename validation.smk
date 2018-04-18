@@ -12,6 +12,10 @@ def get_yaml():
                  model=config['model'], k=config['k'],
                  dataset=config['dataset'], selection=config['selection'],
                  filter=config['filter'])
+    out += expand('results/validation/yaml/{model}/genome{fragment}/' +
+                  '{dataset}/{selection}/results.yml',
+                  model=config['model'], fragment=config['fragment'],
+                  dataset=config['dataset'], selection=config['selection'])
     return out
 
 
@@ -20,17 +24,24 @@ rule all:
         'manuscript/tables/validation_results.md',
         'manuscript/images/validation_results.pdf',
         'manuscript/validation_results.tex',
-        'results/validation/features/7mer_filtered_13_features.csv',
-        expand('results/validation/features/{k}mer_{filter}_features.csv',
-               k=config['k'], filter=config['filter']),
-        expand('results/validation/histogram/{k}mer_histogram.csv', k=config['k']),
-        expand('results/validation/kmer_appearances/{k}mer_appearances.csv', k=config['k'])
+#         'results/validation/features/7mer_filtered_13_features.csv',
+#         expand('results/validation/features/{k}mer_{filter}_features.csv',
+#                k=config['k'], filter=config['filter']),
+#         expand('results/validation/histogram/{k}mer_histogram.csv', k=config['k']),
+#         expand('results/validation/kmer_appearances/{k}mer_appearances.csv', k=config['k'])
 
 
 # Generate the input config files for the Lupolova e. Coli analysis
 rule config:
     output:
         'config_files/validation/{model}/{k}mer_{filter}/{dataset}/{selection}/config.yml'
+    threads: 24
+    script:
+        'scripts/validation_config.py'
+
+rule genome_region_config:
+    output:
+        'config_files/validation/{model}/genome{fragment}/{dataset}/{selection}/config.yml'
     threads: 24
     script:
         'scripts/validation_config.py'
@@ -63,7 +74,8 @@ rule figures:
     input:
         'results/validation/DataFrames/results.csv'
     output:
-        'manuscript/images/validation_results.pdf'
+        'manuscript/images/lupolova_comparison.pdf',
+        'manuscript/images/genome_region_comparison.pdf'
     script:
         'scripts/validation_figs.py'
 
@@ -79,7 +91,7 @@ rule tables:
 
 
 # Make LaTeX macros to expand validation results in manuscript
-rule macros:
+rule macros: # TODO: write the script for this rule
     input:
         'results/validation/DataFrames/results.csv'
     output:
@@ -101,14 +113,18 @@ rule histograms:
 # compare importance of features for different models/datasets
 rule features:
     input:
-        expand('results/validation/yaml/{model}/{{k}}mer_{{filter}}/' +
+        expand('results/validation/yaml/{model}/{{k}}mer_{filter}/' +
                '{dataset}/{selection}/results.yml',
                model=config['model'], dataset=config['dataset'],
-               selection=config['selection']),
+               selection=config['selection'], filter=config['filter']),
     output:
-        'results/validation/features/{k}mer_{filter}_features.csv'
+        'results/validation/features/{k}mer_features.csv'
     script:
         'scripts/validation_features.py'
+
+rule all_features:
+    input:
+        expand('results/validation/features/{k}mer_features.csv', k=config['k'])
 
 rule filtered_features:
     input:
