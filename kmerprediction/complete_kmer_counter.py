@@ -424,6 +424,9 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
     temp_dir = tempfile.mkdtemp()
     temp_files = [temp_dir + '/' + x for x in db_keys]
 
+    if not os.path.exists(database):
+        os.makedirs(database)
+
     env = lmdb.open(database, map_size=160e10, max_dbs=4000, max_readers=1e7)
     global_counts = env.open_db('global_counts'.encode())
     file_counts = env.open_db('file_counts'.encode())
@@ -433,6 +436,8 @@ def count_kmers(fasta_files, database, k=constants.DEFAULT_K, verbose=True,
     recounts = backfill_all(db_keys, global_counts, env, force, recounts)
 
     if output_db:
+        if not os.path.exists(output_db):
+            os.makedirs(output_db)
         output_env = lmdb.open(output_db, map_size=160e10, max_dbs=4000,
                                max_readers=1e7)
     else:

@@ -360,7 +360,7 @@ def get_genome_region_us_uk_reverse_split(table=constants.GENOME_REGION_TABLE,
               'test_label': 'Train'}
     return get_genome_regions(kwargs, table, sep, validate=True)
 
-def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
+def get_omnilog_data(metadata_kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
                      validate=True):
     """
     Gets the omnilog data contained in omnilog_sheet for the genomes specified
@@ -377,10 +377,10 @@ def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
                 LabelEncoder
 
     """
-    kwargs = kwargs or {}
-    kwargs['validate'] = validate
+    metadata_kwargs = metadata_kwargs or {}
+    metadata_kwargs['validate'] = validate
 
-    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+    (x_train, y_train, x_test, y_test) = parse_metadata(**metadata_kwargs)
 
     test_files = [str(x) for x in x_test]
 
