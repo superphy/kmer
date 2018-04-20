@@ -1,0 +1,6 @@
+k: [7, 9]
+model: ['neural_network', 'support_vector_machine', 'random_forest']
+selection: ['kbest']
+filter: ['complete']
+important_features_models: ['support_vector_machine', 'random_forest']
+reps: 100
