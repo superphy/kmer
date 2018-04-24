@@ -13,9 +13,9 @@ import random
 kmer_length = 7
 df = pd.read_csv('{}mer_features.csv'.format(kmer_length))
 
-models = ['random_forest', 'support_vector_machine']
-datasets = ['mixed', 'reverse_split', 'split', 'UK', 'US']
-filters = ['complete', 'complete_filtered', 'filtered']
+models = ['Random forest', 'Support vector machine']
+datasets = ['Mixed', 'Reverse split', 'Split', 'UK', 'US']
+filters = ['Complete', 'Complete filtered', 'Filtered']
 sorts = {}
 for m in models:
     for d in datasets:
@@ -27,9 +27,9 @@ for m in models:
             xrange = temp['Kmer'].values
             sorts['{} {} {}'.format(m, d, f)] = xrange
 
-converters = {'Model': {0: 'random_forest', 1: 'support_vector_machine'},
-              'Dataset': {0: 'UK', 1: 'US', 2: 'mixed', 3: 'reverse_split', 4: 'split'},
-              'Filter': {0: 'complete', 1: 'complete_filtered', 2: 'filtered'}}
+converters = {'Model': {0: 'Random forest', 1: 'Support vector machine'},
+              'Dataset': {0: 'UK', 1: 'US', 2: 'Mixed', 3: 'Reverse split', 4: 'Split'},
+              'Filter': {0: 'Complete', 1: 'Complete filtered', 2: 'Filtered'}}
 
 source = ColumnDataSource(df)
 
@@ -40,12 +40,12 @@ def create_figure():
     key = '{} {} {}'.format(active['Model'], active['Dataset'], active['Filter'])
     xrange = sorts[key]
 
-    alpha_dict = {'support_vector_machine': 1.0, 'random_forest': 0.1}
-    color_dict = {'split': Dark2[5][0], 'mixed': Dark2[5][1],
-                  'reverse_split': Dark2[5][2], 'US': Dark2[5][3],
+    alpha_dict = {'Support vector machine': 1.0, 'Random forest': 0.1}
+    color_dict = {'Split': Dark2[5][0], 'Mixed': Dark2[5][1],
+                  'Reverse split': Dark2[5][2], 'US': Dark2[5][3],
                   'UK': Dark2[5][4]}
-    shape_dict = {'complete': 'circle', 'complete_filtered': 'diamond',
-                  'filtered': 'square'}
+    shape_dict = {'Complete': 'circle', 'Complete filtered': 'diamond',
+                  'Filtered': 'square'}
 
     visible_models = [modelboxes.labels[x] for x in modelboxes.active]
     visible_datasets = [datasetboxes.labels[x] for x in datasetboxes.active]
@@ -62,7 +62,8 @@ def create_figure():
                 curr_filter = [GroupFilter(column_name='Model', group=model),
                                GroupFilter(column_name='Dataset', group=dataset),
                                GroupFilter(column_name='Filter', group=f),
-                               BooleanFilter([True if k in xrange else False for k in source.data['Kmer']])]
+                               bools = [True if k in xrange else False for k in source.data['Kmer']]
+                               BooleanFilter(bools)]
                 view = CDSView(source=source, filters=curr_filter)
                 alpha = alpha_dict[model]
                 color = color_dict[dataset]

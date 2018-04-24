@@ -2,28 +2,18 @@ import yaml
 import pandas as pd
 import numpy as np
 
-cols = ['Model', 'Kmer Filter Method', 'Dataset', 'k',
-        'Feature Selection', 'Accuracy']
-index = np.arange(len(snakemake.input))
-output = pd.DataFrame(columns=cols, index=index)
+def main():
+    data = pd.read_csv(snakemake.input[0])
+    cols = ['Model', 'Datatype', 'Kmer Filter', 'Kmer Length', 'Fragment Size',
+            'Dataset', 'Feature Selection']
 
-output.loc[0] = ['---',]*len(cols)
+    data = data.groupby(by=cols).mean().reset_index()
 
-for index, yf in enumerate(snakemake.input):
-    name = yf.replace('results/validation/yaml/', '')
-    name = name.split('/')
-    model = name[0]
-    datatype = name[1].split('_')
-    k = int(datatype[0].replace('mer', ''))
-    filter_method = '_'.join(datatype[1:])
-    dataset = name[2]
-    selection = name[3]
-    with open(yf, 'r') as f:
-        data = yaml.load(f)
-    acc = float(data['output']['avg_result'])*100
-    acc = "{0:.2f}%".format(acc)
+    header = pd.DataFrame(columns=cols  + ['Mean Accuracy'])
+    header.loc[0] = ['---',]*(len(cols) + 1)
+    frames = [header, data]
+    output = pd.concat(frames, ignore_index=True)
+    output.to_csv(snakemake.output[1], index=False, sep='|')
 
-    output.loc[index + 1] = [model, filter_method, dataset, k, selection, acc]
-
-output.to_csv(snakemake.output[0], index=False, sep='|')
-
+if __name__ == "__main__":
+    main()

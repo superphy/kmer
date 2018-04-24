@@ -1,19 +1,14 @@
 import yaml
 import pandas as pd
 import numpy as np
+from omni_naming import convert_filepath
 
 def add_to_output(yaml_file, df):
     with open(yaml_file, 'r') as f:
         data = yaml.load(f)
         data = data['output']['important_features']
 
-    name = yaml_file.replace('results/omnilog/yaml/', '')
-    name = name.split('/')
-    model = name[0]
-    datatype = name[1]
-    selection = name[2]
-    prediction = name[3]
-    ova = name[4]
+    info = convert_filepath(yaml_file)
 
     feature_scores = {}
     for d in data:
@@ -27,7 +22,7 @@ def add_to_output(yaml_file, df):
     top_features = sorted(feature_scores, reverse=True, key=lambda k: feature_scores[k])
     for index, feature in enumerate(top_features):
         score = feature_scores[feature]
-        curr_out = [feature, model, score]
+        curr_out = [feature, info['model'], score]
         df.loc[height + index] = curr_out
     return df
 

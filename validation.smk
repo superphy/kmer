@@ -81,7 +81,7 @@ rule figures:
 # Make markdown tables for manuscript
 rule tables:
     input:
-        get_yaml()
+        'results/validation/DataFrames/results.csv'
     output:
         'manuscript/tables/validation_results.md'
     script:
