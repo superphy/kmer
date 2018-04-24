@@ -6,7 +6,8 @@ configfile: 'omnilog_config.yml'
 ova_dict = {'Host': constants.VALID_HOSTS,
             'Htype': constants.VALID_HTYPES,
             'Otype': constants.VALID_OTYPES,
-            'Serotype': constants.VALID_SEROTYPES}
+            'Serotype': constants.VALID_SEROTYPES,
+            'Multiclass': 'all'}
 
 rule all:
     input:
@@ -49,7 +50,7 @@ rule run:
 
 
 # Convert the Omnilog binary results into pandas DataFrames to plot the model accuracies
-rule binary_data_frames:
+rule dataframes:
     input:
         lambda wc: expand('results/omnilog/yaml/{model}/{k}mer_{filter}/{selection}/' +
                           '{prediction}/{ova}/results.yml',
@@ -68,7 +69,7 @@ rule binary_data_frames:
     output:
         'results/omnilog/DataFrames/{prediction}.csv'
     script:
-        'scripts/omni_binary_dfs.py'
+        'scripts/omni_dataframes.py'
 
 
 # Convert the Omnilog multiclass results into a pandas DataFrame to plot the model accuracies
@@ -93,23 +94,13 @@ rule multiclass_data_frames:
 
 
 # Make figures for the manuscript of the binary results.
-rule binary_figures:
+rule figures:
     input:
         'results/omnilog/DataFrames/{prediction}.csv'
     output:
-        'manuscript/images/omnilog_{prediction, (Host)|(Otype)|(Htype)|(Serotype)}.pdf'
+        'manuscript/images/omnilog_{prediction}.pdf'
     script:
-        'scripts/omni_binary_figs.py'
-
-
-# Make figures for the manuscript of the multiclass results
-rule multiclass_figures:
-    input:
-        'results/omnilog/DataFrames/Multiclass.csv'
-    output:
-        'manuscript/images/omnilog_Multiclass.pdf'
-    script:
-        'scripts/omni_multi_figs.py'
+        'scripts/omni_figures.py'
 
 
 # Convert the important feature data returned by the SVM and RF models into pandas DataFrames
