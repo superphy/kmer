@@ -7,7 +7,7 @@ def main():
     new = pd.DataFrame(columns=complete.columns)
     new.loc[0] = ['---',]*len(complete.columns)
     output_df = pd.concat([new, complete], ignore_index=True)
-    output_df.to_csv(output[0], sep='|', index=False)
+    output_df.to_csv(snakemake.output[0], sep='|', index=False)
 
 if __name__ == '__main__':
     main()

@@ -2,8 +2,9 @@ import yaml
 import pandas as pd
 import numpy as np
 
-cols = ['Model', 'Data Type', 'Prediction', 'Accuracy']
-index = np.arange(len(snakemake.input))
+cols = ['Model', 'Data Type', 'Kmer Length', 'Kmer Filter',
+        'Feature Selection', 'Prediction', 'Accuracy']
+index = np.arange(len(snakemake.input) + 1)
 output = pd.DataFrame(columns=cols, index=index)
 
 output.loc[0] = ['---',]*len(cols)
@@ -14,19 +15,27 @@ for yf in snakemake.input:
         data = yaml.load(f)
     acc = float(data['output']['avg_result'])*100
     acc = "{0:.2f}%".format(acc)
-    name = data['name'].split('/')[-1]
-    name = name.split('_')
-    prediction = name[-1].replace('.yml', '')
-    data = name[-2]
-    prediction_class = name[-3]
-    model = ' '.join(name[:-3]).title()
-
-    if prediction == 'all':
-        prediction = 'All ' + prediction_class + 's'
+    name = yf.replace('results/omnilog/yaml/', '')
+    name = name.split('/')
+    model = name[0]
+    if name[1] == 'omnilog':
+        datatype = 'omnilog'
+        k = None
+        f = None
     else:
-        prediction = prediction + '/Non-' + prediction
+        kmer_info = name[1].split('_')
+        datatype = 'Kmer'
+        k = int(kmer_info[0].replace('mer', ''))
+        f = kmer_info[1]
+    selection = name[2]
+    prediction = name[3]
+    ova = name[4]
+    if ova == 'all':
+        ova = 'All ' + prediction + 's'
+    else:
+        ova = ova + '/Non-' + ova
 
-    output.loc[count] = [model, data, prediction, acc]
+    output.loc[count] = [model, datatype, k, f, selection, ova, acc]
     count += 1
 
 output.to_csv(snakemake.output[0], index=False, sep='|')
