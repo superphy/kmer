@@ -3,24 +3,24 @@ from kmerprediction import constants
 
 configfile: 'omnilog_config.yml'
 
-ova_dict = {'Host': constants.VALID_HOSTS + ['all'],
-            'Htype': constants.VALID_HTYPES + ['all'],
-            'Otype': constants.VALID_OTYPES + ['all'],
-            'Serotype': constants.VALID_SEROTYPES + ['all']}
+ova_dict = {'Host': constants.VALID_HOSTS,
+            'Htype': constants.VALID_HTYPES,
+            'Otype': constants.VALID_OTYPES,
+            'Serotype': constants.VALID_SEROTYPES}
 
 rule all:
     input:
-#         'manuscript/tables/complete_omnilog_results.md',
+        'manuscript/tables/complete_omnilog_results.md',
         expand('manuscript/images/omnilog_{figure}.pdf',
                figure=['Multiclass', 'Host', 'Htype', 'Otype', 'Serotype']),
-#         expand('manuscript/images/important_features/Host_{ova}.pdf',
-#                ova=constants.VALID_HOSTS + ['all']),
-#         expand('manuscript/images/important_features/Serotype_{ova}.pdf',
-#                ova=constants.VALID_SEROTYPES + ['all']),
-#         expand('manuscript/images/important_features/Otype_{ova}.pdf',
-#                ova=constants.VALID_OTYPES + ['all']),
-#         expand('manuscript/images/important_features/Htype_{ova}.pdf',
-#                ova=constants.VALID_HTYPES + ['all'])
+        expand('manuscript/images/important_features/Host_{ova}.pdf',
+               ova=constants.VALID_HOSTS + ['all']),
+        expand('manuscript/images/important_features/Serotype_{ova}.pdf',
+               ova=constants.VALID_SEROTYPES + ['all']),
+        expand('manuscript/images/important_features/Otype_{ova}.pdf',
+               ova=constants.VALID_OTYPES + ['all']),
+        expand('manuscript/images/important_features/Htype_{ova}.pdf',
+               ova=constants.VALID_HTYPES + ['all'])
 
 
 # Generate the input config files for the Omnilog analysis
@@ -115,12 +115,13 @@ rule multiclass_figures:
 # Convert the important feature data returned by the SVM and RF models into pandas DataFrames
 rule important_features_data_frames:
     input:
-        expand('results/omnilog/yaml/{model}_{{prediction}}_omni_{{ova}}.yml',
-               model=config['important_features_models'])
+        expand('results/omnilog/yaml/{model}/omnilog/{selection}/{{prediction}}/{{ova}}/results.yml',
+               model=config['important_features_models'],
+               selection=config['selection'])
     output:
         'results/omnilog/important_features/{prediction}_{ova}.csv'
     script:
-        'scripts/important_features.py'
+        'scripts/omni_features.py'
 
 
 # Make figures for the manuscript of the important feature results
@@ -130,19 +131,28 @@ rule important_features_figures:
     output:
         'manuscript/images/important_features/{prediction}_{ova}.pdf'
     script:
-        'scripts/important_features_figs.py'
+        'scripts/omni_features_figs.py'
 
 
 # Convert dataframes to markdown tables for the manuscript
 rule tables:
     input:
-        lambda wc : expand('results/omnilog/yaml/{model}_{p_class}_{datatype}_{p}.yml',
+        lambda wc : expand('results/omnilog/yaml/{model}/omnilog/{selection}/' +
+                           '{prediction}/{ova}/results.yml',
                            model=config['model'],
-                           datatype=['kmer', 'omni'],
-                           p_class = wc.p_class,
-                           p=ova_dict[wc.p_class] + ['all'])
+                           selection=config['selection'],
+                           prediction = wc.prediction,
+                           ova=ova_dict[wc.prediction] + ['all']),
+        lambda wc : expand('results/omnilog/yaml/{model}/{k}mer_{filter}/' +
+                           '{selection}/{prediction}/{ova}/results.yml',
+                           model=config['model'],
+                           k=config['k'],
+                           filter=config['filter'],
+                           selection=config['selection'],
+                           prediction = wc.prediction,
+                           ova=ova_dict[wc.prediction] + ['all'])
     output:
-        'manuscript/tables/omnilog_{p_class}_table.md'
+        'manuscript/tables/omnilog_{prediction}_table.md'
     script:
         'scripts/omni_tables.py'
 
@@ -150,7 +160,7 @@ rule tables:
 # Combine individual tables into one large table for the manuscript
 rule complete_results_table:
     input:
-        expand('results/omnilog/Tables/{p_class}_table.md',
+        expand('manuscript/tables/omnilog_{p_class}_table.md',
                p_class=['Host', 'Htype', 'Otype', 'Serotype'])
     output:
         'manuscript/tables/complete_omnilog_results.md'
