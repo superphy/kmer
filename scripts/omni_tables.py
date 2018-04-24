@@ -1,7 +1,7 @@
 import yaml
 import pandas as pd
 import numpy as np
-from omni_naming import convert_filepath
+import convert_filepaths
 
 cols = ['Model', 'Datatype', 'Kmer Length', 'Kmer Filter',
         'Feature Selection', 'Prediction', 'Accuracy']
@@ -16,7 +16,7 @@ for yf in snakemake.input:
         data = yaml.load(f)
     acc = float(data['output']['avg_result'])*100
     acc = "{0:.2f}%".format(acc)
-    info = convert_filepath(yf)
+    info = convert_filepaths.omnilog(yf)
     if info['ova'] == 'All':
         output_prediction = 'All ' + info['prediction'] + 's'
     else:

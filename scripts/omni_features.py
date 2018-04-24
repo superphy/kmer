@@ -1,14 +1,14 @@
 import yaml
 import pandas as pd
 import numpy as np
-from omni_naming import convert_filepath
+import convert_filepaths
 
 def add_to_output(yaml_file, df):
     with open(yaml_file, 'r') as f:
         data = yaml.load(f)
         data = data['output']['important_features']
 
-    info = convert_filepath(yaml_file)
+    info = convert_filepaths.omnilog(yaml_file)
 
     feature_scores = {}
     for d in data:

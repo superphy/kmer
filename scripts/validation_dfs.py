@@ -2,7 +2,7 @@ import yaml
 import pandas as pd
 import numpy as np
 from kmerprediction import constants
-from validation_naming import convert_filepath
+import convert_filepaths
 
 def main():
     num_rows = snakemake.config['reps'] * len(snakemake.input)
@@ -12,7 +12,7 @@ def main():
 
     count = 0
     for yf in snakemake.input:
-        info = convert_filepath(yf)
+        info = convert_filepaths.validation(yf)
         with open(yf, 'r') as f:
             data = yaml.load(f)
             acc = data['output']['results']

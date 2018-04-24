@@ -1,10 +1,10 @@
 import yaml
 import pandas as pd
 import numpy as np
-from validation_naming import convert_filepath
+import convert_filepaths
 
 def add_to_output(yaml_file, df):
-    info = convert_filepath(yaml_file)
+    info = convert_filepaths.validation(yaml_file)
 
     with open(yaml_file, 'r') as f:
         data = yaml.load(f)
