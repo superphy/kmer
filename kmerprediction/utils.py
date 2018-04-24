@@ -249,8 +249,20 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
     else:
         data = pd.read_csv(metadata, sep=sep)
 
-    if extra_header:
-        data = data.loc[data[extra_header] == extra_label]
+    if extra_header is not None:
+        if isinstance(extra_header, list):
+            for header, index in enumerate(extra_header):
+                if isinstance(extra_label[index], list):
+                    for label in extra_label[index]:
+                        data = data.loc[data[header] == label]
+                else:
+                    data = data.loc[data[header] == extra_label]
+        else:
+            if isinstance(extra_label, list):
+                for label in extra_label:
+                    data = data.loc[data[extra_header] == label]
+            else:
+                data = data.loc[data[extra_header] == extra_label]
 
     if remove:
         data = data.drop(data[data[label_header] == remove].index)
