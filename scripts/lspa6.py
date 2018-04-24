@@ -4,6 +4,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
 from collections import defaultdict
 import re
+import sys
 
 
 
@@ -94,7 +95,7 @@ def get_ltype(gene, hit):
     if difference < 1:
         ltype = "1"
     else:
-        print("Gene {} has a difference of {}".format(gene, difference))
+        print("Gene {} has a difference of {}".format(gene, difference), file= sys.stderr)
     return ltype
 
 
@@ -115,4 +116,4 @@ def get_formatted_results(res):
 if __name__ == "__main__":
     blast_xml = run_blast()
     results = parse_blast(blast_xml)
-    print(get_formatted_results(results))
+    print("\n".join(get_formatted_results(results)))
