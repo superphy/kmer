@@ -454,7 +454,7 @@ def do_nothing(input_data, **kwargs):
         (tuple): input_data unchanged, feature_names if given in kwargs.
     """
     if 'feature_names' in kwargs:
-        output = (input_data, kwargs['feature_names'])
+        output = (input_data, kwargs['feature_names'], {})
     else:
         output = input_data
     return output

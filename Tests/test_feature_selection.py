@@ -27,8 +27,8 @@ class VarianceThreshold(unittest.TestCase):
         new_x_train = train_df.values
         new_x_test = test_df.values
         self.correct_data = [new_x_train, y_train, new_x_test, y_test]
-        self.new_data, self.fn = variance_threshold(self.data, None,
-                                                    self.threshold)
+        self.new_data, self.fn, self.fa  = variance_threshold(self.data, None,
+                                                              self.threshold)
 
     def test_dimensions(self):
         count1 = 0
@@ -69,7 +69,7 @@ class RemoveConstantFeatures(unittest.TestCase):
         self.x_train = np.hstack((a, b, a))
         self.x_test = np.random.randint(15, size=(6, 6))
         self.data = (self.x_train, [], self.x_test, [])
-        self.new_data, self.feat_name = remove_constant(self.data, None)
+        self.new_data, self.feat_name, self.final_args = remove_constant(self.data, None)
         self.correct_x_train = b
         self.correct_x_test = np.delete(self.x_test, [0, 5], axis=1)
 
@@ -82,7 +82,7 @@ class RemoveConstantFeatures(unittest.TestCase):
     def test_feature_extraction(self):
         features_before = np.array(['a', 'b', 'c', 'd', 'e', 'f'])
         features_after = np.array(['b', 'c', 'd', 'e'])
-        data, features = remove_constant(self.data, features_before)
+        data, features, args = remove_constant(self.data, features_before)
         if np.array_equal(features_after, features):
             val = True
         else:
@@ -105,8 +105,8 @@ class SelectKBest(unittest.TestCase):
         x_test = np.random.randint(15, size=(10, self.features))
         y_test = np.random.randint(self.classes, size=(10))
         self.data = [x_train, y_train, x_test, y_test]
-        self.new_data, self.fn = select_k_best(self.data, None,
-                                               score_func=self.score_func, k=2)
+        self.new_data, self.fn, self.fa = select_k_best(self.data, None,
+                                                        score_func=self.score_func, k=2)
         correct_x_train = np.delete(x_train, np.arange(1, self.features - 1),
                                     axis=1)
         correct_x_test = np.delete(x_test, np.arange(1, self.features - 1),
@@ -125,8 +125,8 @@ class SelectKBest(unittest.TestCase):
     def test_feature_extraction(self):
         features_before = np.random.randint(self.features, size=self.features)
         features_after = features_before[[0, -1]]
-        data, features = select_k_best(self.data, features_before,
-                                       score_func=self.score_func, k=2)
+        data, features, args = select_k_best(self.data, features_before,
+                                             score_func=self.score_func, k=2)
         if np.array_equal(features_after, features):
             val = True
         else:
@@ -150,9 +150,9 @@ class SelectPercentile(unittest.TestCase):
         y_test = np.random.randint(self.classes, size=(10))
         self.data = [x_train, y_train, x_test, y_test]
         p = old_div(200, self.features)
-        self.new_data, self.f = select_percentile(self.data, None,
-                                                  score_func=self.score_func,
-                                                  percentile=p)
+        self.new_data, self.f, self.fa = select_percentile(self.data, None,
+                                                           score_func=self.score_func,
+                                                           percentile=p)
         correct_x_train = np.delete(x_train, np.arange(1, self.features - 1),
                                     axis=1)
         correct_x_test = np.delete(x_test, np.arange(1, self.features - 1),
@@ -176,8 +176,8 @@ class SelectPercentile(unittest.TestCase):
         p = old_div(200, self.features)
         sf = self.score_func
         fn = features_before
-        data, features = select_percentile(self.data, fn, score_func=sf,
-                                           percentile=p)
+        data, features, args = select_percentile(self.data, fn, score_func=sf,
+                                                 percentile=p)
         if np.array_equal(features_after, features):
             val = True
         else:
