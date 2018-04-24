@@ -10,13 +10,13 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def get_distribution(feature, ova, label_hader):
+def get_distribution(feature, ova, label_header):
     args = {'metadata': constants.OMNILOG_METADATA,
             'fasta_header': 'Strain',
             'train_header': None,
             'label_header': label_header,
             'one_vs_all': ova
-            }
+           }
     x_train, y_train, x_test, y_test = parse_metadata(**args)
 
     all_data = list(x_train) + list(x_test)
@@ -36,13 +36,12 @@ def get_distribution(feature, ova, label_hader):
     for key in sample_distributions.keys():
         genomes = [x for x in sample_distributions[key] if x in row]
         data = row[genomes].values
-        output[key] = data
+        output[key] = data.reshape(data.shape[1])
     return output
 
 def gather_distribution_data(feature_data, ova, label_header):
     cols = ['Feature', 'Distribution', 'Sample Type']
     data = pd.DataFrame(columns=cols)
-
     feature_names = feature_data['Feature']
     seen_features = []
     count = 0
@@ -50,11 +49,11 @@ def gather_distribution_data(feature_data, ova, label_header):
         if name not in seen_features:
             seen_features.append(name)
             distributions = get_distribution(name, ova, label_header)
-            distributions = {k: v.reshape(v.shape[1]) for k, v in distributions.items()}
             for key in distributions:
                 for elem in distributions[key]:
                     data.loc[count] = [name, elem, key]
                     count += 1
+    print(data)
     return data
 
 def plot_bars(data, palette, ova, p):
@@ -67,11 +66,10 @@ def plot_bars(data, palette, ova, p):
     ax.set_xlim(0, 1.01)
     ax.set_xlabel(ax.get_xlabel(), fontsize=18)
     ax.set_xticks(np.arange(0, 1.05, 0.05))
-    ax.set_xticklabels(np.arange(0,1.05,0.05), fontsize=15)
+    ax.set_xticklabels(np.arange(0, 1.05, 0.05), fontsize=15)
 
-    ax.set_title('Features Important for Predicting {ova} {p}'.format(ova=ova, p=p),
+    ax.set_title('Features Important for predicting {ova} {p}'.format(ova=ova, p=p),
                  fontsize=24)
-
     legend = ax.legend(title='Model', fontsize=15, loc='lower right')
     plt.setp(legend.get_title(), fontsize=15)
 
@@ -87,7 +85,7 @@ def plot_distributions(data, palette):
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_ticks, fontsize=15)
     ax.set_xlim(min(x_ticks)-10, max(x_ticks)+10)
-    ax.set_xlabel('Omnilog Area Under the Curve', fontsize=18)
+    ax.set_xlabel('Omnilog Are Under the Curve', fontsize=18)
 
     legend = ax.legend(fontsize=15, loc='lower right', ncol=2)
     plt.setp(legend.get_title(), fontsize=15)
@@ -95,34 +93,41 @@ def plot_distributions(data, palette):
     ax.set_title('Sample Distribution', fontsize=24)
     return ax
 
-bar_data = pd.read_csv(snakemake.input[0])
+def main():
+    bar_data = pd.read_csv(snakemake.input[0])
+    if snakemake.wildcards.ova == 'all':
+        ova = False
+    else:
+        ova = snakemake.wildcards.ova
 
-if snakemake.wildcards.ova == 'all':
-    ova = False
-else:
-    ova = snakemake.wildcards.ova
+    if snakemake.wildcards.prediction == 'Otype':
+        label_header = 'O type'
+    elif snakemake.wildcards.prediction == 'Htype':
+        label_header = 'H type'
+    else:
+        label_header = snakemake.wildcards.prediction
 
-if snakemake.wildcards.prediction == 'Otype':
-    label_header = 'O type'
-elif snakemake.wildcards.prediction == 'Htype':
-    label_header = 'H type'
-else:
-    label_header = snakemake.wildcards.prediction
+    dist_data = gather_distribution_data(bar_data, ova, label_header)
 
-dist_data = gather_distribution_data(bar_data, ova, label_header)
+    palette1 = sns.color_palette('deep')
+    palette2 = sns.color_palette('Set1')
+    sns.set(context='paper')
 
-palette1 = sns.color_palette('deep')
-palette2 = sns.color_palette('Set1')
-sns.set(context='paper')
+    fig = plt.figure(1, figsize=(25, 12.5))
 
-fig = plt.figure(1, figsize=(25,12.5))
+    plt.subplot(1, 2, 1)
+    plot_bars(bar_data, palette1, ova, label_header)
 
-plt.subplot(1,2,1)
-plot_bars(bar_data, palette1, ova, label_header)
+    plt.subplot(1, 2, 2)
+    plot_distributions(dist_data, palette2)
 
-plt.subplot(1,2,2)
-plot_distributions(dist_data, palette2)
+    plt.tight_layout()
 
-plt.tight_layout()
+    plt.savefig(snakemake.output[0])
 
-plt.savefig(snakemake.output[0])
+if __name__ == "__main__":
+    main()
+
+
+
+
