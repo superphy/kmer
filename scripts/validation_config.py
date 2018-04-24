@@ -22,10 +22,12 @@ genome_data_methods = {'split': 'get_genome_region_us_uk_split',
                        'UK': 'get_genome_region_uk',
                        'reverse_split': 'get_genome_region_us_uk_reverse_split'}
 
-selection_methods = {'kbest': 'select_k_best', 'fdr': 'select_fdr'}
+selection_methods = {'kbest': 'select_k_best', 'fdr': 'select_fdr',
+                     'kbest197': 'select_k_best'}
 
 selection_args = {'kbest': {'score_func': 'f_classif', 'k': 270},
-                  'fdr': {'alpha': 1e-5, 'score_func': 'f_classif'}}
+                  'fdr': {'alpha': 1e-5, 'score_func': 'f_classif'},
+                  'kbest197': {'score_func': 'f_classif', 'k': 197}}
 
 complete_path = '/home/rylan/Data/lupolova_data/complete_database/complete_'
 complete_dbs = lambda x: complete_path + str(x) + '-mer_DB/'
