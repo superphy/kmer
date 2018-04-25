@@ -32,7 +32,7 @@ g = sns.factorplot(x=x, y='Accuracy', hue='Data', col='Model', kind='box',
                                 'solid_capstyle': 'butt'})
 g.set_titles("Using a {col_name}")
 plt.subplots_adjust(top=0.9)
-prediction = snakemake.wildcards.prediction.title()
+prediction = snakemake.wildcards.prediction.capitalize()
 g.fig.suptitle("Accuracy When Making {} Predictions".format(prediction))
 
 plt.savefig(snakemake.output[0], dpi=1200)

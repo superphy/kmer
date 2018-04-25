@@ -16,16 +16,16 @@ def validation(filepath):
     dataset = name[2].replace('_', ' ').capitalize()
     if dataset == 'Uk' or dataset == 'Us':
         dataset = dataset.upper()
-    selection = name[3].replcae('_', ' ').capitalize()
+    selection = name[3].replace('_', ' ').capitalize()
 
     output = {'model': model, 'datatype': datatype, 'fragment': fragment,
               'k': k, 'filter': f, 'dataset': dataset, 'selection': selection}
     return output
 
-def omnilog(filepath)
-    name = filepath.replace('results/omnilog/yaml', '')
+def omnilog(filepath):
+    name = filepath.replace('results/omnilog/yaml/', '')
     name = name.split('/')
-    model = name[0].replace('_', ' ').title()
+    model = name[0].replace('_', ' ').capitalize()
     if name[1] == 'omnilog':
         datatype = 'Omnilog'
         k = None
@@ -34,10 +34,10 @@ def omnilog(filepath)
         kmer_info = name[1].split('_')
         datatype = 'Kmer'
         k = int(kmer_info[0].replace('mer', ''))
-        f = kmer_info[1].replace('_', ' ').title()
-    selection = name[2].replcae('_', ' ').title()
-    prediction = name[3].replcae('_', ' ').title()
-    ova = name[4].replcae('_', ' ').title()
+        f = kmer_info[1].replace('_', ' ').capitalize()
+    selection = name[2].replace('_', ' ').capitalize()
+    prediction = name[3].replace('_', ' ').capitalize()
+    ova = name[4].replace('_', ' ').capitalize()
 
     output = {'model': model, 'datatype': datatype, 'k': k, 'filter': f,
               'selection': selection, 'prediction': prediction, 'ova': ova}
