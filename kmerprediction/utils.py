@@ -98,11 +98,8 @@ def shuffle(data, labels):
     Returns:
         tuple: all_data, all_labels
     """
-    try:
-        assert len(data) == len(labels)
-        assert isinstance(data[0], (list, np.ndarray))
-    except AssertionError as E:
-        print(E)
+    assert len(data) == len(labels)
+    assert isinstance(data[0], (list, np.ndarray))
     if isinstance(data[0], list):
         all_data = []
         for x in data:
@@ -248,6 +245,9 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
         data = pd.read_csv(metadata, sep=sep, engine='python')
     else:
         data = pd.read_csv(metadata, sep=sep)
+
+    data = data[pd.notnull(data[label_header])]
+    data[label_header] = data[label_header].astype(str)
 
     if extra_header is not None:
         if isinstance(extra_header, list):

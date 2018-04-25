@@ -7,8 +7,8 @@ from kmerprediction import constants
 selection_methods = {'kbest': 'select_k_best'}
 selection_args = {'kbest': {'score_func': 'f_classif', 'k': 270}}
 
-predictions = {'Host': 'Host', 'Htype': 'H type',
-               'Otype': 'O type', 'Serotype': 'Serotype'}
+predictions = {'Host': 'Host', 'Htype': 'H type', 'Otype': 'O type',
+               'Serotype': 'Serotype', 'Lineage': 'LSPA6'}
 
 complete_path = '/home/rylan/Data/omnilog_data/complete_database/complete_'
 complete_dbs = lambda x: complete_path + str(x) + '-mer_DB/'
@@ -66,13 +66,16 @@ def main():
         base['data_method'] = 'get_kmer'
         base['data_args']['metadata_kwargs']['prefix'] = constants.OMNILOG_FASTA
         base['data_args']['metadata_kwargs']['suffix'] = '.fasta'
-        base['data_args']['metadata_kwargs']['extra_header'] = 'WGS'
-        base['data_args']['metadata_kwargs']['extra_label'] = 1
         base['data_args']['kmer_kwargs']['k'] = k
+        if prediction != 'Lineage':
+            base['data_args']['metadata_kwargs']['extra_header'] = 'WGS'
+            base['data_args']['metadata_kwargs']['extra_label'] = 1
+
     else:
         base['data_method'] = 'get_omnilog_data'
         base['data_args']['metadata_kwargs']['prefix'] = ''
         base['data_args']['metadata_kwargs']['suffix'] = ''
+
 
     with open(snakemake.output[0], 'w') as f:
         yaml.dump(base, f)

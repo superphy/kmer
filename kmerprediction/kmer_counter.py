@@ -247,11 +247,7 @@ def get_counts(files, database, name=None):
 
                 cursor = txn.cursor(db=current)
                 for i, (key, value) in enumerate(cursor):
-                    try:
-                        output[index, i] = float(value)
-                    except IndexError:
-                        print(key, value)
-                        raise(IndexError)
+                    output[index, i] = float(value)
 
     env.close()
     return output

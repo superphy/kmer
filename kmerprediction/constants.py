@@ -61,6 +61,10 @@ VALID_HTYPES = [htype[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
 host, count = np.unique(metadata['Host'].values, return_counts=True)
 VALID_HOSTS = [host[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
 
+metadata = metadata[pd.notnull(metadata['LSPA6'])]
+lspa6, count = np.unique(metadata['LSPA6'].values, return_counts=True)
+VALID_LINEAGES = [lspa6[x] for x, y in enumerate(count) if not pd.isnull(lspa6[x])]
+
 DEFAULT_NAME = 'complete_results'
 DEFAULT_K = 7
 DEFAULT_LIMIT = 13

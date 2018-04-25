@@ -7,21 +7,54 @@ ova_dict = {'Host': constants.VALID_HOSTS,
             'Htype': constants.VALID_HTYPES,
             'Otype': constants.VALID_OTYPES,
             'Serotype': constants.VALID_SEROTYPES,
+            'Lineage': constants.VALID_LINEAGES,
             'Multiclass': 'all'}
+
+
+def prediction_converter(prediction):
+    if prediction == 'Multiclass':
+        out = [x for x in config['prediction'] if x != 'Multiclass']
+    else:
+        out = prediction
+    return out
+
+
+def get_yaml(wc):
+    yaml_dir = 'results/omnilog/yaml/'
+    a = expand(yaml_dir + '{model}/omnilog/{selection}/{prediction}/{ova}/results.yml',
+               model=config['model'],
+               selection=config['selection'],
+               prediction = prediction_converter(wc.prediction),
+               ova=ova_dict[wc.prediction] + ['all'])
+    b = expand(yaml_dir + '{model}/{k}mer_{filter}/{selection}/{prediction}/{ova}/results.yml',
+               model=config['model'],
+               k=config['k'],
+               filter=config['filter'],
+               selection=config['selection'],
+               prediction = prediction_converter(wc.prediction),
+               ova=ova_dict[wc.prediction] + ['all'])
+    return a + b
+
+def all_predictions():
+    out = []
+    for p in config['prediction']:
+        if p != 'Multiclass':
+            for o in ova_dict[p]:
+                out.append('{}_{}'.format(p, o))
+        else:
+            for x in config['prediction']:
+                if x != 'Multiclass':
+                    out.append('{}_all'.format(x))
+    return out
+
 
 rule all:
     input:
         'manuscript/tables/complete_omnilog_results.md',
         expand('manuscript/images/omnilog_{figure}.pdf',
-               figure=['Multiclass', 'Host', 'Htype', 'Otype', 'Serotype']),
-        expand('manuscript/images/important_features/Host_{ova}.pdf',
-               ova=constants.VALID_HOSTS + ['all']),
-        expand('manuscript/images/important_features/Serotype_{ova}.pdf',
-               ova=constants.VALID_SEROTYPES + ['all']),
-        expand('manuscript/images/important_features/Otype_{ova}.pdf',
-               ova=constants.VALID_OTYPES + ['all']),
-        expand('manuscript/images/important_features/Htype_{ova}.pdf',
-               ova=constants.VALID_HTYPES + ['all'])
+               figure=config['prediction']),
+        expand('manuscript/images/important_features/{prediction}.pdf',
+                prediction=all_predictions())
 
 
 # Generate the input config files for the Omnilog analysis
@@ -49,48 +82,14 @@ rule run:
         main(input[0], output[0], input[0])
 
 
-# Convert the Omnilog binary results into pandas DataFrames to plot the model accuracies
+# Convert the Omnilog results into pandas DataFrames to plot the model accuracies
 rule dataframes:
     input:
-        lambda wc: expand('results/omnilog/yaml/{model}/{k}mer_{filter}/{selection}/' +
-                          '{prediction}/{ova}/results.yml',
-                          model=config['model'],
-                          k=config['k'],
-                          filter=config['filter'],
-                          selection=config['selection'],
-                          prediction=wc.prediction,
-                          ova=ova_dict[wc.prediction]),
-        lambda wc: expand('results/omnilog/yaml/{model}/omnilog/{selection}/' +
-                          '{prediction}/{ova}/results.yml',
-                          model=config['model'],
-                          selection=config['selection'],
-                          prediction=wc.prediction,
-                          ova=ova_dict[wc.prediction])
+        get_yaml
     output:
         'results/omnilog/DataFrames/{prediction}.csv'
     script:
         'scripts/omni_dataframes.py'
-
-
-# Convert the Omnilog multiclass results into a pandas DataFrame to plot the model accuracies
-rule multiclass_data_frames:
-    input:
-        expand('results/omnilog/yaml/{model}/{k}mer_{filter}/{selection}/' +
-               '{prediction}/all/results.yml',
-               model=config['model'],
-               k=config['k'],
-               filter=config['filter'],
-               selection=config['selection'],
-               prediction=['Host', 'Htype', 'Otype', 'Serotype']),
-        expand('results/omnilog/yaml/{model}/omnilog/{selection}/' +
-               '{prediction}/all/results.yml',
-               model=config['model'],
-               selection=config['selection'],
-               prediction=['Host', 'Htype', 'Otype', 'Serotype'])
-    output:
-        'results/omnilog/DataFrames/Multiclass.csv'
-    script:
-        'scripts/omni_multi_dfs.py'
 
 
 # Make figures for the manuscript of the binary results.
@@ -128,20 +127,7 @@ rule important_features_figures:
 # Convert dataframes to markdown tables for the manuscript
 rule tables:
     input:
-        lambda wc : expand('results/omnilog/yaml/{model}/omnilog/{selection}/' +
-                           '{prediction}/{ova}/results.yml',
-                           model=config['model'],
-                           selection=config['selection'],
-                           prediction = wc.prediction,
-                           ova=ova_dict[wc.prediction] + ['all']),
-        lambda wc : expand('results/omnilog/yaml/{model}/{k}mer_{filter}/' +
-                           '{selection}/{prediction}/{ova}/results.yml',
-                           model=config['model'],
-                           k=config['k'],
-                           filter=config['filter'],
-                           selection=config['selection'],
-                           prediction = wc.prediction,
-                           ova=ova_dict[wc.prediction] + ['all'])
+        get_yaml
     output:
         'manuscript/tables/omnilog_{prediction}_table.md'
     script:
@@ -152,7 +138,7 @@ rule tables:
 rule complete_results_table:
     input:
         expand('manuscript/tables/omnilog_{p_class}_table.md',
-               p_class=['Host', 'Htype', 'Otype', 'Serotype'])
+               p_class=config['prediction'])
     output:
         'manuscript/tables/complete_omnilog_results.md'
     script:
