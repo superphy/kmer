@@ -141,7 +141,7 @@ rule macros:
     output:
         'manuscript/omnilog_results.tex'
     script:
-        'scripts/omnil_results.py'
+        'scripts/omni_results.py'
 
 
 
