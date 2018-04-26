@@ -11,7 +11,10 @@ from kmerprediction import constants
 import logging
 
 class KmerCounterError(Exception):
-    """Raise for errors in kmer_counter module"""
+    """
+    Raise for errors in kmer_counter and complete_kmer counter
+    modules
+    """
 
 
 def count_file(input_file, output_file, k):
@@ -58,7 +61,7 @@ def count_all(fasta_files, temp_files, db_keys, k, env, force):
                                 False only Files that do not appear in the
                                 database already are recounted.
     Returns:
-        recount (list): Every db_key whose kmers were recounted.
+        recounts (list): Every db_key whose kmers were recounted.
     """
     logging.info('Begin Counting kmers')
     threads = []
@@ -81,7 +84,7 @@ def count_all(fasta_files, temp_files, db_keys, k, env, force):
     return recounts
 
 
-def add_file(input_file, key, env, global_counts, file_counts):
+def add_file(input_file, key, global_counts, file_counts, env):
     """
     Add the kmer counts contained in the input csv file to the database in
     env under the identifier key. Update global_counts and file_counts.
@@ -91,14 +94,14 @@ def add_file(input_file, key, env, global_counts, file_counts):
                                     output.
         key (str):                  Identifier for a named database
                                     corresponding to input_file
-        env (lmdb.Environment):     Environment containing the database to store
-                                    the complete results in.
         global_counts (database):   Named database with keys of kmers and values
                                     of their total count across all files in the
                                     database.
         file_counts (database):     Named database with keys of kmers and values
                                     of the number of files they appear in across
                                     the database.
+        env (lmdb.Environment):     Environment containing the database to store
+                                    the complete results in.
     Returns:
         None
     """
@@ -126,17 +129,23 @@ def add_all(temp_files, db_keys, global_counts, file_counts, env, force, recount
     contained in env under the identifiers contianed in db_keys.
 
     Args:
-        temp_files (list):      The paths to each csv file output by jellyfish.
-        db_keys (list):         The identifiers corresponding to each file in
-                                temp_files to be used as names in the database.
-        env (lmdb.Environment): Environment containing the database to store
-                                the complete results in.
-        force (bool):           If True every file in temp_file is added to the
-                                database, if False only files whose db_key is
-                                not present in the database or whose db_key is
-                                in recounts are added to the database.
-        recounts (list):        A list of all db_keys that were changed by
-                                count_all
+        temp_files (list):          The paths to each csv file output by jellyfish.
+        db_keys (list):             The identifiers corresponding to each file in
+                                    temp_files to be used as names in the database.
+        global_counts (database):   Named database with keys of kmers and values
+                                    of their total count across all files in the
+                                    database.
+        file_counts (database):     Named database with keys of kmers and values
+                                    of the number of files they appear in across
+                                    the database.
+        env (lmdb.Environment):     Environment containing the database to store
+                                    the complete results in.
+        force (bool):               If True every file in temp_file is added to
+                                    the database, if False only files whose db_key
+                                    is not present in the database or whose db_key
+                                    is in recounts are added to the database.
+        recounts (list):            A list of all db_keys that were changed by
+                                    count_all
     Returns:
         recounts (list): Every db_key that was altered in the database.
     """
@@ -147,7 +156,7 @@ def add_all(temp_files, db_keys, global_counts, file_counts, env, force, recount
     for i, f in enumerate(temp_files):
         with env.begin(write=False) as txn:
             if force or not txn.get(db_keys[i].encode(), default=False) or db_keys[i] in recounts:
-                args = [f, db_keys[i], env, global_counts, file_counts]
+                args = [f, db_keys[i], global_counts, file_counts, env]
                 threads.append(Thread(target=add_file, args=args))
                 if db_keys[i] not in recounts:
                     recounts.append(db_keys[i])
