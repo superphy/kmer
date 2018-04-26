@@ -22,7 +22,9 @@ def get_yaml():
 rule all:
     input:
         'manuscript/tables/validation_results.md',
-        'manuscript/images/validation_results.pdf',
+        'manuscript/images/validation_lupolova_comparison.pdf',
+        'manuscript/images/validation_genome_region_comparison.pdf',
+        'manuscript/images/validation_both_comparisons.pdf',
         'manuscript/validation_results.tex',
         expand('results/validation/features/{k}mer_features.csv',
                k=config['k'], filter=config['filter']),
@@ -71,9 +73,9 @@ rule figures:
         'results/validation/DataFrames/results.csv',
         'manuscript/tables/lupolova_results.md'
     output:
-        'manuscript/images/lupolova_comparison.pdf',
-        'manuscript/images/genome_region_comparison.pdf',
-        'manuscript/images/both_comparisons.pdf'
+        'manuscript/images/validation_lupolova_comparison.pdf',
+        'manuscript/images/validation_genome_region_comparison.pdf',
+        'manuscript/images/validation_both_comparisons.pdf'
     script:
         'scripts/validation_figs.py'
 
@@ -120,6 +122,7 @@ rule features:
     script:
         'scripts/validation_features.py'
 
+
 rule filtered_features:
     input:
         expand('results/validation/yaml/{model}/7mer_filtered_13/' +
@@ -130,6 +133,7 @@ rule filtered_features:
         'results/validation/features/7mer_filtered_13_features.csv'
     script:
         'scripts/validation_features.py'
+
 
 # Create histograms for file counts of different kmer lengths
 rule kmer_appearances:
