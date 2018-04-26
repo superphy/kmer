@@ -37,7 +37,7 @@ def omnilog(filepath):
         f = kmer_info[1].replace('_', ' ').capitalize()
     selection = name[2].replace('_', ' ').capitalize()
     prediction = name[3].replace('_', ' ').capitalize()
-    ova = name[4].replace('_', ' ').capitalize()
+    ova = name[4]
 
     output = {'model': model, 'datatype': datatype, 'k': k, 'filter': f,
               'selection': selection, 'prediction': prediction, 'ova': ova}

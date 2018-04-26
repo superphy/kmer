@@ -13,7 +13,7 @@ def main():
     header.loc[0] = ['---',]*(len(cols) + 1)
     frames = [header, data]
     output = pd.concat(frames, ignore_index=True)
-    output.to_csv(snakemake.output[1], index=False, sep='|')
+    output.to_csv(snakemake.output[0], index=False, sep='|')
 
 if __name__ == "__main__":
     main()

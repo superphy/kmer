@@ -21,7 +21,7 @@ def add_to_output(yaml_file, df):
     height = df.shape[0]
     top_features = sorted(feature_scores, reverse=True,
                           key=lambda k: feature_scores[k])
-    for index, feature in enumerate(top_features[:50]):
+    for index, feature in enumerate(top_features[:100]):
         score = feature_scores[feature]
         curr_out = [feature, info['model'], info['dataset'],
                     info['filter'], score]

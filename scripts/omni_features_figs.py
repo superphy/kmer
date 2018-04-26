@@ -53,7 +53,6 @@ def gather_distribution_data(feature_data, ova, label_header):
                 for elem in distributions[key]:
                     data.loc[count] = [name, elem, key]
                     count += 1
-    print(data)
     return data
 
 def plot_bars(data, palette, ova, p):
@@ -104,6 +103,8 @@ def main():
         label_header = 'O type'
     elif snakemake.wildcards.prediction == 'Htype':
         label_header = 'H type'
+    elif snakemake.wildcards.prediction == 'Lineage':
+        label_header = 'LSPA6'
     else:
         label_header = snakemake.wildcards.prediction
 
