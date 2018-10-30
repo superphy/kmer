@@ -20,9 +20,12 @@ Most return: ((x_train, y_train, x_test, y_test), feature_names, test_files,
 """
 
 from builtins import str
+import logging
 import os
 from sklearn.preprocessing import Imputer
-from kmerprediction.kmer_counter import count_kmers, get_counts, get_kmer_names
+import kmerprediction.complete_kmer_counter as complete_kmer_counter
+from kmerprediction.complete_kmer_counter import KmerCounterError
+import kmerprediction.kmer_counter as kmer_counter
 from kmerprediction.utils import shuffle, setup_files, parse_metadata, parse_json
 from kmerprediction.utils import encode_labels
 import numpy as np
@@ -30,8 +33,9 @@ import pandas as pd
 from kmerprediction import constants
 
 
-def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
-             validate=True, verbose=True):
+def get_kmer(metadata_kwargs=None, kmer_kwargs=None, recount=False,
+             database=constants.DEFAULT_DB, validate=True,
+             complete_count=True):
     """
     Get kmer data for genomes specified in kwargs, uses kmer_counter and
     utils.parse_metadata
@@ -45,31 +49,48 @@ def get_kmer(kwargs=None, database=constants.DB, recount=False, k=7, L=13,
         L (int):         kmer cutoff value. Ignored if recount is false
         validate (bool): If True y_test is created, if False y_test is
                          an empty ndarray.
-        verbose (bool):  If True and recount is also True a status bar is
-                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
+    if complete_count:
+        counter = complete_kmer_counter
+    else:
+        counter = kmer_counter
 
-    kwargs = kwargs or {}
-    kwargs['validate'] = validate
+    metadata_kwargs = metadata_kwargs or {}
+    metadata_kwargs['validate'] = validate
+    kmer_kwargs = kmer_kwargs or {}
 
-    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+    if 'name' in kmer_kwargs:
+        name = kmer_kwargs['name']
+    else:
+        name = constants.DEFAULT_NAME
+    if 'output_db' in kmer_kwargs:
+        output_db = kmer_kwargs['output_db']
+    else:
+        output_db = database
+
+    (x_train, y_train, x_test, y_test) = parse_metadata(**metadata_kwargs)
 
     test_files = [str(x) for x in x_test]
+    all_files = x_train + x_test
 
     if recount:
-        count_kmers(k, L, x_train + x_test, database, verbose)
+        counter.count_kmers(all_files, database, **kmer_kwargs, force=True)
+    else:
+        try:
+            temp = counter.get_counts(x_train, output_db, name)
+        except KmerCounterError as e:
+            msg = 'Warning: get_counts failed, attempting a recount'
+            logging.exception(msg)
+            counter.count_kmers(all_files, database, **kmer_kwargs)
 
-    x_train = get_counts(x_train, database)
-    x_train = np.asarray(x_train, dtype='float64')
+    x_train = counter.get_counts(x_train, output_db, name)
+    x_test = counter.get_counts(x_test, output_db, name)
 
-    x_test = get_counts(x_test, database)
-    x_test = np.asarray(x_test, dtype='float64')
-
-    feature_names = get_kmer_names(database)
+    feature_names = counter.get_kmer_names(output_db, name)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
@@ -125,8 +146,9 @@ def get_genome_regions(kwargs=None, table=constants.GENOME_REGION_TABLE,
     return (output_data, feature_names, test_label, le)
 
 
-def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13,
-                         validate=True, verbose=True):
+def get_kmer_us_uk_split(kmer_kwargs=None, database=constants.DEFAULT_DB,
+                         recount=False, validate=True,
+                         complete_count=True):
     """
     Wraps get_kmer to get the US/UK split dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -138,22 +160,22 @@ def get_kmer_us_uk_split(database=constants.DB, recount=False, k=7, L=13,
                          False.
         L (int):         kmer cutoff value. Ignored if recount is false.
         validate (bool): Ignored, here for compatability.
-        verbose (bool):  If True and recount is also True a status bar is
-                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    kwargs = {'prefix': constants.ECOLI,
-              'suffix': '.fasta',
-              'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True,
-                    verbose=verbose)
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'validate': validate}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
 
 
-def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13,
-                         validate=True, verbose=True):
+def get_kmer_us_uk_mixed(kmer_kwargs=None, database=constants.DEFAULT_DB,
+                         recount=False, validate=True,
+                         complete_count=True):
     """
     Wraps get_kmer to get the US/UK mixed dataset to recreate the Lupolova et
     al paper with kmer input data.
@@ -165,23 +187,75 @@ def get_kmer_us_uk_mixed(database=constants.DB, recount=False, k=7, L=13,
                          False.
         L (int):         kmer cutoff value. Ignored if recount is false.
         validate (bool): Ignored, here for compatability.
-        verbose (bool):  If True and recount is also True a status bar is
-                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    kwargs = {'prefix': constants.ECOLI,
-              'suffix': '.fasta',
-              'train_header': None,
-              'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True,
-                    verbose=verbose)
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'train_header': None,
+                       'validate': validate}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
 
 
-def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
-                        recount=False, k=7, L=13, validate=True, verbose=True):
+def get_kmer_us_uk_reverse_split(kmer_kwargs=None, recount=False,
+                                 validate=True, database=constants.DEFAULT_DB,
+                                 complete_count=True):
+    """
+    Wraps get_kmer to get the US UK train test split reversed. I.e. The US set
+    is the train set and the UK set is the test set.
+    """
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'train_header': 'Dataset',
+                       'train_label': 'Test',
+                       'test_label': 'Train',
+                       'validate': validate}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
+
+
+def get_kmer_us(kmer_kwargs=None, database=constants.DEFAULT_DB, recount=False,
+                validate=True, complete_count=True):
+    """
+    Wraps get_kmer to get a random train/test split of just the US lupolova
+    data.
+    """
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'train_header': None,
+                       'extra_header': 'Dataset',
+                       'extra_label': 'Test',
+                       'validate': True}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
+
+
+def get_kmer_uk(kmer_kwargs=None, database=constants.DEFAULT_DB, recount=False,
+                validate=True, complete_count=True):
+    """
+    Wraps get_kmer to get a random train/test split of just the UK lupolova
+    data.
+    """
+    metadata_kwargs = {'prefix': constants.ECOLI,
+                       'suffix': '.fasta',
+                       'train_header': None,
+                       'extra_header': 'Dataset',
+                       'extra_label': 'Train',
+                       'validate': True}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
+
+
+def get_salmonella_kmer(kmer_kwargs, antibiotic='ampicillin',
+                        database=constants.DEFAULT_DB, recount=False,
+                        validate=True, complete_count=True):
     """
     Wraps get_kmer to get salmonella amr data.
 
@@ -193,24 +267,23 @@ def get_salmonella_kmer(antibiotic='ampicillin', database=constants.DB,
                           false.
         L (int):          kmer cutoff value. Ignored if recount is false.
         validate (bool):  Ignored, here for compatability.
-        verbose (bool):  If True and recount is also True a status bar is
-                         is displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
-    kwargs = {'metadata': constants.SALMONELLA_METADATA,
-              'fasta_header': 'Fasta',
-              'label_header': 'AMR',
-              'train_header': None,
-              'extra_header': 'Antibiotic',
-              'extra_label': antibiotic,
-              'prefix': constants.SALMONELLA,
-              'suffix': '.fna',
-              'validate': True}
-    return get_kmer(kwargs, database, recount, k, L, validate=True,
-                    verbose=verbose)
+    metadata_kwargs = {'metadata': constants.SALMONELLA_METADATA,
+                       'fasta_header': 'Fasta',
+                       'label_header': 'AMR',
+                       'train_header': None,
+                       'extra_header': 'Antibiotic',
+                       'extra_label': antibiotic,
+                       'prefix': constants.SALMONELLA,
+                       'suffix': '.fna',
+                       'validate': True}
+    return get_kmer(metadata_kwargs=metadata_kwargs, kmer_kwargs=kmer_kwargs,
+                    database=database, recount=recount, validate=validate,
+                    complete_count=complete_count)
 
 
 def get_genome_region_us_uk_mixed(table=constants.GENOME_REGION_TABLE, sep=None,
@@ -251,8 +324,43 @@ def get_genome_region_us_uk_split(table=constants.GENOME_REGION_TABLE, sep=None,
     kwargs = {'validate': True}
     return get_genome_regions(kwargs, table, sep, validate=True)
 
+def get_genome_region_us(table=constants.GENOME_REGION_TABLE, sep=None,
+                         validate=True):
+    """
+    Wraps get_genome_regions to get a random 80/20 train test split on the
+    lupolova US data.
+    """
+    kwargs = {'validate': True,
+              'train_header': None,
+              'extra_header': 'Dataset',
+              'extra_label': 'Test'}
+    return get_genome_regions(kwargs, table, sep, validate=True)
 
-def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
+def get_genome_region_uk(table=constants.GENOME_REGION_TABLE, sep=None,
+                         validate=True):
+    """
+    Wraps get_genome_regions to get a random 80/20 train test split on the
+    lupolova UK data
+    """
+    kwargs = {'validate': True,
+              'train_header': None,
+              'extra_header': 'Dataset',
+              'extra_label': 'Train'}
+    return get_genome_regions(kwargs, table, sep, validate=True)
+
+def get_genome_region_us_uk_reverse_split(table=constants.GENOME_REGION_TABLE,
+                                          sep=None, validate=True):
+    """
+    Wraps get_genome_regions to get triaing data from the US dataset and testing
+    data from the UK dataset
+    """
+    kwargs = {'validate': True,
+              'train_header': 'Dataset',
+              'train_label': 'Test',
+              'test_label': 'Train'}
+    return get_genome_regions(kwargs, table, sep, validate=True)
+
+def get_omnilog_data(metadata_kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
                      validate=True):
     """
     Gets the omnilog data contained in omnilog_sheet for the genomes specified
@@ -269,10 +377,10 @@ def get_omnilog_data(kwargs=None, omnilog_sheet=constants.OMNILOG_DATA,
                 LabelEncoder
 
     """
-    kwargs = kwargs or {}
-    kwargs['validate'] = validate
+    metadata_kwargs = metadata_kwargs or {}
+    metadata_kwargs['validate'] = validate
 
-    (x_train, y_train, x_test, y_test) = parse_metadata(**kwargs)
+    (x_train, y_train, x_test, y_test) = parse_metadata(**metadata_kwargs)
 
     test_files = [str(x) for x in x_test]
 
@@ -594,9 +702,9 @@ def get_genome_prefiltered(input_table=constants.GENOME_REGION_TABLE,
     return (output_data, feature_names, test_label, le)
 
 
-def get_kmer_from_json(train, test, database=constants.DB,
-                       recount=False, k=7, L=13, kwargs=None, verbose=True,
-                       validate=True):
+def get_kmer_from_json(train, test, database=constants.DEFAULT_DB,
+                       recount=False, k=7, L=13, kwargs=None,
+                       validate=True, complete_count=True):
     """
     Gets kmer data for the genomes specified in the json files. Divides genomes
     into train/test sets and classifies them with utils.parse_json.
@@ -612,8 +720,6 @@ def get_kmer_from_json(train, test, database=constants.DB,
                             false
         L (int):            kmer cutoff value. Ignored if recount is false.
         kwargs (dict):      The arguments to pass to parse_json.
-        verbose (bool):     If True and recount is also True a status bar is
-                            displayed to show the kmer count progress.
         validate (bool):    If True and the kmers are being recounter a status
                             bar displaying the kmer count progress is output.
 
@@ -621,6 +727,10 @@ def get_kmer_from_json(train, test, database=constants.DB,
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
+    if complete_count:
+        counter = complete_kmer_counter
+    else:
+        counter = kmer_counter
     kwargs = kwargs or {}
     kwargs['validate'] = validate
 
@@ -629,15 +739,12 @@ def get_kmer_from_json(train, test, database=constants.DB,
     test_files = [str(x) for x in x_test]
 
     if recount:
-        count_kmers(k, L, x_train + x_test, database, verbose)
+        counter.count_kmers(x_train + x_test, database, k=k, limit=L, force=True)
 
-    x_train = get_counts(x_train, database)
-    x_train = np.asarray(x_train, dtype='float64')
+    x_train = counter.get_counts(x_train, database)
+    x_test = counter.get_counts(x_test, database)
 
-    x_test = get_counts(x_test, database)
-    x_test = np.asarray(x_test, dtype='float64')
-
-    feature_names = get_kmer_names(database)
+    feature_names = counter.get_kmer_names(database)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 
@@ -646,9 +753,9 @@ def get_kmer_from_json(train, test, database=constants.DB,
     return (output_data, feature_names, test_files, le)
 
 
-def get_kmer_from_directory(train_dir, test_dir, database=constants.DB,
+def get_kmer_from_directory(train_dir, test_dir, database=constants.DEFAULT_DB,
                             recount=False, k=7, L=13, validate=True,
-                            verbose=True):
+                            complete_count=True):
     """
     Organizes fasta files into train/test splits and classifies them based
     on their location in a directory structure rather than a metadata sheet.
@@ -697,13 +804,16 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DB,
         L (int):            kmer cutoff value. Ignored if recount is false.
         validate (bool):    If True y_test is created, if False y_test is an
                             empty ndarray.
-        verbose (bool):     If True and recount is also True a status bar is
-                            displayed to show the kmer count progress.
 
     Returns:
         tuple:  (x_train, y_train, x_test, y_test), feature_names, file_names,
                 LabelEncoder
     """
+    if complete_count:
+        counter = complete_kmer_counter
+    else:
+        counter = kmer_counter
+
     train_directories = [train_dir + x for x in os.listdir(train_dir)]
     test_directories = [test_dir + x for x in os.listdir(test_dir)]
 
@@ -724,29 +834,29 @@ def get_kmer_from_directory(train_dir, test_dir, database=constants.DB,
     if recount:
         all_files = train_files + test_files
         all_files = [x for l in all_files for x in l]
-        count_kmers(k, L, all_files, database, verbose)
+        counter.count_kmers(all_files, database, k=k, limit=L, force=True)
 
     train_counts = []
     for group in train_files:
-        temp = get_counts(group, database)
+        temp = counter.get_counts(group, database)
         temp = np.asarray(temp, dtype='float64')
         train_counts.append(temp)
 
     test_counts = []
     for group in test_files:
-        temp = get_counts(group, database)
+        temp = counter.get_counts(group, database)
         temp = np.asarray(temp, dtype='float64')
         test_counts.append(temp)
 
     test_files = [x for l in test_files for x in l]
-    
+
     x_train, y_train = shuffle(train_counts, train_classes)
     x_test, y_test = shuffle(test_counts, test_classes)
 
     if not validate:
         y_test = np.array([], dtype='float64')
 
-    feature_names = get_kmer_names(database)
+    feature_names = counter.get_kmer_names(database)
 
     y_train, y_test, le = encode_labels(y_train, y_test)
 

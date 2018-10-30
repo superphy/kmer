@@ -4,99 +4,81 @@ import os
 import yaml
 from kmerprediction import constants
 
-directory = 'config_files/omni/'
+selection_methods = {'kbest': 'select_k_best'}
+selection_args = {'kbest': {'score_func': 'f_classif', 'k': 270}}
 
-if not os.path.exists(directory):
-    os.makedirs(directory)
+predictions = {'Host': 'Host', 'Htype': 'H type', 'Otype': 'O type',
+               'Serotype': 'Serotype', 'Lineage': 'LSPA6'}
 
-# Generate base config for omnilog data
-base_yaml = {'augment': False,
-             'augment_args': {},
-             'scaler': 'scale_to_range',
-             'scaler_args': {'high': 1, 'low': -1},
-             'selection': 'select_k_best',
-             'selection_args': {'k': 270, 'score_func': 'f_classif'},
-             'data_method': 'get_omnilog_data',
-             'data_args': {
-                 'kwargs': {
-                     'fasta_header': 'Strain',
-                     'train_header': None,
-                     'metadata': constants.OMNILOG_METADATA,
-                     'one_vs_all': False,
-                     'label_header': 'Host',
-                     'prefix': '',
-                     'suffix': ''
-                 },
-             },
-             'model': 'neural_network',
-             'model_args': {},
-             'reps': constants.DEFAULT_REPITITIONS,
-             'validate': True
-            }
+complete_path = '/home/rylan/Data/omnilog_data/complete_database/complete_'
+complete_dbs = lambda x: complete_path + str(x) + '-mer_DB/'
 
-with open(directory + 'neural_network_Host_omni_all.yml', 'w') as f:
-    yaml.dump(base_yaml, f)
+output_path = '/home/rylan/Data/omnilog_data/output_database/'
+output_dbs = lambda x: output_path + str(x) + '-mer_DB/'
 
-#Generate base config for kmer data
-base_yaml['data_method'] = 'get_kmer'
-base_yaml['data_args']['database'] = constants.DB
-base_yaml['data_args']['kwargs']['prefix'] = constants.OMNILOG_FASTA
-base_yaml['data_args']['kwargs']['suffix'] = '.fasta'
-base_yaml['data_args']['kwargs']['extra_header'] = 'WGS'
-base_yaml['data_args']['kwargs']['extra_label'] = 1
+filter_path = '/home/rylan/Data/omnilog_data/filter_database/'
+filter_dbs = lambda x: filter_path + str(x) + '-mer_DB/'
 
-with open(directory + 'neural_network_Host_kmer_all.yml', 'w') as f:
-    yaml.dump(base_yaml, f)
+base = {'augment': False,
+        'augment_args': {},
+        'validate': True,
+        'scaler': 'scale_to_range',
+        'reps': snakemake.config['reps'],
+        'scaler_args': {'high': 1, 'low': -1},
+        'data_args': {
+            'metadata_kwargs': {'metadata': constants.OMNILOG_METADATA,
+                                'fasta_header': 'Strain',
+                                'train_header': None},
+        }
+       }
 
-yaml_files = [directory + x for x in os.listdir(directory) if '.yml' in x]
+def main():
+    model = snakemake.wildcards['model']
+    selection = snakemake.wildcards['selection']
+    prediction = snakemake.wildcards['prediction']
+    one_vs_all = snakemake.wildcards['ova']
 
-# generate base config for each model
-models = ['random_forest', 'support_vector_machine']
-for yf in yaml_files:
-    with open(yf, 'r') as f:
-        curr_yaml = yaml.load(f)
-    for m in models:
-        curr_yaml['model'] = m
-        new_name = yf.replace('neural_network', m)
-        with open(new_name, 'w') as f:
-            yaml.dump(curr_yaml, f)
+    base['model'] = model
+    base['selection'] = selection_methods[selection]
+    base['selection_args'] = selection_args[selection]
 
-yaml_files = [directory + x for x in os.listdir(directory) if '.yml' in x]
+    base['data_args']['metadata_kwargs']['label_header'] = predictions[prediction]
+    if one_vs_all == 'all':
+        base['data_args']['metadata_kwargs']['one_vs_all'] = False
+    else:
+        base['data_args']['metadata_kwargs']['one_vs_all'] = one_vs_all
 
-# generate base config for each prediction
-predictions = ['H type', 'O type', 'Serotype']
-for yf in yaml_files:
-    with open(yf, 'r') as f:
-        curr_yaml = yaml.load(f)
-    for p in predictions:
-        curr_yaml['data_args']['kwargs']['label_header'] = p
-        converted_prediction = ''.join(p.split(' '))
-        new_name = yf.replace('Host', converted_prediction)
-        with open(new_name, 'w') as f:
-            yaml.dump(curr_yaml, f)
+    wc = snakemake.wildcards.keys()
+    if 'k' in wc and 'filter' in wc:
+        k = int(snakemake.wildcards['k'])
+        f = snakemake.wildcards['filter']
+        base['data_args']['kmer_kwargs'] = {}
+        if 'complete' in f:
+            base['data_args']['complete_count'] = True
+            base['data_args']['database'] = complete_dbs(k)
+            base['data_args']['kmer_kwargs']['output_db'] = output_dbs(k)
+            if 'filtered' in f:
+                base['data_args']['kmer_kwargs']['name'] = 'min143'
+                base['data_args']['kmer_kwargs']['min_file_count'] = 143
+        elif 'filtered' in f:
+            base['data_args']['complete_count'] = False
+            base['data_args']['database'] = filtered_dbs(k)
+        base['data_method'] = 'get_kmer'
+        base['data_args']['metadata_kwargs']['prefix'] = constants.OMNILOG_FASTA
+        base['data_args']['metadata_kwargs']['suffix'] = '.fasta'
+        base['data_args']['kmer_kwargs']['k'] = k
+        if prediction != 'Lineage':
+            base['data_args']['metadata_kwargs']['extra_header'] = 'WGS'
+            base['data_args']['metadata_kwargs']['extra_label'] = 1
 
-serotype_files = [directory + x for x in os.listdir(directory)
-                  if '_Serotype_' in x]
-otype_files = [directory + x for x in os.listdir(directory)
-               if '_Otype_' in x]
-htype_files = [directory + x for x in os.listdir(directory)
-               if '_Htype_' in x]
-host_files = [directory + x for x in os.listdir(directory)
-              if '_Host_' in x]
+    else:
+        base['data_method'] = 'get_omnilog_data'
+        base['data_args']['metadata_kwargs']['prefix'] = ''
+        base['data_args']['metadata_kwargs']['suffix'] = ''
 
-complete_combos = [(serotype_files, constants.VALID_SEROTYPES),
-                   (otype_files, constants.VALID_OTYPES),
-                   (htype_files, constants.VALID_HTYPES),
-                   (host_files, constants.VALID_HOSTS)]
 
-for cc in complete_combos:
-    filenames = cc[0]
-    one_vs_alls = cc[1]
-    for yf in filenames:
-        with open(yf, 'r') as f:
-            curr_yaml = yaml.load(f)
-        for ova in one_vs_alls:
-            curr_yaml['data_args']['kwargs']['one_vs_all'] = ova
-            new_name = yf.replace('all', ova)
-            with open(new_name, 'w') as f:
-                yaml.dump(curr_yaml, f)
+    with open(snakemake.output[0], 'w') as f:
+        yaml.dump(base, f)
+
+if __name__ == "__main__":
+    main()

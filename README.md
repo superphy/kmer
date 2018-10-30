@@ -34,15 +34,11 @@ Update `kmerprediction/constants.py` so that `OMNILOG_FASTA`, `OMNILOG_DATA`,`GE
 
 ## US/UK Analysis
 
-Run `snakemake us_uk_analysis`
+Run `snakemake -s validation.smk`
 
 ## Omnilog Analysis
 
-Run `snakemake omnilog_analysis`
-
-## Omnilog Feature Importance Analysis
-
-Run `snakemake important_features_analysis` 
+Run `snakemake -s omnilog.smk`
 
 # kmerprediction information
 

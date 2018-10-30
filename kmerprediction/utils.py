@@ -98,11 +98,8 @@ def shuffle(data, labels):
     Returns:
         tuple: all_data, all_labels
     """
-    try:
-        assert len(data) == len(labels)
-        assert isinstance(data[0], (list, np.ndarray))
-    except AssertionError as E:
-        print(E)
+    assert len(data) == len(labels)
+    assert isinstance(data[0], (list, np.ndarray))
     if isinstance(data[0], list):
         all_data = []
         for x in data:
@@ -249,8 +246,23 @@ def parse_metadata(metadata=constants.ECOLI_METADATA, fasta_header='Fasta',
     else:
         data = pd.read_csv(metadata, sep=sep)
 
-    if extra_header:
-        data = data.loc[data[extra_header] == extra_label]
+    data = data[pd.notnull(data[label_header])]
+    data[label_header] = data[label_header].astype(str)
+
+    if extra_header is not None:
+        if isinstance(extra_header, list):
+            for header, index in enumerate(extra_header):
+                if isinstance(extra_label[index], list):
+                    for label in extra_label[index]:
+                        data = data.loc[data[header] == label]
+                else:
+                    data = data.loc[data[header] == extra_label]
+        else:
+            if isinstance(extra_label, list):
+                for label in extra_label:
+                    data = data.loc[data[extra_header] == label]
+            else:
+                data = data.loc[data[extra_header] == extra_label]
 
     if remove:
         data = data.drop(data[data[label_header] == remove].index)
@@ -454,7 +466,7 @@ def do_nothing(input_data, **kwargs):
         (tuple): input_data unchanged, feature_names if given in kwargs.
     """
     if 'feature_names' in kwargs:
-        output = (input_data, kwargs['feature_names'])
+        output = (input_data, kwargs['feature_names'], {})
     else:
         output = input_data
     return output

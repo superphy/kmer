@@ -7,9 +7,7 @@ import yaml
 class FirstExample(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp() + '/'
-        self.config = {'model': 'neural_network',
-                       'data_method': 'get_kmer_us_uk_split',
-                       'validate': False}
+        self.config = {}
         self.config_file = self.dir + 'config_file.yml'
         with open(self.config_file, 'w') as f:
             yaml.dump(self.config, f)
@@ -32,7 +30,7 @@ class FirstExample(unittest.TestCase):
             from kmerprediction.run import main
             main(self.config_file, self.output_file, 'name of run')
         except Exception as e:
-            error_msg = ''
+            error_msg = e
         self.assertEqual(error_msg, '', msg=error_msg)
 
 
@@ -100,7 +98,7 @@ class FourthExample(unittest.TestCase):
             from kmerprediction.get_data import get_genome_region_us_uk_mixed as data
             from kmerprediction.feature_selection import variance_threshold as sel
             d = data()
-            d, f = sel(d[0], d[1], threshold=0.01)
+            d, f, fa = sel(d[0], d[1], threshold=0.01)
             score = neural_network(d)
         except Exception as e:
             error_msg = e

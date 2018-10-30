@@ -18,9 +18,13 @@ from kmerprediction import get_data
 from kmerprediction import feature_scaling
 from kmerprediction import feature_selection
 from kmerprediction import data_augmentation
+from kmerprediction import constants
 import numpy as np
 import yaml
 from kmerprediction.utils import do_nothing
+import logging
+import sys
+import os
 
 
 def run(model=models.support_vector_machine, model_args=None,
@@ -63,6 +67,7 @@ def run(model=models.support_vector_machine, model_args=None,
     Returns:
         (dict):   Contains all of the arguments and results from the run.
     """
+
     scaler = scaler or do_nothing
     selection = selection or do_nothing
     augment = augment or do_nothing
@@ -85,17 +90,27 @@ def run(model=models.support_vector_machine, model_args=None,
     model_args['validate'] = validate
 
     feature_importances = []
+    final_selection_args = []
+    num_features_before_selection = np.zeros(reps, dtype=int)
+    num_features_after_selection = np.zeros(reps, dtype=int)
     for i in range(reps):
+        logging.info('Begin run {} of {}'.format(i+1, reps))
         start = time.time()
         # Get input data
+        logging.info('Get data from {} with args: {}'.format(data_method, data_args))
         data, features, files, le = data_method(**data_args)
+        num_features_before_selection[i] = data[0].shape[1]
 
         # Perform feature selection on input_data
         selection_args['feature_names'] = features
-        data, features = selection(data, **selection_args)
+        logging.info('Perform feature selection using {} with args: {}'.format(selection, selection_args))
+        data, features, final_sel_args = selection(data, **selection_args)
         selection_args.pop('feature_names', None)
+        num_features_after_selection[i] = data[0].shape[1]
+        final_selection_args.append(final_sel_args)
 
         # Scale input data
+        logging.info('Scale data using {} with args: {}'.format(scaler, scaler_args))
         data = scaler(data, **scaler_args)
 
         # Augment training data
@@ -103,6 +118,7 @@ def run(model=models.support_vector_machine, model_args=None,
 
         # Build and use the model
         model_args['feature_names'] = features
+        logging.info('Train and test {} model with args {}'.format(model, model_args))
         output_data, features = model(data, **model_args)
         model_args.pop('feature_names', None)
 
@@ -115,6 +131,7 @@ def run(model=models.support_vector_machine, model_args=None,
         train_sizes[i] = data[0].shape[0]
         test_sizes[i] = data[2].shape[0]
         feature_importances.append(features)
+        logging.info('Done {} of {} repitions'.format(i+1, reps))
 
     # Store information about the run in a dictionary
     output = {}
@@ -123,6 +140,9 @@ def run(model=models.support_vector_machine, model_args=None,
     output['avg_run_time'] = times.mean().tolist()
     output['std_dev_run_times'] = times.std().tolist()
     output['num_genomes'] = data[0].shape[0] + data[2].shape[0]
+    output['features_before_selection'] = num_features_before_selection.mean().tolist()
+    output['features_after_selection'] = num_features_after_selection.mean().tolist()
+    output['final_selection_args'] = final_selection_args
 
     if validate:
         # Compute the mean and std dev of all the runs
@@ -255,6 +275,26 @@ def create_arg_parser():
     return parser.parse_args()
 
 
+def set_up_logging(verbose):
+    sh = logging.StreamHandler(sys.stdout)
+    if verbose:
+        sh.setLevel(logging.DEBUG)
+    else:
+        sh.setLevel(logging.WARNING)
+
+    if not os.path.exists(constants.LOG_DIRECTORY):
+        os.makedirs(constants.LOG_DIRECTORY)
+    logfile = constants.LOG_DIRECTORY + time.strftime('%Y-%m-%d-%H:%M:%S') + '.log'
+
+    fh = logging.FileHandler(logfile, mode='w')
+    fh.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    sh.setFormatter(formatter)
+    logging.basicConfig(level=logging.DEBUG, handlers=[fh, sh])
+
+
 def main(input_yaml, output_yaml, name):
     """
     Reads config from a yaml file, performs the run, and saves the results and
@@ -270,13 +310,25 @@ def main(input_yaml, output_yaml, name):
         None
     """
     args = convert_yaml(input_yaml)
-    run_output = run(**args)
+
+    verbose = args.pop('verbose', False)
+
+    set_up_logging(verbose)
+    logging.info('Input file: {}. Output file: {}'.format(input_yaml, output_yaml))
+
+    try:
+        run_output = run(**args)
+    except Exception as E:
+        logging.exception('Run Failed')
+        raise E
+
     document = {'name': name, 'output': run_output}
     with open(output_yaml, 'a') as output_file:
         yaml.dump(document, output_file, explicit_start=True,
                   explicit_end=True, default_flow_style=False,
                   allow_unicode=True)
         output_file.write('\n\n\n')
+    logging.shutdown()
 
 
 if __name__ == "__main__":

@@ -11,10 +11,10 @@ import os
 
 # default filepaths to data
 SALMONELLA = '/home/rboothman/Data/salmonella_amr/'
-ECOLI = '/home/rylan/Data/ecoli/'
+ECOLI = '/home/rylan/Data/ecoli/fasta/'
 OMNILOG_FASTA = '/home/rylan/Data/ecomnilog/fasta/'
 MORIA = '/home/rboothman/moria/enterobase_db/'
-GENOME_REGIONS = '/home/rboothman/Data/genome_regions/binary_tables/'
+GENOME_REGIONS = '/home/rylan/Data/ecoli/genome_regions/'
 
 # default genome_region table
 GENOME_REGION_TABLE = '/home/rylan/Data/binary_table.txt'
@@ -31,7 +31,7 @@ ROARY_VALID = './Data/PNAS_valid.txt'
 SOURCE = os.path.dirname(os.path.abspath(__file__)) + '/'
 
 # path to default kmer count database
-DB = SOURCE + 'database'
+DEFAULT_DB = SOURCE + 'database'
 
 # default run config file
 CONFIG = SOURCE + 'Data/config.yml'
@@ -45,9 +45,6 @@ ECOLI_METADATA = SOURCE + 'Data/human_bovine.csv'
 OMNILOG_METADATA = SOURCE + 'Data/omnilog_metadata.csv'
 PREDICTIVE_RESULTS = SOURCE + 'Data/hb_train_predictiveresults.csv'
 OMNILOG_WELLS = SOURCE + 'Data/omnilog_wells.csv'
-
-# Default repitions to place in config files created by generate_config.py
-DEFAULT_REPITITIONS = 100
 
 MIN_FREQUENCY = 5
 metadata = pd.read_csv(OMNILOG_METADATA)
@@ -64,4 +61,12 @@ VALID_HTYPES = [htype[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
 host, count = np.unique(metadata['Host'].values, return_counts=True)
 VALID_HOSTS = [host[x] for x, y in enumerate(count) if y >= MIN_FREQUENCY]
 
+metadata = metadata[pd.notnull(metadata['LSPA6'])]
+lspa6, count = np.unique(metadata['LSPA6'].values, return_counts=True)
+VALID_LINEAGES = [lspa6[x] for x, y in enumerate(count) if not pd.isnull(lspa6[x])]
 
+DEFAULT_NAME = 'complete_results'
+DEFAULT_K = 7
+DEFAULT_LIMIT = 13
+
+LOG_DIRECTORY = './kmerprediction_logs/'

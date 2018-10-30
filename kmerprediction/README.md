@@ -134,13 +134,14 @@ The three methods useful to a user in kmer_counter.py are:
 * **count kmers**: Counts all kmers of length k that appear at least limit times in each given fasta file. Stores the output in a database.
 * **get_counts**: Returns a list of the kmer counts stored in the database for each input fasta file.
 * **add_counts**: Adds new files to the database, does not affect kmer counts already in the database. Useful for when you train a model on a dataset and then later get more data. Since the kmers present in the new data must match the kmers present in the old data.
+* **get_kmer_names**: Returns a list of all the kmers in the database sorted alphabetically.
 
 
 #### To use in another script:
 
 ```python
 from kmerprediction.kmer_counter import count_kmers, add_kmers, get_counts
-count_kmers(k, limit, files, database)
+count_kmers(files, database, k=k, limit=limit)
 add_counts(new_files, database)
 data = get_counts(files+new_files, database)
 ```
@@ -151,6 +152,22 @@ data = get_counts(files+new_files, database)
 - database: Name of the lmdb database you would like to use.
 - data: A list of lists of kmer counts, can be used as the input to a machine learning model.
 
+
+## complete_kmer_counter.py
+
+Works similar to `kmer_counter.py`, but instead of removing all kmers that do not appear X times in every genome, any kmer that appears in some genome A but not in some other genome B is given a count of 0 in genome B. This creates significantly larger databases than kmer_counter.py and can take significantly longer to run.
+
+Provides methods to filter kmers based on how many times accross all genomes in the database a kmer appears and based on how many different genomes a kmer appears in. **count_kmers**, **get_counts**, and **get_kmer_names** work the same as in kmer_counter.py. **add_counts** is not currently supported.
+
+#### To filter kmers based on their global values
+
+```python
+from kmerprediction.complete_kmer_counter import count_kmers
+count_kmers(files, database, k=k, max_file_count=A, min_file_count=B,
+            max_global_count=C, min_global_count=D)
+```
+
+This will store every kmer that appears in `files` in `database` that meets the requirments of appearing in at least `B`, but no more than `A` files, as well as appearing at least `D`, but no more than `C` times in total in all the files.
 
 ## Example Configuration File
 
