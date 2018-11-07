@@ -14,7 +14,6 @@ def strain_to_y(strain, y):
     takes in a strain name and what you want returned, e.g. Serotype or Host.
     For example, (ECI-2895, host) will return water
     """
-    print(strain,y)
     return metadata.loc[metadata['Strain'] == strain][y].values[0]
 
 kmer_rows = np.load('data/unfiltered/kmer_rows.npy')
