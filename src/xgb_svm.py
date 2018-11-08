@@ -73,7 +73,7 @@ if __name__ == "__main__":
 		cvscores.append(results[0])
 
 	print("Predicting for:", predict_for)
-        print("on {} features".format(num_feats))
+	print("on {} features".format(num_feats))
 	print("Avg base acc:   %.2f%%   (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
 	print("Avg window acc: %.2f%%   (+/- %.2f%%)" % (np.mean(window_scores), np.std(window_scores)))
 	print("Avg mcc:        %f (+/- %f)" % (np.mean(mcc_scores), np.std(mcc_scores)))
