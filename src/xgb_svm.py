@@ -25,8 +25,8 @@ if __name__ == "__main__":
 	# can be SVM or XGB
 	model_type = sys.argv[3]
 
-	print("Predicting for:", predict_for)
-	print("on {} features".format(num_feats))
+	#print("Predicting for:", predict_for)
+	#print("on {} features".format(num_feats))
 
 	X = np.load('data/unfiltered/kmer_matrix.npy')
 	Y = np.load('data/unfiltered/kmer_rows_'+predict_for+'.npy')
@@ -72,6 +72,8 @@ if __name__ == "__main__":
 		report_scores.append(report)
 		cvscores.append(results[0])
 
+	print("Predicting for:", predict_for)
+        print("on {} features".format(num_feats))
 	print("Avg base acc:   %.2f%%   (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
 	print("Avg window acc: %.2f%%   (+/- %.2f%%)" % (np.mean(window_scores), np.std(window_scores)))
 	print("Avg mcc:        %f (+/- %f)" % (np.mean(mcc_scores), np.std(mcc_scores)))
