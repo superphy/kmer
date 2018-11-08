@@ -8,3 +8,6 @@ build/
 .snakemake/
 *.swp
 kmerprediction_logs/*.log
+data/*jellyfish*
+data/unfiltered*
+data/.~lock*

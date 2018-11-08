@@ -17,7 +17,7 @@ ids, = glob_wildcards(RAW_GENOMES_PATH+"{id}.fasta")
 
 rule all:
   input:
-    ".us_uk_touchfile.txt"
+    ".uk_us_touchfile.txt"
 """
 rule clean:
   input:
@@ -49,6 +49,6 @@ rule matrix:
     input:
         expand("data/uk_us_jellyfish_results/{id}.fa", id=ids)
     output:
-        touch(".us_uk_touchfile.txt")
+        touch(".uk_us_touchfile.txt")
     shell:
-        "python src/parallel_matrix.py {KMER_SIZE} {MATRIX_DTYPE} data/uk_us_jellyfish_results/ data/us_uk_unfiltered/"
+        "python src/parallel_matrix.py {KMER_SIZE} {MATRIX_DTYPE} data/uk_us_jellyfish_results/ data/uk_us_unfiltered/"
