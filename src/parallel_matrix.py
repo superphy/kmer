@@ -130,8 +130,8 @@ if __name__ == "__main__":
     print("end: create matrix (parallel)")
 
     # Convert dict to array
-    row_array = np.empty([num_rows], dtype='S11')
-    col_array = np.empty([num_cols], dtype='S11')
+    row_array = np.empty([num_rows], dtype='object')
+    col_array = np.empty([num_cols], dtype='object')
 
     # Walk through row dictionary, place genome in correct index
     for key, index in row_names.items():

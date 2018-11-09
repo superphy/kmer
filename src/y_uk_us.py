@@ -19,7 +19,7 @@ def strain_to_y(strain, y):
 kmer_rows = np.load('data/uk_us_unfiltered/kmer_rows.npy')
 kmer_rows = [i.decode('utf-8') for i in kmer_rows]
 
-metadata = pd.read_csv('data/human_bovine.csv')
+metadata = pd.read_csv('data/human_bovine.csv', delimiter='\t')
 
 for col in ['Class', 'Dataset']:
     kmer_y = [strain_to_y(i,col) for i in kmer_rows]
