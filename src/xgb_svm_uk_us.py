@@ -22,6 +22,7 @@ if __name__ == "__main__":
 	# can be SVM or XGB
 	model_type = sys.argv[2]
 
+	predict_for = 'Host'
 	#print("Predicting for:", predict_for)
 	#print("on {} features".format(num_feats))
 
@@ -29,18 +30,18 @@ if __name__ == "__main__":
 	class_array   = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy')
 	dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy')
 
-	train_mask = np.asarray[i =='Train' for i in dataset_array]
-	test_mask  = np.asarray[i =='Test'  for i in dataset_array]
+	train_mask = np.asarray([i =='Train' for i in dataset_array])
+	test_mask  = np.asarray([i =='Test'  for i in dataset_array])
 
 
 	le = preprocessing.LabelEncoder()
 	class_array = le.fit_transform(class_array)
 	num_classes = len(le.classes_)
 
-	x_train = kmer_matrix[train_mask] #UK
-	y_train = class_array[train_mask] #UK
-	x_test  = kmer_matrix[test_mask]  #US
-	y_test  = class_array[test_mask]  #US
+	x_test = kmer_matrix[train_mask] #UK
+	y_test = class_array[train_mask] #UK
+	x_train  = kmer_matrix[test_mask]  #US
+	y_train  = class_array[test_mask]  #US
 
 	num_threads = 64
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
 		x_test  = sk_obj.transform(x_test)
 
 
-	model = XGBClassifier(learning_rate=1, n_estimators=10, objective='multi:softmax', silent=True, nthread=num_threads)
+	model = XGBClassifier(learning_rate=1, n_estimators=10, objective='binary:logistic', silent=True, nthread=num_threads)
 	model.fit(x_train,y_train)
 
 	results = xgb_tester(model, x_test, y_test, 0)
