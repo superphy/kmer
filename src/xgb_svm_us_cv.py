@@ -82,7 +82,7 @@ if __name__ == "__main__":
 			reduce_LR = ReduceLROnPlateau(monitor='loss', factor= 0.1, patience=(patience/2), verbose = 0, min_delta=0.005,mode = 'auto', cooldown=0, min_lr=0)
 
 			model = Sequential()
-			model.add(Dense(num_feats,activation='relu',input_dim=(feats)))
+			model.add(Dense(num_feats,activation='relu',input_dim=(num_feats)))
 			model.add(Dropout(0.5))
 			model.add(Dense(int((num_feats+num_classes)/2), activation='relu', kernel_initializer='uniform'))
 			model.add(Dropout(0.5))
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 		cvscores.append(results[0])
 
 	print("Predicting for:", predict_for)
-	print("on {} features".format(num_feats))
+	print("on {} features using a {}".format(num_feats, model_type))
 	print("Avg base acc:   %.2f%%   (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
 	#print("Avg window acc: %.2f%%   (+/- %.2f%%)" % (np.mean(window_scores), np.std(window_scores)))
 	print("Avg mcc:        %f (+/- %f)" % (np.mean(mcc_scores), np.std(mcc_scores)))
