@@ -29,8 +29,8 @@ if __name__ == "__main__":
 	class_array   = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy')
 	dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy')
 
-	train_mask = np.asarray[i =='Train' for i in dataset_array]
-	test_mask  = np.asarray[i =='Test'  for i in dataset_array]
+	train_mask = np.asarray([i =='Train' for i in dataset_array])
+	test_mask  = np.asarray([i =='Test'  for i in dataset_array])
 
 
 	le = preprocessing.LabelEncoder()
