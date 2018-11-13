@@ -65,7 +65,7 @@ if __name__ == "__main__":
 		y_test = Y[test]
 		y_train = Y[train]
 
-		model = XGBClassifier(learning_rate=1, n_estimators=10, objective='multi:softmax', silent=True, nthread=num_threads)
+		model = XGBClassifier(learning_rate=1, n_estimators=10, objective='binary:logistic', silent=True, nthread=num_threads)
 		model.fit(x_train,y_train)
 
 		results = xgb_tester(model, x_test, y_test, 0)
