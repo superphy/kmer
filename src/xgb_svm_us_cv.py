@@ -76,6 +76,10 @@ if __name__ == "__main__":
 			from keras.models import Sequential
 			from keras.utils import np_utils, to_categorical
 			from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+
+			y_train = to_categorical(y_train, num_classes)
+			y_test  = to_categorical(y_test, num_classes)
+			
 			patience = 16
 			early_stop = EarlyStopping(monitor='loss', patience=patience, verbose=0, min_delta=0.005, mode='auto')
 			model_save = ModelCheckpoint("best_model.hdf5",monitor='loss', verbose = 0, save_best_only =True, save_weights_only = False, mode ='auto', period =1)
