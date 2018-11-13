@@ -24,6 +24,7 @@ if __name__ == "__main__":
 
 	#print("Predicting for:", predict_for)
 	#print("on {} features".format(num_feats))
+	predict_for = 'Host'
 
 	kmer_matrix   = np.load('data/uk_us_unfiltered/kmer_matrix.npy')
 	class_array   = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy')
