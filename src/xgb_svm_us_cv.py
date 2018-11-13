@@ -68,9 +68,11 @@ if __name__ == "__main__":
 
 		if(model_type == 'XGB'):
 			model = XGBClassifier(learning_rate=1, n_estimators=10, objective='binary:logistic', silent=True, nthread=num_threads)
+			model.fit(x_train,y_train)
 		elif(model_type == 'SVM'):
 			from sklearn import svm
 			model = svm.SVC()
+			model.fit(x_train,y_train)
 		elif(model_type == 'ANN'):
 			from keras.layers.core import Dense, Dropout, Activation
 			from keras.models import Sequential
@@ -79,9 +81,9 @@ if __name__ == "__main__":
 
 			y_train = to_categorical(y_train, num_classes)
 			y_test  = to_categorical(y_test, num_classes)
-			
+
 			patience = 16
-			early_stop = EarlyStopping(monitor='loss', patience=patience, verbose=0, min_delta=0.005, mode='auto')
+			early_stop = EarlyStopping(monitor='loss', patience=patience, verbose=1, min_delta=0.005, mode='auto')
 			model_save = ModelCheckpoint("best_model.hdf5",monitor='loss', verbose = 0, save_best_only =True, save_weights_only = False, mode ='auto', period =1)
 			reduce_LR = ReduceLROnPlateau(monitor='loss', factor= 0.1, patience=(patience/2), verbose = 0, min_delta=0.005,mode = 'auto', cooldown=0, min_lr=0)
 
@@ -93,10 +95,10 @@ if __name__ == "__main__":
 			model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
 
 			model.compile(loss='binary_crossentropy', metrics=['accuracy'], optimizer='adam')
+
+			model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
 		else:
 			raise Exception('Unrecognized Model. Use XGB, SVM or ANN')
-
-		model.fit(x_train,y_train)
 
 		if(model_type == 'ANN'):
 			results = ann_1d(model, x_test, y_test, 0)
