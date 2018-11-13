@@ -9,5 +9,9 @@ build/
 *.swp
 kmerprediction_logs/*.log
 data/*jellyfish*
-data/unfiltered*
+data/*unfiltered*
 data/.~lock*
+kmerprediction/Data/.~lock*
+*slurm*
+stype*
+*touchfile*
