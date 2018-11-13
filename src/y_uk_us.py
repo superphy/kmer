@@ -17,7 +17,7 @@ def strain_to_y(strain, y):
     return metadata.loc[metadata['Fasta'] == strain][y].values[0]
 
 kmer_rows = np.load('data/uk_us_unfiltered/kmer_rows.npy')
-kmer_rows = [i.decode('utf-8') for i in kmer_rows]
+#kmer_rows = [i.decode('utf-8') for i in kmer_rows]
 
 metadata = pd.read_csv('data/human_bovine.csv', delimiter='\t')
 

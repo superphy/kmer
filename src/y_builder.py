@@ -17,7 +17,7 @@ def strain_to_y(strain, y):
     return metadata.loc[metadata['Strain'] == strain][y].values[0]
 
 kmer_rows = np.load('data/unfiltered/kmer_rows.npy')
-kmer_rows = [i.decode('utf-8') for i in kmer_rows]
+#kmer_rows = [i.decode('utf-8') for i in kmer_rows]
 
 metadata = pd.read_csv('data/omnilog_metadata.csv')
 
