@@ -86,7 +86,7 @@ if __name__ == "__main__":
 			model.add(Dropout(0.5))
 			model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
 
-			model.compile(loss='binary_crossentropy', metrics=['accuracy'], optimizer='adam')
+			model.compile(loss='poisson', metrics=['accuracy'], optimizer='adam')
 
 			model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
 		else:
