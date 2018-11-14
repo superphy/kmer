@@ -57,13 +57,48 @@ if __name__ == "__main__":
 		x_test  = sk_obj.transform(x_test)
 
 
-	model = XGBClassifier(learning_rate=1, n_estimators=10, objective='binary:logistic', silent=True, nthread=num_threads)
-	model.fit(x_train,y_train)
+	if(model_type == 'XGB'):
+		model = XGBClassifier(learning_rate=1, n_estimators=10, objective='binary:logistic', silent=True, nthread=num_threads)
+		model.fit(x_train,y_train)
+	elif(model_type == 'SVM'):
+		from sklearn import svm
+		model = svm.SVC()
+		model.fit(x_train,y_train)
+	elif(model_type == 'ANN'):
+		from keras.layers.core import Dense, Dropout, Activation
+		from keras.models import Sequential
+		from keras.utils import np_utils, to_categorical
+		from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
-	results = xgb_tester(model, x_test, y_test, 0)
-	OBOResults = xgb_tester(model, x_test, y_test, 1)
+		y_train = to_categorical(y_train, num_classes)
+		y_test  = to_categorical(y_test, num_classes)
 
-	window_scores.append(OBOResults[0])
+		patience = 16
+		early_stop = EarlyStopping(monitor='loss', patience=patience, verbose=1, min_delta=0.005, mode='auto')
+		model_save = ModelCheckpoint("best_model.hdf5",monitor='loss', verbose = 0, save_best_only =True, save_weights_only = False, mode ='auto', period =1)
+		reduce_LR = ReduceLROnPlateau(monitor='loss', factor= 0.1, patience=(patience/2), verbose = 0, min_delta=0.005,mode = 'auto', cooldown=0, min_lr=0)
+
+		model = Sequential()
+		model.add(Dense(num_feats,activation='relu',input_dim=(num_feats)))
+		model.add(Dropout(0.5))
+		model.add(Dense(int((num_feats+num_classes)/2), activation='relu', kernel_initializer='uniform'))
+		model.add(Dropout(0.5))
+		model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
+
+		model.compile(loss='binary_crossentropy', metrics=['accuracy'], optimizer='adam')
+
+		model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
+	else:
+		raise Exception('Unrecognized Model. Use XGB, SVM or ANN')
+
+	if(model_type == 'ANN'):
+		results = ann_1d(model, x_test, y_test, 0)
+		#OBOResults = ann_1d(model, x_test, y_test, 1)
+	else:
+		results = xgb_tester(model, x_test, y_test, 0)
+		#OBOResults = xgb_tester(model, x_test, y_test, 1)
+
+	#window_scores.append(OBOResults[0])
 	mcc_scores.append(results[1])
 
 	labels = np.arange(0,num_classes)
@@ -72,9 +107,9 @@ if __name__ == "__main__":
 	cvscores.append(results[0])
 
 	print("Predicting for:", predict_for)
-	print("on {} features".format(num_feats))
+	print("on {} features using a {}".format(num_feats, model_type))
 	print("Avg base acc:   %.2f%%   (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
-	print("Avg window acc: %.2f%%   (+/- %.2f%%)" % (np.mean(window_scores), np.std(window_scores)))
+	#print("Avg window acc: %.2f%%   (+/- %.2f%%)" % (np.mean(window_scores), np.std(window_scores)))
 	print("Avg mcc:        %f (+/- %f)" % (np.mean(mcc_scores), np.std(mcc_scores)))
 
 	np.set_printoptions(suppress=True)
