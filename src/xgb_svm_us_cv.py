@@ -19,7 +19,7 @@ if __name__ == "__main__":
 	#leave at 0 features for no feature selection
 	num_feats = int(sys.argv[1])
 
-	# can be SVM or XGB
+	# can be SVM, XGB or ANN
 	model_type = sys.argv[2]
 
 	#print("Predicting for:", predict_for)
