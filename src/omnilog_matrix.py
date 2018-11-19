@@ -39,8 +39,8 @@ if __name__ == "__main__":
 
 	omnilog_cols = np.empty(192,dtype = 'object')
 	all_feats = np.unique(omni_df.values[:,1])
-	print(all_feats)
-	print(find_index('Sucrose', all_feats))
+	#print(all_feats)
+	#print(find_index('Sucrose', all_feats))
 	all_feats_matrix = np.zeros((len(row_names),len(all_feats)), dtype='object')
 	all_feats_matrix[:] = -1
 
@@ -53,9 +53,9 @@ if __name__ == "__main__":
 		if(rowindx != -1 and colindx != -1):
 			all_feats_matrix[rowindx,colindx] = row[2]
 			coutnt +=1
-	print(coutnt)
-	print('start:',all_feats_matrix)
-	print('start:',all_feats_matrix.shape)
+	#print(coutnt)
+	#print('start:',all_feats_matrix)
+	#print('start:',all_feats_matrix.shape)
 
 	"""
 		Matrix currently has all possible features against all possible genomes,
@@ -65,18 +65,18 @@ if __name__ == "__main__":
 	first = []
 	PM1_2 = []
 	for i in range(1,21):
-		print('***** PM'+str(i)+' *****')
+		#print('***** PM'+str(i)+' *****')
 		PM1 = listdir('data/PM'+str(i))
 		PM1 = [find_eci(i) for i in PM1]
 		PM1 = [pad_zeros(i) for i in PM1]
 		if(i==1):
 			first = PM1
-		print(sorted(PM1))
+		#print(sorted(PM1))
 		if(i==2):
-			print('***** INTERSECTION *****')
+			#print('***** INTERSECTION *****')
 			PM1_2 = intersection(PM1, first)
-			print(len(PM1_2))
-			print(sorted(PM1_2))
+			#print(len(PM1_2))
+			#print(sorted(PM1_2))
 			break
 
 	intsct_mask = np.zeros((145))
@@ -87,12 +87,12 @@ if __name__ == "__main__":
 
 	all_feats_matrix = all_feats_matrix[intsct_mask]
 	row_names = row_names[intsct_mask]
-	print('pm1_2:',all_feats_matrix)
-	print('pm1_2:',all_feats_matrix.shape)
+	#print('pm1_2:',all_feats_matrix)
+	#print('pm1_2:',all_feats_matrix.shape)
 
 
 	feat_mask = np.zeros(len(all_feats))
-	print('before feat clean:',all_feats_matrix.shape)
+	#print('before feat clean:',all_feats_matrix.shape)
 	all_feats_matrix = np.transpose(all_feats_matrix)
 	for i, col in enumerate(all_feats_matrix):
 		for ele in col:
@@ -103,10 +103,10 @@ if __name__ == "__main__":
 	all_feats_matrix = all_feats_matrix[feat_mask]
 	all_feats_matrix = np.transpose(all_feats_matrix)
 	all_feats = all_feats[feat_mask]
-	print('after feat clean:',all_feats_matrix)
-	print('after feat clean:',all_feats_matrix.shape)
-	print('row names:', len(row_names))
-	print('feat names:', len(all_feats))
+	#print('after feat clean:',all_feats_matrix)
+	#print('after feat clean:',all_feats_matrix.shape)
+	#print('row names:', len(row_names))
+	#print('feat names:', len(all_feats))
 
 	np.save('data/unfiltered/omnilog_matrix.npy', all_feats_matrix)
 	np.save('data/unfiltered/omnilog_rows.npy', row_names)
