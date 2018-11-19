@@ -37,6 +37,9 @@ if __name__ == "__main__":
 	if(num_feats>= X.shape[1]):
 		num_feats = 0
 
+	if((num_feats == 0 or num_feats>190) and source=='omnilog'):
+		num_feats = 190
+
 	le = preprocessing.LabelEncoder()
 	Y = le.fit_transform(Y)
 	num_classes = len(le.classes_)
