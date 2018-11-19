@@ -19,7 +19,7 @@ if __name__ == "__main__":
 	#leave at 0 features for no feature selection
 	num_feats = int(sys.argv[1])
 
-	# can be Host or Serotype
+	# can be Host, Serotype, Otype or Htype
 	predict_for = sys.argv[2]
 
 	# can be SVM, XGB, or ANN
@@ -31,8 +31,8 @@ if __name__ == "__main__":
 	#print("Predicting for:", predict_for)
 	#print("on {} features".format(num_feats))
 
-	X = np.load('data/unfiltered/'+source+'_matrix.npy')
-	Y = np.load('data/unfiltered/'+source+'_rows_'+predict_for+'.npy')
+	X = np.load('data/filtered/'+predict_for+'/'+source+'_matrix.npy')
+	Y = np.load('data/filtered/'+predict_for+'/'+source+'_rows_'+predict_for+'.npy')
 
 	if(num_feats>= X.shape[1]):
 		num_feats = 0
@@ -68,7 +68,11 @@ if __name__ == "__main__":
 		y_train = Y[train]
 
 		if(model_type == 'XGB'):
-			model = XGBClassifier(learning_rate=1, n_estimators=10, objective='binary:logistic', silent=True, nthread=num_threads)
+			if(num_classes==2):
+				objective = 'binary:logistic'
+			else:
+				objective = 'multi:softmax'
+			model = XGBClassifier(learning_rate=1, n_estimators=10, objective=objective, silent=True, nthread=num_threads)
 			model.fit(x_train,y_train)
 		elif(model_type == 'SVM'):
 			from sklearn import svm
@@ -95,7 +99,11 @@ if __name__ == "__main__":
 			model.add(Dropout(0.5))
 			model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
 
-			model.compile(loss='poisson', metrics=['accuracy'], optimizer='adam')
+			if(num_classes==2):
+				loss = 'binary_crossentropy'
+			else:
+				loss = 'poisson'
+			model.compile(loss=loss, metrics=['accuracy'], optimizer='adam')
 
 			model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
 		else:

@@ -21,6 +21,6 @@ kmer_rows = np.load('data/unfiltered/kmer_rows.npy')
 
 metadata = pd.read_csv('data/omnilog_metadata.csv')
 
-for col in ['Host', 'Serotype']:
+for col in ['Host', 'Serotype', 'Otype', 'Htype']:
     kmer_y = [strain_to_y(i,col) for i in kmer_rows]
     np.save("data/unfiltered/kmer_rows_"+col, kmer_y)
