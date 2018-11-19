@@ -25,11 +25,17 @@ if __name__ == "__main__":
 	# can be SVM, XGB, or ANN
 	model_type = sys.argv[3]
 
+	# can be kmer or omnilog
+	source = sys.argv[4]
+
 	#print("Predicting for:", predict_for)
 	#print("on {} features".format(num_feats))
 
-	X = np.load('data/unfiltered/kmer_matrix.npy')
-	Y = np.load('data/unfiltered/kmer_rows_'+predict_for+'.npy')
+	X = np.load('data/unfiltered/'+source+'_matrix.npy')
+	Y = np.load('data/unfiltered/'+source+'_rows_'+predict_for+'.npy')
+
+	if(num_feats>= X.shape[1]):
+		num_feats = 0
 
 	le = preprocessing.LabelEncoder()
 	Y = le.fit_transform(Y)
@@ -108,7 +114,7 @@ if __name__ == "__main__":
 		cvscores.append(results[0])
 
 	print("Predicting for:", predict_for)
-	print("on {} features using a {}".format(num_feats, model_type))
+	print("on {} features using a {} trained on {} data".format(num_feats, model_type, source))
 	print("Avg base acc:   %.2f%%   (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
 	#print("Avg window acc: %.2f%%   (+/- %.2f%%)" % (np.mean(window_scores), np.std(window_scores)))
 	print("Avg mcc:        %f (+/- %f)" % (np.mean(mcc_scores), np.std(mcc_scores)))
