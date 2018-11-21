@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 
+import warnings
+warnings.filterwarnings('ignore')
+
 import numpy as np
 import pandas as pd
 from xgboost import XGBClassifier
@@ -10,12 +13,17 @@ from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.metrics import matthews_corrcoef, classification_report, precision_recall_fscore_support
 import collections
 from sklearn.externals import joblib
-import sys
+import sys, os
 from sklearn import preprocessing
 import getopt
+import pickle
+
+from hpsklearn import HyperoptEstimator, svc, xgboost_classification
+from hyperopt import tpe
 
 from model_evaluators import *
 from data_transformers import *
+
 
 def get_data(train, predict_for):
 	X = []
@@ -31,11 +39,11 @@ def get_data(train, predict_for):
 		if(train!='uk_us'):
 			dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy')
 			if(train=='us'):
-				us_mask = np.asarray([i =='Train' for i in dataset_array])
+				us_mask = np.asarray([i =='Test' for i in dataset_array])
 				X = X[us_mask]
 				Y = Y[us_mask]
 			else:
-				uk_mask  = np.asarray([i =='Test'  for i in dataset_array])
+				uk_mask  = np.asarray([i =='Train'  for i in dataset_array])
 				X = X[uk_mask]
 				Y = Y[uk_mask]
 	else:
@@ -165,11 +173,17 @@ if __name__ == "__main__":
 				objective = 'binary:logistic'
 			else:
 				objective = 'multi:softmax'
-			model = XGBClassifier(learning_rate=1, n_estimators=10, objective=objective, silent=True, nthread=num_threads)
+			if(hyper_param):
+				model = HyperoptEstimator(classifier=xgboost_classification('xbc'), preprocessing=[], algo=tpe.suggest, trial_timeout=200)
+			else:
+				model = XGBClassifier(learning_rate=1, n_estimators=10, objective=objective, silent=True, nthread=num_threads)
 			model.fit(x_train,y_train)
 		elif(model_type == 'SVM'):
 			from sklearn import svm
-			model = svm.SVC()
+			if(hyper_param):
+				model = HyperoptEstimator(classifier=svc("mySVC"), preprocessing=[], algo=tpe.suggest, trial_timeout=200)
+			else:
+				model = svm.SVC()
 			model.fit(x_train,y_train)
 		elif(model_type == 'ANN'):
 			from keras.layers.core import Dense, Dropout, Activation
@@ -217,24 +231,28 @@ if __name__ == "__main__":
 		report_scores.append(report)
 		cvscores.append(results[0])
 
-
-	print("Predicting for:", predict_for)
-	if(test_string == 'cv'):
-		test_string = 'a cross validation'
-	print("on {} features using a {} trained on {} data, tested on {}".format(num_feats, model_type, train_string, test_string))
-	#print("Avg base acc:   %.2f%%   (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
-	#print("Avg window acc: %.2f%%   (+/- %.2f%%)" % (np.mean(window_scores), np.std(window_scores)))
-	#print("Avg mcc:        %f (+/- %f)" % (np.mean(mcc_scores), np.std(mcc_scores)))
-
 	np.set_printoptions(suppress=True)
 	avg_reports = np.mean(report_scores,axis=0)
 	avg_reports = np.transpose(avg_reports)
 	avg_reports = np.around(avg_reports, decimals=2)
 	result_df = pd.DataFrame(data = avg_reports, index = le.classes_, columns = ['Precision','Recall', 'F-Score','Supports'])
+	running_sum = 0
+	t_string = ''
 	if(test_string == 'cv'):
 		result_df.values[:,3] = [i*5 for i in result_df.values[:,3]]
-	running_sum  = 0
-	for row in result_df.values:
-		running_sum+=(row[1]*row[3]/X.shape[0])
+		t_string = 'a cross validation'
+		for row in result_df.values:
+			running_sum+=(row[1]*row[3]/X.shape[0])
+	else:
+		for row in result_df.values:
+			running_sum+=(row[1]*row[3]/(len(y_test)))
+	print("Predicting for", predict_for)
+	print("on {} features using a {} trained on {} data, tested on {}".format(num_feats, model_type, train_string, t_string))
 	print("Accuracy:", running_sum)
-	print(result_df)
+	if(out=='print'):
+		print(result_df)
+	else:
+		if not (out.endswith('/')):
+			out = out + '/'
+		out = out+predict_for+'_'+str(num_feats)+'feats_'+model_type+'trainedOn'+train_string+'_testedOn'+test_string+'.pkl'
+		result_df.to_pickle(out)
