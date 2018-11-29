@@ -197,13 +197,13 @@ if __name__ == "__main__":
 			patience = 16
 			early_stop = EarlyStopping(monitor='loss', patience=patience, verbose=1, min_delta=0.005, mode='auto')
 			model_save = ModelCheckpoint("best_model.hdf5",monitor='loss', verbose = 0, save_best_only =True, save_weights_only = False, mode ='auto', period =1)
-			reduce_LR = ReduceLROnPlateau(monitor='loss', factor= 0.1, patience=(patience/2), verbose = 0, min_delta=0.005,mode = 'auto', cooldown=0, min_lr=0)
+			reduce_LR = ReduceLROnPlateau(monitor='loss', factor= 0.1, patience=(patience/2), verbose = 1, min_delta=0.005,mode = 'auto', cooldown=0, min_lr=0)
 
 			model = Sequential()
 			model.add(Dense(num_feats,activation='relu',input_dim=(num_feats)))
-			model.add(Dropout(0.5))
-			model.add(Dense(int((num_feats+num_classes)/2), activation='relu', kernel_initializer='uniform'))
-			model.add(Dropout(0.5))
+			model.add(Dropout(0.16))
+			model.add(Dense(62, activation='relu', kernel_initializer='uniform'))
+			model.add(Dropout(0.44))
 			model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
 
 			if(num_classes==2):

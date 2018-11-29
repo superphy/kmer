@@ -1,6 +1,7 @@
 *.jf
 *.pyc
 *.swp
+*.npy
 database
 results/
 config_files/
