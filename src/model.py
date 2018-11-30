@@ -248,9 +248,9 @@ if __name__ == "__main__":
 		for row in result_df.values:
 			running_sum+=(row[1]*row[3]/(len(y_test)))
 	if(train_string == 'uk_us'):
-		train_string == 'ukus'
+		train_string = 'ukus'
 	if(t_string == 'uk_us'):
-		t_string == 'ukus'
+		t_string = 'ukus'
 	print("Predicting for", predict_for)
 	print("on {} features using a {} trained on {} data, tested on {}".format(num_feats, model_type, train_string, t_string))
 	print("Accuracy:", running_sum)
