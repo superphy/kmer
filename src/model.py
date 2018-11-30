@@ -244,8 +244,13 @@ if __name__ == "__main__":
 		for row in result_df.values:
 			running_sum+=(row[1]*row[3]/X.shape[0])
 	else:
+		t_string = test_string
 		for row in result_df.values:
 			running_sum+=(row[1]*row[3]/(len(y_test)))
+	if(train_string == 'uk_us'):
+		train_string == 'ukus'
+	if(t_string == 'uk_us'):
+		t_string == 'ukus'
 	print("Predicting for", predict_for)
 	print("on {} features using a {} trained on {} data, tested on {}".format(num_feats, model_type, train_string, t_string))
 	print("Accuracy:", running_sum)
@@ -254,5 +259,5 @@ if __name__ == "__main__":
 	else:
 		if not (out.endswith('/')):
 			out = out + '/'
-		out = out+predict_for+'_'+str(num_feats)+'feats_'+model_type+'trainedOn'+train_string+'_testedOn'+test_string+'.pkl'
+		out = out+predict_for+'_'+str(num_feats)+'feats_'+model_type+'trainedOn'+train_string+'_testedOn'+t_string+'.pkl'
 		result_df.to_pickle(out)
