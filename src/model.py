@@ -240,7 +240,7 @@ if __name__ == "__main__":
 	t_string = ''
 	if(test_string == 'cv'):
 		result_df.values[:,3] = [i*5 for i in result_df.values[:,3]]
-		t_string = 'a cross validation'
+		t_string = 'aCrossValidation'
 		for row in result_df.values:
 			running_sum+=(row[1]*row[3]/X.shape[0])
 	else:
