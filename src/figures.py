@@ -11,7 +11,7 @@ if __name__ == "__main__":
     num_samples = sum([len(files) for r, d, files in os.walk(path)])
 
     master_df = pd.DataFrame(data = np.zeros((num_samples, 6),dtype = 'object'),index =[i for i in range(num_samples)], columns = ['acc','model','feats','train','test','attribute'])
-
+    title_string = ''
     for root, dirs, files in os.walk(path):
         for i, file in enumerate(files):
             file = file.split('.')[0]
@@ -28,6 +28,8 @@ if __name__ == "__main__":
                 acc += row[1]*row[3]/total
             for j, stat in enumerate([acc,model,num_feats,train,test,attribute]):
                 master_df.values[i,j] = stat
+            if(i==0):
+                title_string = (("{} predictor trained on {}, tested on {}".format(attribute, train, test)))
 
     master_df['feats'] = pd.to_numeric(master_df['feats'])
     master_df['acc'] = pd.to_numeric(master_df['acc'])
@@ -38,5 +40,8 @@ if __name__ == "__main__":
     #idk = sns.relplot(x="timepoint", y="signal", hue="region", style="event", kind="line", data=fmri)
     idk = sns.relplot(x="feats", y="acc", hue="model", kind="line", data=master_df)
     #idk = sns.relplot(x="feats", y="acc", kind="line", data=master_df)
-    plt.ylim(0.5,1)
-    plt.show()
+    plt.title(title_string)
+    plt.ylim(0,1)
+    plt.tight_layout()
+    plt.savefig('figures/'+(title_string.replace(" ",""))+'.png')
+    #plt.show()
