@@ -1,6 +1,7 @@
 *.jf
 *.pyc
 *.swp
+*.npy
 database
 results/
 config_files/
@@ -8,3 +9,11 @@ build/
 .snakemake/
 *.swp
 kmerprediction_logs/*.log
+data/*jellyfish*
+data/*unfiltered*
+data/.~lock*
+kmerprediction/Data/.~lock*
+*slurm*
+stype*
+*touchfile*
+data/filtered*
