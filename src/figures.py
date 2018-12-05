@@ -35,13 +35,9 @@ if __name__ == "__main__":
     master_df['acc'] = pd.to_numeric(master_df['acc'])
     print(master_df)
     print(master_df.dtypes)
-    #fmri = sns.load_dataset("fmri")
-    #print(fmri)
-    #idk = sns.relplot(x="timepoint", y="signal", hue="region", style="event", kind="line", data=fmri)
-    idk = sns.relplot(x="feats", y="acc", hue="model", kind="line", data=master_df)
-    #idk = sns.relplot(x="feats", y="acc", kind="line", data=master_df)
+    idk = sns.relplot(x="feats", y="acc", hue="model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN"])
+
+    plt.rcParams["axes.titlesize"] = 8
     plt.title(title_string)
     plt.ylim(0,1)
-    plt.tight_layout()
     plt.savefig('figures/'+(title_string.replace(" ",""))+'.png')
-    #plt.show()
