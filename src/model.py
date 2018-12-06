@@ -53,8 +53,8 @@ def get_data(train, predict_for):
 def usage():
 	print("usage: model.py -x uk -y us -f 3000 -a Host\n\nOptions:")
 	print(
-	"-x, --x_train     Which set to train on [us, uk, uk_us, omnilog, kmer]",
-	"-y, --y_train     Which set to test on [us, uk, uk_us, omnilog, kmer]",
+	"-x, --train       Which set to train on [us, uk, uk_us, omnilog, kmer]",
+	"-y, --test        Which set to test on [us, uk, uk_us, omnilog, kmer]",
 	"                  Note that not passing a -y causes cross validation on the train set",
 	"-f, --features    Number of features to train on, set to 0 to use all",
 	"-a, --attribute   What to make the prediction on [Host, Serotype, Otype, Htype]",
@@ -88,14 +88,14 @@ if __name__ == "__main__":
 	out = 'print'
 
 	try:
-		opts, args =  getopt.getopt(sys.argv[1:],"hx:y:f:a:m:o:p",["help","x_train=","y_train=","features=","attribute=","model=","out="])
+		opts, args =  getopt.getopt(sys.argv[1:],"hx:y:f:a:m:o:p",["help","train=","test=","features=","attribute=","model=","out="])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
 	for opt, arg, in opts:
-		if opt in ('-x', '--x_train'):
+		if opt in ('-x', '--train'):
 			train = arg
-		elif opt in ('-y', '--y_train'):
+		elif opt in ('-y', '--test'):
 			test = arg
 		elif opt in ('-f', '--features'):
 			num_feats = int(arg)
