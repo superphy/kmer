@@ -97,7 +97,7 @@ if __name__ == "__main__":
 	print("Parameters of best run", best_run)
 	results = ann_1d(best_model, test_data, test_names, 0)
 	labels = np.arange(0,9)
-	avg_reports = precision_recall_fscore_support(results[3], results[2], average=None, labels=labels))
+	avg_reports = precision_recall_fscore_support(results[3], results[2], average=None, labels=labels)
 	avg_reports = np.transpose(avg_reports)
 	avg_reports = np.around(avg_reports, decimals=2)
 	print(avg_reports)
