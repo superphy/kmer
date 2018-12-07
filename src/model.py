@@ -74,9 +74,10 @@ if __name__ == "__main__":
 	model_type = 'XGB'
 	hyper_param = 0
 	out = 'print'
+	imp_feats = 0
 
 	try:
-		opts, args =  getopt.getopt(sys.argv[1:],"hx:y:f:a:m:o:p",["help","train=","test=","features=","attribute=","model=","out="])
+		opts, args =  getopt.getopt(sys.argv[1:],"hx:y:f:a:m:o:pi",["help","train=","test=","features=","attribute=","model=","out="])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -95,6 +96,10 @@ if __name__ == "__main__":
 			out = arg
 		elif opt == '-p':
 			hyper_param = 1
+		elif opt == '-i':
+			imp_feats = 1
+			if not os.path.exists(os.path.abspath(os.path.curdir)+'/data/features'):
+				os.mkdir(os.path.abspath(os.path.curdir)+'/data/features')
 		elif opt in ('-h', '--help'):
 			usage()
 			sys.exit()
@@ -150,13 +155,14 @@ if __name__ == "__main__":
 	If we did pass a -y then this will only run once
 	"""
 	for train,test in model_data:
-		#split_counter +=1
+		split_counter +=1
 		if(test_string=='cv'):
 			x_train = X[train]
 			x_test = X[test]
 			y_test = Y[test]
 			y_train = Y[train]
 
+		cols = []
 		#feature selection
 		if(num_feats!=0):
 			sk_obj = SelectKBest(f_classif, k=num_feats)
@@ -169,6 +175,27 @@ if __name__ == "__main__":
 			np.save('y_test.npy', y_test)
 			np.save('y_train.npy', y_train)
 			"""
+			if(imp_feats):
+				if(train_string == 'omnilog'):
+					cols = np.load('data/unfiltered/omnilog_cols.npy')
+				else:
+					cols = np.load('data/unfiltered/kmer_cols.npy')
+				"""
+				print(cols)
+				cols = cols.reshape(-1, 1)
+				print(np.asarray(cols))
+				cols = sk_obj.transform(cols)
+				"""
+				feat_indices = np.zeros(len(cols))
+				for i in range(len(cols)):
+					feat_indices[i] = i
+
+				feat_indices = sk_obj.transform(feat_indices.reshape(1,-1))
+				feat_indices = feat_indices.flatten()
+				top_feat_mask  = np.zeros(len(cols))
+				top_feat_mask = np.asarray([i in feat_indices for i in range(len(cols))])
+				cols = cols[top_feat_mask]
+
 
 		if(model_type == 'XGB'):
 			if(num_classes==2 or (train_string == 'uk_us' and test_string == 'kmer')):
@@ -180,6 +207,11 @@ if __name__ == "__main__":
 			else:
 				model = XGBClassifier(learning_rate=1, n_estimators=10, objective=objective, silent=True, nthread=num_threads)
 			model.fit(x_train,y_train)
+
+			if(imp_feats):
+				feat_save = 'data/features/'+predict_for+'_'+str(num_feats)+'feats_'+model_type+'trainedOn'+train_string+'_testedOn'+test_string+'_fold'+str(split_counter)+'.npy'
+				np.save(feat_save, np.vstack((cols.flatten(), model.feature_importances_)))
+
 		elif(model_type == 'SVM'):
 			from sklearn import svm
 			if(hyper_param):
@@ -187,9 +219,13 @@ if __name__ == "__main__":
 			else:
 				model = svm.SVC()
 			model.fit(x_train,y_train)
+			if(imp_feats):
+				raise Exception('You can only pull feature importances from XGB, remove the -i or -m flags')
 		elif(model_type == 'ANN'):
 			if(hyper_param):
 				raise Exception('This script does not support hyperas for ANN hyperparameter optimization, see src/hyp.py')
+			if(imp_feats):
+				raise Exception('You can only pull feature importances from XGB, remove the -i or -m flags')
 			from keras.layers.core import Dense, Dropout, Activation
 			from keras.models import Sequential
 			from keras.utils import np_utils, to_categorical
