@@ -188,6 +188,8 @@ if __name__ == "__main__":
 				model = svm.SVC()
 			model.fit(x_train,y_train)
 		elif(model_type == 'ANN'):
+			if(hyper_param):
+				raise Exception('This script does not support hyperas for ANN hyperparameter optimization, see src/hyp.py')
 			from keras.layers.core import Dense, Dropout, Activation
 			from keras.models import Sequential
 			from keras.utils import np_utils, to_categorical
@@ -260,7 +262,7 @@ if __name__ == "__main__":
 	print("on {} features using a {} trained on {} data, tested on {}".format(num_feats, model_type, train_string, t_string))
 	print("Accuracy:", running_sum)
 	print(result_df)
-	else:
+	if(out!='print'):
 		if not (out.endswith('/')):
 			out = out + '/'
 		out = out+predict_for+'_'+str(num_feats)+'feats_'+model_type+'trainedOn'+train_string+'_testedOn'+t_string+'.pkl'
