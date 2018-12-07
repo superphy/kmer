@@ -13,7 +13,7 @@ data/*jellyfish*
 data/*unfiltered*
 data/.~lock*
 kmerprediction/Data/.~lock*
-*slurm*
+*slurm-*
 stype*
 *touchfile*
 data/filtered*
