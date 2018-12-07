@@ -73,6 +73,8 @@ if __name__ == "__main__":
     """
     Creates a matrix of kmer counts, and two dictionaries to keep
     track of row and column names & their indices.
+    The matrix rows are labeled as genome id's and the columns are kmers of length 11
+    the elements of the array at [row][col] is the count of how many times that kmer appeared in that genome
     """
     print("start: create matrix (parallel)")
 

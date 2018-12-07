@@ -2,6 +2,8 @@
 
 """
 Removes any classes below a certain threshold
+currently set to remove any classes that have less than 5 samples
+because when we split on 5 folds, we want at least 1 sample in each fold
 """
 import numpy as np
 import pandas as pd

@@ -38,6 +38,15 @@ from sklearn.metrics import matthews_corrcoef, confusion_matrix, classification_
 from model_evaluators import *
 from data_transformers import *
 
+"""
+Comments in the data and create_model functions can cause unintended behaviour so all comments will be here
+Save x_train, y_train, x_test, y_test right after line 'x_test  = sk_obj.transform(x_test)' of feature selection
+The script will try up to 5 hidden layers, reporting number of layers, number of neurons in each hidden layer,
+and dropout between each of the layers.
+Output to std.out contains # of layers, # of neurons, dropout rates, EarlyStopping & ReduceLROnPlateau patience
+as well as the accuracy of the optimized model 
+"""
+
 def data():
 	from keras.utils import to_categorical
 	num_classes = 9
