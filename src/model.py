@@ -62,6 +62,7 @@ def usage():
 	"-m, --model       Which model to use [XGB, SVM, ANN], defaults to XGB",
 	"-o, --out         Where to save result DF, defaults to print to std out",
 	"-p,               Add this flag to do hyperparameter optimization, XGB/SVM only",
+	"-i,               Saves all features and their importance in data/features",
 	"-h, --help        Prints this menu",
 	sep = '\n')
 	return
