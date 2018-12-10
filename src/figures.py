@@ -51,4 +51,4 @@ if __name__ == "__main__":
     plt.rcParams["axes.titlesize"] = 8
     plt.title(title_string)
     plt.ylim(0,1)
-    plt.savefig('figures/'+(title_string.replace(" ",""))+'.png')
+    plt.savefig('results/figures/'+(title_string.replace(" ",""))+'.png')
