@@ -15,6 +15,7 @@ def find_index(element, array):
 	return -1
 
 def pad_zeros(genomeid):
+	#turns ECI-93 into ECI-0093
 	if (genomeid[:3]=='ECI'):
 		eci, num = genomeid.split('-')
 		return'{0}-{1:0>4}'.format(eci, num)
@@ -32,6 +33,12 @@ def intersection(lst1, lst2):
 	return lst3
 
 if __name__ == "__main__":
+	"""
+	We are going to scan to find largest subset of omnilog substrates that is consistent across the most genomes
+	We are then going to build a 2D matrix with rows labelled as genomes and the columns are labeled as substrates
+	Next we go through the data and load the [row][col] with the area under the curve value for that substrate genome combo
+	We save this so that we can later replace the genome name with some form of training data
+	"""
 	row_names = pd.read_csv('data/omnilog_metadata.csv')
 	row_names = row_names.values[:,0]
 	omni_df = pd.read_csv('data/omnilog_data_summary.txt', delimiter = '\t')

@@ -14,14 +14,25 @@ if __name__ == "__main__":
     title_string = ''
     for root, dirs, files in os.walk(path):
         for i, file in enumerate(files):
+            """
+            All files in directory are in the format:
+            Host_2700feats_SVMtrainedOnkmer_testedOnaCrossValidation.pkl
+            We split on the _ and extract the relevant information to load into dataframe
+            """
             file = file.split('.')[0]
             attribute, num_feats, train, test = file.split('_')
-            num_feats = int(num_feats[:-5])
-            model = train[:3]
-            train = train[12:]
-            test = test[8:]
+            num_feats = int(num_feats[:-5]) # all but last 5 chars
+            model = train[:3] # first 3 chars
+            train = train[12:] # all but first 12
+            test = test[8:] # all but last 8
             #print(attribute, num_feats, model, train, test)
             acc_data = pd.read_pickle(path+file+'.pkl')
+
+            """
+            We cannot use the average accuracy across the 5 folds because there are a
+            different number of samples in each fold. So we multiply class accuracy by
+            number of samples in that class, sum that for all classes and divide by total # classes
+            """
             acc = 0
             total = np.sum(acc_data.values[:,3])
             for row in acc_data.values:
@@ -35,13 +46,9 @@ if __name__ == "__main__":
     master_df['acc'] = pd.to_numeric(master_df['acc'])
     print(master_df)
     print(master_df.dtypes)
-    #fmri = sns.load_dataset("fmri")
-    #print(fmri)
-    #idk = sns.relplot(x="timepoint", y="signal", hue="region", style="event", kind="line", data=fmri)
-    idk = sns.relplot(x="feats", y="acc", hue="model", kind="line", data=master_df)
-    #idk = sns.relplot(x="feats", y="acc", kind="line", data=master_df)
+    idk = sns.relplot(x="feats", y="acc", hue="model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN"])
+
+    plt.rcParams["axes.titlesize"] = 8
     plt.title(title_string)
     plt.ylim(0,1)
-    plt.tight_layout()
-    plt.savefig('figures/'+(title_string.replace(" ",""))+'.png')
-    #plt.show()
+    plt.savefig('results/figures/'+(title_string.replace(" ",""))+'.png')

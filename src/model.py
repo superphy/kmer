@@ -37,6 +37,7 @@ def get_data(train, predict_for):
 		Y = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy')
 
 		if(train!='uk_us'):
+			#the US dataset has been labeled as Test and the UK set as Train, we need to load the correct one
 			dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy')
 			if(train=='us'):
 				us_mask = np.asarray([i =='Test' for i in dataset_array])
@@ -53,32 +54,20 @@ def get_data(train, predict_for):
 def usage():
 	print("usage: model.py -x uk -y us -f 3000 -a Host\n\nOptions:")
 	print(
-	"-x, --x_train     Which set to train on [us, uk, uk_us, omnilog, kmer]",
-	"-y, --y_train     Which set to test on [us, uk, uk_us, omnilog, kmer]",
+	"-x, --train       Which set to train on [us, uk, uk_us, omnilog, kmer]",
+	"-y, --test        Which set to test on [us, uk, uk_us, omnilog, kmer]",
 	"                  Note that not passing a -y causes cross validation on the train set",
 	"-f, --features    Number of features to train on, set to 0 to use all",
 	"-a, --attribute   What to make the prediction on [Host, Serotype, Otype, Htype]",
 	"-m, --model       Which model to use [XGB, SVM, ANN], defaults to XGB",
 	"-o, --out         Where to save result DF, defaults to print to std out",
 	"-p,               Add this flag to do hyperparameter optimization, XGB/SVM only",
+	"-i,               Saves all features and their importance in data/features",
 	"-h, --help        Prints this menu",
 	sep = '\n')
 	return
 
 if __name__ == "__main__":
-	"""
-	#leave at 0 features for no feature selection
-	num_feats = int(sys.argv[1])
-
-	# can be Host, Serotype, Otype or Htype
-	predict_for = sys.argv[2]
-
-	# can be SVM, XGB, or ANN
-	model_type = sys.argv[3]
-
-	# can be kmer or omnilog
-	source = sys.argv[4]
-	"""
 	train = ''
 	test = 'cv'
 	num_feats = 0
@@ -86,16 +75,17 @@ if __name__ == "__main__":
 	model_type = 'XGB'
 	hyper_param = 0
 	out = 'print'
+	imp_feats = 0
 
 	try:
-		opts, args =  getopt.getopt(sys.argv[1:],"hx:y:f:a:m:o:p",["help","x_train=","y_train=","features=","attribute=","model=","out="])
+		opts, args =  getopt.getopt(sys.argv[1:],"hx:y:f:a:m:o:pi",["help","train=","test=","features=","attribute=","model=","out="])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
 	for opt, arg, in opts:
-		if opt in ('-x', '--x_train'):
+		if opt in ('-x', '--train'):
 			train = arg
-		elif opt in ('-y', '--y_train'):
+		elif opt in ('-y', '--test'):
 			test = arg
 		elif opt in ('-f', '--features'):
 			num_feats = int(arg)
@@ -107,6 +97,10 @@ if __name__ == "__main__":
 			out = arg
 		elif opt == '-p':
 			hyper_param = 1
+		elif opt == '-i':
+			imp_feats = 1
+			if not os.path.exists(os.path.abspath(os.path.curdir)+'/data/features'):
+				os.mkdir(os.path.abspath(os.path.curdir)+'/data/features')
 		elif opt in ('-h', '--help'):
 			usage()
 			sys.exit()
@@ -118,22 +112,24 @@ if __name__ == "__main__":
 	y_train = []
 	y_test = []
 
-	le = preprocessing.LabelEncoder()
+	le = preprocessing.LabelEncoder() # this encodes the classes into integers for the models (human, bovine, water -> 0,1,2)
+
+	#if no -y is passed in we want to do a 5 fold cross validation on the data
 	if test =='cv':
-		X, Y = get_data(train, predict_for)
+		X, Y = get_data(train, predict_for) # pull entire data set to be split later
 		Y = le.fit_transform(Y)
 		if(num_feats>= X.shape[1]):
 			num_feats = 0
 	else: #we are not cross validating
-		x_train, y_train = get_data(train, predict_for)
-		x_test, y_test = get_data(test, predict_for)
-		le.fit(np.concatenate((y_train,y_test)))
-		y_train = le.transform(y_train)
+		x_train, y_train = get_data(train, predict_for) # pull training set
+		x_test, y_test = get_data(test, predict_for) # pull testing set
+		le.fit(np.concatenate((y_train,y_test))) # need to fit on both sets of labels, so everything is accounted for (finding what the replacements are)
+		y_train = le.transform(y_train) # just applying the label encoder on the 2 sets (actually replacing things)
 		y_test = le.transform(y_test)
 		if(num_feats>= x_train.shape[1]):
 			num_feats = 0
 
-
+	# the omnilog crashes at 191, so 190 is our new 'all features'
 	if((num_feats == 0 or num_feats>190) and train=='omnilog'):
 		num_feats = 190
 
@@ -155,21 +151,55 @@ if __name__ == "__main__":
 	if(test == 'cv'):
 		model_data = cv.split(X,Y)
 
+	"""
+	If we didnt pass -y then we will be doing a 5 fold CV which means that this for loop will run 5 times, taking the average of each run
+	If we did pass a -y then this will only run once
+	"""
 	for train,test in model_data:
-		#split_counter +=1
+		split_counter +=1
 		if(test_string=='cv'):
 			x_train = X[train]
 			x_test = X[test]
 			y_test = Y[test]
 			y_train = Y[train]
 
+		cols = []
+		#feature selection
 		if(num_feats!=0):
 			sk_obj = SelectKBest(f_classif, k=num_feats)
 			x_train = sk_obj.fit_transform(x_train, y_train)
 			x_test  = sk_obj.transform(x_test)
+			"""
+			#uncomment this section if you want to save datasets for hyp.property
+			np.save('x_test.npy', x_test)
+			np.save('x_train.npy', x_train)
+			np.save('y_test.npy', y_test)
+			np.save('y_train.npy', y_train)
+			"""
+			if(imp_feats):
+				if(train_string == 'omnilog'):
+					cols = np.load('data/unfiltered/omnilog_cols.npy')
+				else:
+					cols = np.load('data/unfiltered/kmer_cols.npy')
+				"""
+				print(cols)
+				cols = cols.reshape(-1, 1)
+				print(np.asarray(cols))
+				cols = sk_obj.transform(cols)
+				"""
+				feat_indices = np.zeros(len(cols))
+				for i in range(len(cols)):
+					feat_indices[i] = i
+
+				feat_indices = sk_obj.transform(feat_indices.reshape(1,-1))
+				feat_indices = feat_indices.flatten()
+				top_feat_mask  = np.zeros(len(cols))
+				top_feat_mask = np.asarray([i in feat_indices for i in range(len(cols))])
+				cols = cols[top_feat_mask]
+
 
 		if(model_type == 'XGB'):
-			if(num_classes==2):
+			if(num_classes==2 or (train_string == 'uk_us' and test_string == 'kmer')):
 				objective = 'binary:logistic'
 			else:
 				objective = 'multi:softmax'
@@ -178,6 +208,11 @@ if __name__ == "__main__":
 			else:
 				model = XGBClassifier(learning_rate=1, n_estimators=10, objective=objective, silent=True, nthread=num_threads)
 			model.fit(x_train,y_train)
+
+			if(imp_feats):
+				feat_save = 'data/features/'+predict_for+'_'+str(num_feats)+'feats_'+model_type+'trainedOn'+train_string+'_testedOn'+test_string+'_fold'+str(split_counter)+'.npy'
+				np.save(feat_save, np.vstack((cols.flatten(), model.feature_importances_)))
+
 		elif(model_type == 'SVM'):
 			from sklearn import svm
 			if(hyper_param):
@@ -185,7 +220,13 @@ if __name__ == "__main__":
 			else:
 				model = svm.SVC()
 			model.fit(x_train,y_train)
+			if(imp_feats):
+				raise Exception('You can only pull feature importances from XGB, remove the -i or -m flags')
 		elif(model_type == 'ANN'):
+			if(hyper_param):
+				raise Exception('This script does not support hyperas for ANN hyperparameter optimization, see src/hyp.py')
+			if(imp_feats):
+				raise Exception('You can only pull feature importances from XGB, remove the -i or -m flags')
 			from keras.layers.core import Dense, Dropout, Activation
 			from keras.models import Sequential
 			from keras.utils import np_utils, to_categorical
@@ -200,16 +241,19 @@ if __name__ == "__main__":
 			reduce_LR = ReduceLROnPlateau(monitor='loss', factor= 0.1, patience=(patience/2), verbose = 1, min_delta=0.005,mode = 'auto', cooldown=0, min_lr=0)
 
 			model = Sequential()
+			#This model currently has an input layer of num_feats neurons, 16% dropout, a hidden layer with 62 neurons, 44% dropout, and an output layer with num_classes outputs (or 1 if binary)
 			model.add(Dense(num_feats,activation='relu',input_dim=(num_feats)))
 			model.add(Dropout(0.16))
 			model.add(Dense(62, activation='relu', kernel_initializer='uniform'))
 			model.add(Dropout(0.44))
-			model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
 
-			if(num_classes==2):
+			if(num_classes==2 or (train_string == 'uk_us' and test_string == 'kmer')):
 				loss = 'binary_crossentropy'
+				num_outs = 1
 			else:
 				loss = 'poisson'
+				num_outs = num_classes
+			model.add(Dense(num_outs, kernel_initializer='uniform', activation='softmax'))
 			model.compile(loss=loss, metrics=['accuracy'], optimizer='adam')
 
 			model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
@@ -254,9 +298,8 @@ if __name__ == "__main__":
 	print("Predicting for", predict_for)
 	print("on {} features using a {} trained on {} data, tested on {}".format(num_feats, model_type, train_string, t_string))
 	print("Accuracy:", running_sum)
-	if(out=='print'):
-		print(result_df)
-	else:
+	print(result_df)
+	if(out!='print'):
 		if not (out.endswith('/')):
 			out = out + '/'
 		out = out+predict_for+'_'+str(num_feats)+'feats_'+model_type+'trainedOn'+train_string+'_testedOn'+t_string+'.pkl'
