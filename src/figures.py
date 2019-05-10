@@ -46,7 +46,7 @@ if __name__ == "__main__":
     master_df['acc'] = pd.to_numeric(master_df['acc'])
     print(master_df)
     print(master_df.dtypes)
-    idk = sns.relplot(x="feats", y="acc", hue="model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN"])
+    idk = sns.relplot(x="Number of Features", y="Accuracy", hue="Model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN"])
 
     plt.rcParams["axes.titlesize"] = 8
     plt.title(title_string)
