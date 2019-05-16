@@ -1,6 +1,6 @@
 ### Bio
 I am Gates Kempenaar and I am a 3rd year Computer Science student at the University of Lethbridge. During this term I will be 
-developing tools to predict differnt serotypes of shiga toxin producing _Escherichia coli_ (STEC) using the relationship between 
+developing tools to predict different serotypes of shiga toxin producing _Escherichia coli_ (STEC) using the relationship between 
 genotype, phenotype and whole genome sequences (WGS). I will be focusing on both O157:H7 and non-O157:H7 serotypes of STEC. 
 
 ### Introduction
@@ -43,5 +43,5 @@ package - the ANN and SVM are implemented using Keras, TensorFlow, and scikit-le
 
 ### Conclusion
 Successful completion of this project will result in rapid classification of isolate host and serotype based on omnilog 
-microarray and WGS data. These calssifications can lead to the identification of STEC phenotypes most closely associated with 
+microarray and WGS data. These classifications can lead to the identification of STEC phenotypes most closely associated with 
 human illness, ultimately leading to healthier Canadians. 
