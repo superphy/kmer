@@ -43,4 +43,6 @@ neural networks (ANN) and Support Vector Machines (SVM). The XGBoost model will 
 package - the ANN and SVM are implemented using Keras, TensorFlow, and scikit-learn.
 
 ### Conclusion
-
+Successful completion of this project will result in rapid classification of isolate host and serotype based on omnilog 
+microarray and WGS data. These calssifications can lead to the identification of STEC phenotypes most closely associated with 
+human illness, ultimately leading to healthier Canadians. 
