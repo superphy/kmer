@@ -10,7 +10,7 @@ responsible for occasional human illness as well as large scale outbreaks.
 
 As whole genome sequencing has become more affordable and easier to access it has since become the standard for STEC analysis. 
 WGS is used for routine identification, characterization, and surveillance of STEC. While there is a wealth of genomic data there 
-have been few large-scale studies linking phenotypic traits to their genome sequence. As well the specific link between between 
+have been few large-scale studies linking phenotypic traits to their genome sequence. As well, the specific link between between 
 phenotype and genotype relating to factors that influence human illness, bacterial survival and virulence is still largly 
 unknown. There have been other studies focusing on well-known virulence factor differences or broad differences between bacterial 
 groups but a fine-grain analysis of phenotypic differences among STEC has largely been absent. 
@@ -27,19 +27,18 @@ from X STEC serotypes in a comprehensive analysis of phenotype and genotype usin
 sequencing. 
 
 ### Implementation
-WGS data will be reformatted for use in the supervised machine learning models using Jellyfish. This reformatted data will be 
-used to predict serotypes.
+WGS data will be reformatted for use in the supervised machine learning models using Jellyfish.
 
-Bacterial strains from 187 E. coli genomes were used in this study made up of X different serotypes. Of this data X were isolated 
-from human hosts, X from bovine hosts, X from environmental water hosts and an additional X isolates from ovine hosts. We can 
-then use ML models to make predictions on serotype. 
+Bacterial strains from 187 _E. coli_ genomes were used in this study made up of X different serotypes. Of this data 112 were 
+isolated from human hosts, 44 from bovine hosts, 27 from environmental water hosts and an additional 5 isolates from ovine hosts. 
+We can then use ML models to make predictions on serotype. 
 
 DNA was extracted from cultured bacteria using the Epicentre MasterPure DNA Purification Kit and stored at -20C until it was 
 needed. The DNA was then sequenced using the Illumina MiSeq platform at either the Core Services centre of the National 
 Microbiology Laboratory (Winnipeg, Manitoba), or the McGill University and Genome Quebec Innovation Centre (Montreal, Quebec).
 
-Predictions will be made using three seperate machine learning models: Gradient Boosted Decision Trees (XGBoost), artificial 
-neural networks (ANN) and Support Vector Machines (SVM). The XGBoost model will be used as implemented using the XGBoost Python 
+Predictions will be made using three seperate machine learning models: Gradient Boosted Decision Trees (XGBoost), Artificial 
+Neural Networks (ANN) and Support Vector Machines (SVM). The XGBoost model will be used as implemented using the XGBoost Python 
 package - the ANN and SVM are implemented using Keras, TensorFlow, and scikit-learn.
 
 ### Conclusion
