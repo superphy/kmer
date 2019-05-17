@@ -17,10 +17,11 @@ groups but a fine-grain analysis of phenotypic differences among STEC has largel
 
 High levels of phenotypic variation can be observed in clonal populations of both O157:H7 and non-O157:H7, this includes traits 
 associated with virulence in humans. Quantitatively measuring phenotypes to facilitate accurate predictive genomics wherein 
-phenotypes can be accurately predicted from the genome sequence. Phenotypes such as resistance to antimicrobials or presence of 
-toxin gene can be attributed to a single gene presence or absence while other phenotypes are more complex and not as easily 
-attributed to specific single changes. As a result of this complexity we cannot look at single changes but instead need to look 
-at relationships across thousands of factors.
+phenotypes can be accurately predicted from the genome sequence is important for the identification of traits known to be 
+associated with virulence in humans. Phenotypes such as resistance to antimicrobials or presence of toxin gene can be attributed 
+to a single gene presence or absence while other phenotypes are more complex and not as easily attributed to specific single 
+changes. As a result of this complexity we cannot look at single changes but instead need to look at relationships across 
+thousands of factors.
 
 Machine Learning (ML) is a tool we can use to look at these complex relationships. Over this term I will be examining 187 genomes 
 from X STEC serotypes in a comprehensive analysis of phenotype and genotype using Omnilog phenotypic microrrays and whole-genome 
