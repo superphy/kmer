@@ -1,10 +1,16 @@
 import pandas as pd
 import os
+import numpy as np
 
 path = os.path.abspath('../../Desktop/ecoli/biolog_csv/_07-2890_Escherichia coli__2_37_PMX_438_2#19#2019_A_ 1B_1.csv')
+path2 = os.path.abspath('../../Desktop/ecoli/PM21/_07-2890_Escherichia coli__2_37_PMX_438_2#19#2019_A_ 1B_1.csv')
+
 new_data = pd.read_csv(path)
+new_data2 = pd.read_csv(path2)
 
 data_file = new_data["Data File"]
+file_name = data_file[1]
+
 setup_time = new_data["Setup Time"]
 position = new_data["Position"]
 plate_type = new_data["Plate Type"]
@@ -14,4 +20,11 @@ strain_name = new_data["Strain Name"]
 strain_number = new_data["Strain Number"]
 other = new_data["Other"]
 
-print(data_file)
+
+list = []
+for x in range(0, 300):
+    list.append(x)
+
+df = pd.DataFrame(index = list, columns = ['Data File    ', '{0}'.format(file_name), 'Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4', 'Unnamed: 5', 'Unnamed: 6', 'Unnamed: 7', 'Unnamed: 8', 'Unnamed: 9', 'Unnamed: 10', 'Unnamed: 11', 'Unnamed: 12', 'Unnamed: 13', 'Unnamed: 14', 'Unnamed: 15', 'Unnamed: 16', 'Unnamed: 17', 'Unnamed: 18', 'Unnamed: 19', 'Unnamed: 20', 'Unnamed: 21', 'Unnamed: 22', 'Unnamed: 23', 'Unnamed: 24', 'Unnamed: 25', 'Unnamed: 26', 'Unnamed: 27', 'Unnamed: 28', 'Unnamed: 29', 'Unnamed: 30', 'Unnamed: 31', 'Unnamed: 32', 'Unnamed: 33', 'Unnamed: 34', 'Unnamed: 35', 'Unnamed: 36', 'Unnamed: 37', 'Unnamed: 38', 'Unnamed: 39', 'Unnamed: 40', 'Unnamed: 41', 'Unnamed: 42', 'Unnamed: 43', 'Unnamed: 44', 'Unnamed: 45', 'Unnamed: 46', 'Unnamed: 47', 'Unnamed: 48', 'Unnamed: 49', 'Unnamed: 50', 'Unnamed: 51', 'Unnamed: 52', 'Unnamed: 53', 'Unnamed: 54', 'Unnamed: 55', 'Unnamed: 56', 'Unnamed: 57', 'Unnamed: 58', 'Unnamed: 59', 'Unnamed: 60', 'Unnamed: 61', 'Unnamed: 62', 'Unnamed: 63', 'Unnamed: 64', 'Unnamed: 65', 'Unnamed: 66', 'Unnamed: 67', 'Unnamed: 68', 'Unnamed: 69', 'Unnamed: 70', 'Unnamed: 71', 'Unnamed: 72', 'Unnamed: 73', 'Unnamed: 74', 'Unnamed: 75', 'Unnamed: 76', 'Unnamed: 77', 'Unnamed: 78', 'Unnamed: 79', 'Unnamed: 80', 'Unnamed: 81', 'Unnamed: 82', 'Unnamed: 83', 'Unnamed: 84', 'Unnamed: 85', 'Unnamed: 86', 'Unnamed: 87', 'Unnamed: 88', 'Unnamed: 89', 'Unnamed: 90', 'Unnamed: 91', 'Unnamed: 92', 'Unnamed: 93', 'Unnamed: 94', 'Unnamed: 95', 'Unnamed: 96'])
+
+print(df)
