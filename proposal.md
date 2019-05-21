@@ -19,7 +19,7 @@ DNA was extracted from cultured bacteria using the Epicentre MasterPure DNA Puri
 needed. The DNA was then sequenced using the Illumina MiSeq platform at either the Core Services centre of the National 
 Microbiology Laboratory (Winnipeg, Manitoba), or the McGill University and Genome Quebec Innovation Centre (Montreal, Quebec).
 
-Experimental procedure for E. coli as detailed in the Omnilog Biolog manual (Biolog, California) was followed. The resulting kinetic bacterial growth curves were subjected to cubic spline fitting using the R package OPM, and the area under this curve was used in downstream analyses.
+Experimental procedure for _E. coli_ as detailed in the Omnilog Biolog manual (Biolog, California) was followed. The resulting kinetic bacterial growth curves were subjected to cubic spline fitting using the R package OPM, and the area under this curve was used in downstream analyses.
 
 Predictions will be made using three separate machine learning models: Gradient Boosted Decision Trees (XGBoost), Artificial Neural Networks (ANN) and Support Vector Machines (SVM). The XGBoost model is implemented using the XGBoost Python package - the ANN and SVM are implemented using Keras, TensorFlow, and scikit-learn.
 
