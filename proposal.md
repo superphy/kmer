@@ -23,16 +23,16 @@ to a single gene presence or absence while other phenotypes are more complex and
 changes. As a result of this complexity we cannot look at single changes but instead need to look at relationships across 
 thousands of factors.
 
-Machine Learning (ML) is a tool we can use to look at these complex relationships. Over this term I will be examining 187 genomes 
-from X STEC serotypes in a comprehensive analysis of phenotype and genotype using Omnilog phenotypic microrrays and whole-genome 
+Machine Learning (ML) is a tool we can use to look at these complex relationships. Over this term I will be examining 192 genomes 
+from 106 STEC serotypes in a comprehensive analysis of phenotype and genotype using Omnilog phenotypic microrrays and whole-genome 
 sequencing. 
 
 ### Implementation
 WGS data will be reformatted for use in the supervised machine learning models using Jellyfish.
 
-Bacterial strains from 187 _E. coli_ genomes were used in this study made up of X different serotypes. Of this data 112 were 
-isolated from human hosts, 44 from bovine hosts, 27 from environmental water hosts and an additional 5 isolates from ovine hosts. 
-We can then use ML models to make predictions on serotype. 
+Bacterial strains from 192 _E. coli_ genomes were used in this study made up of 106 different serotypes. Of this data 114 were 
+isolated from human hosts, 44 from bovine hosts, 27 from environmental water hosts, an additional 5 isolates from ovine hosts, 
+and one each from retail meat and a goose fecal sample. We can then use ML models to make predictions on serotype. 
 
 DNA was extracted from cultured bacteria using the Epicentre MasterPure DNA Purification Kit and stored at -20C until it was 
 needed. The DNA was then sequenced using the Illumina MiSeq platform at either the Core Services centre of the National 
