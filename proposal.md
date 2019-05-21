@@ -6,14 +6,14 @@ STEC vary in the frequency and severity of disease that they cause among humans.
 
 WGS is used for routine identification, characterization, and surveillance of STEC. While there is a wealth of genomic data there have been few large-scale studies linking phenotypic traits to specific differences in genome sequence. As well, the specific link between genotype and phenotype among factors that influence human illness, bacterial survival, and virulence is still largely unknown. There have been other studies focusing on well-known virulence factor differences, or broad differences between bacterial groups, but an in-depth genomic analysis of phenotypic differences among STEC has largely been absent. 
 
-Phenotypes such as resistance to antimicrobials or presence of toxin gene can be attributed to the presence of absence of a single gene, while other phenotypes are more complex and not as easily attributed to specific single changes. As a result of this complexity we must look at the contributions of thousands of factors to individual phenotypes. Using the omnilog system by Biolog we can do a quantitative phenotypic assessment of bacteria by testing nutrient utlization and chemical sensitivity of microorganisms in a high-throughput manner.
+Phenotypes such as resistance to antimicrobials or presence of toxin gene can be attributed to the presence or absence o a single gene, while other phenotypes are more complex and not as easily attributed to specific single changes. As a result of this complexity we must look at the contributions of thousands of factors to individual phenotypes. Using the omnilog system by Biolog we can do a quantitative phenotypic assessment of bacteria by testing nutrient utlization and chemical sensitivity of microorganisms in a high-throughput manner.
 
 Machine Learning (ML) models allows us to examine these complex relationships. Over this term I will analyze 192 genomes from 106 STEC serotypes in a comprehensive analysis of phenotype and genotype using Omnilog phenotypic microrrays and whole-genome sequencing. 
 
 ### Implementation
 WGS data will be reformatted for use in the supervised machine learning models using Jellyfish.
 
-The 192 bacterial isolates are from 106 serotypes, with 114 isolated from human hosts, 44 from bovine hosts, 27 from environmental smaples, and 5 from ovine hosts. 
+The 192 bacterial isolates are from 106 serotypes, with 114 isolated from human hosts, 44 from bovine hosts, 27 from environmental samples, and 5 from ovine hosts. 
 
 DNA was extracted from cultured bacteria using the Epicentre MasterPure DNA Purification Kit and stored at -20C until it was 
 needed. The DNA was then sequenced using the Illumina MiSeq platform at either the Core Services centre of the National 
