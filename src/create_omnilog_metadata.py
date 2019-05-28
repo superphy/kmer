@@ -15,4 +15,6 @@ df2 = pd.read_csv('data/omnilog_metadata.csv')
 
 df3 = pd.concat([df, df2])
 
+#print(df3)
+
 df3.to_csv("data/final_onmilog_metadata.csv")
