@@ -72,10 +72,6 @@ for filename in os.listdir('../ecoli/biolog_csv'):
     df.at[4, 'Data File    '] = 'Sample Number'
     df.at[4, file_name] = sample
 
-    # set strain name
-    df.at[5, 'Data File    '] = 'Strain Name'
-    df.at[5, file_name] = name
-
     df.at[6, 'Data File    '] = 'O-type'
     df.at[6, file_name] = o_type
 
@@ -88,6 +84,10 @@ for filename in os.listdir('../ecoli/biolog_csv'):
     # set strain number
     df.at[9, 'Data File    '] = 'Strain Number'
     df.at[9, file_name] = number
+
+    # set strain name
+    df.at[5, 'Data File    '] = 'Strain Name'
+    df.at[5, file_name] = number
 
     # set other
     df.at[10, 'Data File    '] = 'Other'
@@ -110,5 +110,6 @@ for filename in os.listdir('../ecoli/biolog_csv'):
     df4 = df.append(df2)
     df5 = df4.append(df3)
 
-    df5.to_csv("data/PM21/{0}".format(filename))
+    #df5.reset_index(drop = True)
+    df5.to_csv("data/PM21/{0}".format(filename), index = False, header = False)
     print("Done file {0}".format(file_name))
