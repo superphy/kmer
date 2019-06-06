@@ -19,12 +19,12 @@ if __name__ == "__main__":
 	if not os.path.exists(os.path.abspath(os.path.curdir)+'/data/filtered/'):
 		os.mkdir(os.path.abspath(os.path.curdir)+'/data/filtered/')
 
-	matrix = np.load("data/unfiltered/"+source+"_matrix.npy")
-	rows_genomes = np.load("data/unfiltered/"+source+"_rows.npy")
-	Host = np.load("data/unfiltered/"+source+"_rows_Host.npy")
-	Serotype = np.load("data/unfiltered/"+source+"_rows_Serotype.npy")
-	Otype = np.load("data/unfiltered/"+source+"_rows_Otype.npy")
-	Htype = np.load("data/unfiltered/"+source+"_rows_Htype.npy")
+	matrix = np.load("data/unfiltered/"+source+"_matrix.npy", allow_pickle = True)
+	rows_genomes = np.load("data/unfiltered/"+source+"_rows.npy", allow_pickle = True)
+	Host = np.load("data/unfiltered/"+source+"_rows_Host.npy", allow_pickle = True)
+	Serotype = np.load("data/unfiltered/"+source+"_rows_Serotype.npy", allow_pickle = True)
+	Otype = np.load("data/unfiltered/"+source+"_rows_Otype.npy", allow_pickle = True)
+	Htype = np.load("data/unfiltered/"+source+"_rows_Htype.npy", allow_pickle = True)
 
 	for i, name in [[Host,'Host'], [Serotype,'Serotype'], [Otype,'Otype'], [Htype,'Htype']]:
 		counts = collections.Counter(i)
