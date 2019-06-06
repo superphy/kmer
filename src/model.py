@@ -29,16 +29,16 @@ def get_data(train, predict_for):
 	X = []
 	Y = []
 	if(train in ('kmer, omnilog')):
-		X = np.load('data/filtered/'+predict_for+'/'+train+'_matrix.npy')
-		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_'+predict_for+'.npy')
+		X = np.load('data/filtered/'+predict_for+'/'+train+'_matrix.npy', allow_pickle = True)
+		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_'+predict_for+'.npy', allow_pickle = True)
 
 	elif(train in ('uk', 'us','uk_us')):
-		X = np.load('data/uk_us_unfiltered/kmer_matrix.npy')
-		Y = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy')
+		X = np.load('data/uk_us_unfiltered/kmer_matrix.npy', allow_pickle = True)
+		Y = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy', allow_pickle = True)
 
 		if(train!='uk_us'):
 			#the US dataset has been labeled as Test and the UK set as Train, we need to load the correct one
-			dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy')
+			dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy', allow_pickle = True)
 			if(train=='us'):
 				us_mask = np.asarray([i =='Test' for i in dataset_array])
 				X = X[us_mask]
