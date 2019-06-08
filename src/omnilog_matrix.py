@@ -24,7 +24,7 @@ def pad_zeros(genomeid):
 
 def find_eci(genomeid):
 	#print(genomeid)
-	return re.search(r'(ECI-\d{1,4})|(ON-2011)|(Sakai)|(EDL933)|(\d{2}\-\d{4})', genomeid).group()
+	return re.search(r'(ECI-\d{1,4})|(ON-2011)|(Sakai)|(EDL933)', genomeid).group()
 	#[\(ECI\-\d{1,4}\)\(ON\-2011\)\(Sakai\)]
 
 def intersection(lst1, lst2):
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 	Next we go through the data and load the [row][col] with the area under the curve value for that substrate genome combo
 	We save this so that we can later replace the genome name with some form of training data
 	"""
-	row_names = pd.read_csv('data/final_omnilog_metadata.csv')
+	row_names = pd.read_csv('data/omnilog_metadata.csv')
 	row_names = row_names.values[:,0]
 	omni_df = pd.read_csv('data/omnilog_data_summary.txt', delimiter = '\t')
 	#pm = pd.read_csv('data/omnilog_well_descriptions.txt', delimiter = '\t')
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 			#print(sorted(PM1_2))
 			break
 
-	intsct_mask = np.zeros((len(row_names)))
+	intsct_mask = np.zeros((145))
 	for i, genome in enumerate(row_names):
 		if genome in PM1_2:
 			intsct_mask[i] = 1

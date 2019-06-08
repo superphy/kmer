@@ -16,11 +16,11 @@ def strain_to_y(strain, y):
     """
     return metadata.loc[metadata['Strain'] == strain][y].values[0]
 
-kmer_rows = np.load('data/unfiltered/kmer_rows.npy', allow_pickle = True)
-#print(kmer_rows)
+kmer_rows = np.load('data/unfiltered/kmer_rows.npy')
 #kmer_rows = [i.decode('utf-8') for i in kmer_rows]
 
-metadata = pd.read_csv('data/final_omnilog_metadata.csv')
+metadata = pd.read_csv('data/omnilog_metadata.csv')
+
 for col in ['Host', 'Serotype', 'Otype', 'Htype']:
     kmer_y = [strain_to_y(i,col) for i in kmer_rows]
     np.save("data/unfiltered/kmer_rows_"+col, kmer_y)
