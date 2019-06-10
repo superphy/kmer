@@ -16,34 +16,61 @@ from data_transformers import *
 
 
 if __name__=='__main__':
+    """
+    input 1 : dataset in [kmer, omnilog, uk, us, uk_us]
+    input 2 : attribute in [Host, Serotype, Otype, Htype]
+    """
     dataset = sys.argv[1]
-    drug = sys.argv[2]
+    attribute = sys.argv[2]
 
-    # grdi dataset has no FIS classifications so we skip it
-    if(dataset == 'grdi' and drug == 'FIS'):
-        sys.exit()
+    # note that the uk_us only has classification data for Host
+    if (dataset in ['uk','us','uk_us'] and attribute != 'Host'):
+        print("Skipping {} prediction in {} dataset".format(attribute, dataset))
 
-    # pathings are public: 'AMP', grdi: 'grdi_AMP', kh: 'kh_AMP'
-    if(dataset == 'public'):
-        path = ''
+    # for data that has been filtered
+    if(dataset in ['kmer','omnilog']):
+        # load the relevant data
+        X = np.load("data/filtered/{}/{}_matrix.npy".format(attribute, dataset),allow_pickle=True)
+        Y = np.load("data/filtered/{}/{}_rows_{}.npy".format(attribute, dataset, attribute),allow_pickle=True)
+        Z = np.load("data/filtered/{}/{}_rows.npy".format(attribute, dataset),allow_pickle=True)
+
+    # for unfiltered data of the uk_us set
+    elif(dataset in ['uk','us','uk_us']):
+        X = np.load("data/uk_us_unfiltered/kmer_matrix.npy",allow_pickle=True)
+        Y = np.load("data/uk_us_unfiltered/kmer_rows_Class.npy",allow_pickle=True)
+        Z = np.load("data/uk_us_unfiltered/kmer_rows.npy",allow_pickle=True)
+
+        # us are labeled as train and uk are labeled as test, we need to return the correct ones only
+        ukus_labels = np.load("data/uk_us_unfiltered/kmer_rows_Dataset.npy",allow_pickle=True)
+
+        # create a bool mask to label rows matching what was passed in as dataset (sys.argv[1])
+        if(dataset=='uk'):
+            dataset_mask = [i=="Test" for i in ukus_labels]
+        elif(dataset=='us'):
+            dataset_mask = [i=="Train" for i in ukus_labels]
+        else:
+            dataset_mask = [True for in ukus_labels]
+
+        X = X[dataset_mask]
+        Y = Y[dataset_mask]
+        Z = Z[dataset_mask]
+
+
     else:
-        path = dataset+'_'
+        raise Exception("Acceptable datasets are: [kmer, omnilog, uk, us, uk_us] but {} was given".format(dataset))
 
-    # load the relevant data
-    X = np.load(("data/filtered/{}{}/kmer_matrix.npy").format(path,drug))
-    Y = np.load(("data/filtered/{}{}/kmer_rows_mic.npy").format(path,drug))
-    Z = np.load(("data/filtered/{}{}/kmer_rows_genomes.npy").format(path,drug))
 
-    Y = [remove_symbols(i) for i in Y]
-    mic_class_dict = joblib.load("data/public_mic_class_order_dict.pkl")
-    mic_dict = [remove_symbols(i) for i in mic_class_dict[drug]]
+    # possible label encodings are determined possible label strings
+    # for example, we change Bovine, Human, Human to 0,1,1
 
-    # possible label encodings are determined from all possible MIC values for that drug
-    # for example, we change 0.25,0.5,1,2 into 0,1,2,3
+    class_labels =
     le = preprocessing.LabelEncoder()
-    le.fit(mic_dict)
+
+    # using fit with LabelEncoder isnt consistent across programs so we are going to manually set the attribute
+    le.classes_ = list(set(Y))
     Y = le.transform(Y)
 
+    # this can be changed to 6 if need be
     cv = StratifiedKFold(n_splits=5, random_state=913824)
     model_data = cv.split(X, Y, Z)
 
@@ -58,18 +85,13 @@ if __name__=='__main__':
         z_test  = Z[test]
 
         # save data
-        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/filtered/{}{}/splits".format(path,drug)):
-            os.mkdir(os.path.abspath(os.path.curdir)+"/data/filtered/{}{}/splits".format(path,drug))
+        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits".format(dataset,attribute)):
+            os.mkdir(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits".format(dataset,attribute))
 
-        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/filtered/{}{}/splits/set".format(path,drug)+str(set_count)):
-            os.mkdir(os.path.abspath(os.path.curdir)+"/data/filtered/{}{}/splits/set".format(path,drug)+str(set_count))
 
-        save_path = "data/filtered/{}{}/splits/set".format(path,drug)+str(set_count)
+        save_path = "data/hyp_splits/{}-{}/splits/set".format(dataset,attribute)+str(set_count)
 
         # This just saves the testing set, so the data is split into 5ths, each set is 1/5th of the data
-        # x is the 2D matrix of kmer counts
-        # y is the row labels as MIC values
-        # z is the row labels as genome ID's
 
         np.save(save_path+'/x.npy', x_test)
         np.save(save_path+'/y.npy', y_test)
