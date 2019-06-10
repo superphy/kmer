@@ -49,7 +49,7 @@ if __name__=='__main__':
         elif(dataset=='us'):
             dataset_mask = [i=="Train" for i in ukus_labels]
         else:
-            dataset_mask = [True for in ukus_labels]
+            dataset_mask = [True for i in ukus_labels]
 
         X = X[dataset_mask]
         Y = Y[dataset_mask]
@@ -63,7 +63,6 @@ if __name__=='__main__':
     # possible label encodings are determined possible label strings
     # for example, we change Bovine, Human, Human to 0,1,1
 
-    class_labels =
     le = preprocessing.LabelEncoder()
 
     # using fit with LabelEncoder isnt consistent across programs so we are going to manually set the attribute
@@ -85,8 +84,8 @@ if __name__=='__main__':
         z_test  = Z[test]
 
         # save data
-        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits".format(dataset,attribute)):
-            os.mkdir(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits".format(dataset,attribute))
+        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits/set{}".format(dataset,attribute, set_count)):
+            os.mkdir(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits/set{}".format(dataset,attribute, set_count))
 
 
         save_path = "data/hyp_splits/{}-{}/splits/set".format(dataset,attribute)+str(set_count)

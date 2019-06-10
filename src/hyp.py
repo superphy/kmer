@@ -120,6 +120,7 @@ def find_errors(model, test_data, test_names, genome_names, class_dict, drug, mi
 def data():
 	from keras.utils import to_categorical
 	from sklearn.feature_selection import SelectKBest, f_classif
+	from collections import Counter
 
 	feats = int(sys.argv[1])
 	attribute  = sys.argv[2]
@@ -139,13 +140,15 @@ def data():
 	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]))
 	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]))
 	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]))
-
+	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]))
+	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]))
+	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
 
 	# merge the 3 training sets into 1
 	x_train = np.vstack((x_train1, x_train2, x_train3))
 	y_train = np.concatenate((y_train1, y_train2, y_train3))
 
-	num_classes = len(set(y_train))
+	num_classes = max(Counter(all_y_trains).keys()) + 1
 
 	x_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[3]))
 	y_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]))
@@ -161,8 +164,8 @@ def data():
 		x_val  = sk_obj.transform(x_val)
 		np.save('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), x_val)
 
-	y_train = to_categorical(y_train, num_classes)
-	y_test  = to_categorical(y_test, num_classes)
+	y_train = to_categorical(y_train)
+	y_test  = to_categorical(y_test)
 
 	return x_train, y_train, x_test, y_test
 
@@ -174,16 +177,16 @@ def create_model(x_train, y_train, x_test, y_test):
 	reduce_LR = ReduceLROnPlateau(monitor='loss', factor= 0.1, patience=(patience/2), verbose = 0, min_delta=0.005,mode = 'auto', cooldown=0, min_lr=0)
 
 	model = Sequential()
-
+	print(x_train.shape, y_train.shape, x_test.shape, y_test.shape, num_classes)
 	# how many hidden layers are in our model
 	num_layers = {{choice(['zero', 'one', 'two', 'three', 'four', 'five'])}}
 
 	if(num_layers == 'zero'):
-		model.add(Dense(num_classes,activation='softmax',input_dim=(x_train.shape[1])))
+		model.add(Dense(num_classes,activation='softmax',input_dim=x_train.shape[1]))
 	else:
 		# this isnt a for loop because each variable needs its own name to be independently trained
 		if (num_layers in ['one','two','three','four','five']):
-			model.add(Dense(int({{uniform(num_classes,x_train.shape[1])}}),activation='relu',input_dim=(x_train.shape[1])))
+			model.add(Dense(int({{uniform(num_classes,x_train.shape[1])}}),activation='relu',input_dim=x_train.shape[1]))
 			model.add(Dropout({{uniform(0,1)}}))
 		if (num_layers in ['two','three','four','five']):
 			model.add(Dense(int({{uniform(num_classes,x_train.shape[1])}})))
@@ -243,7 +246,7 @@ if __name__ == "__main__":
 
 	# Split data, get best model
 	train_data, train_names, test_data, test_names = data()
-	best_run, best_model = optim.minimize(model=create_model, data=data, algo=tpe.suggest, max_evals=max_evals, trials=Trials(),keep_temp=True)
+	best_run, best_model = optim.minimize(model=create_model, data=data, algo=tpe.suggest, max_evals=max_evals, trials=Trials())
 
 	# Find and record errors
 	# find_errors(best_model, test_data, test_names, genome_names, class_dict, drug, mic_class_dict)
@@ -256,6 +259,14 @@ if __name__ == "__main__":
 	test_names  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]))
 	test_data = np.load('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)))
 	from keras.utils import to_categorical
+	from collections import Counter
+	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]))
+	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]))
+	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]))
+	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]))
+	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]))
+	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
+	num_classes = max(Counter(all_y_trains).keys()) + 1
 	test_names = to_categorical(test_names, num_classes)
 
 	## Score #######################################################
