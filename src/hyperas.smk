@@ -1,10 +1,10 @@
-attributes = ["host"]
+attributes = ["Host"]
 splits = ["1","2","3","4","5"]
 dataset = ["kmer"]
 feats=[i for i in range(100,3000,100)]+[i for i in range(3000, 10500, 500)]
 rule all:
     input:
-        expand("results/{params.dataset}1_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{params.dataset}_testedOnaCrossValidation.pkl", attributes = attributes, feat = feats)
+        expand("results/{dataset}1_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation.pkl", attributes = attributes, feat = feats, dataset = dataset)
 
 rule split:
     output:
@@ -12,7 +12,7 @@ rule split:
     params:
         attributes  = "{attributes}"
     shell:
-        "sbatch -c 1 --mem 32G --wrap='python src/validation_split_hyperas.py {params.dataset} {params.attributes}'"
+        "sbatch -c 1 --mem 32G --wrap='python src/validation_split_hyperas.py kmer {params.attributes}'"
 
 rule hyperas:
     input:
