@@ -1,7 +1,7 @@
 attributes = ["Host"]
 splits = ["1","2","3","4","5"]
 dataset = ["kmer"]
-feats=[i for i in range(100,3000,100)]+[i for i in range(3000, 10500, 500)]
+feats=[i for i in range(100,3000,100)]
 rule all:
     input:
         expand("results/{dataset}_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation.pkl", attributes = attributes, feat = feats, dataset = dataset)
