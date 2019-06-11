@@ -19,7 +19,7 @@ rule kmer_serotype:
     output:
         "results/kmer_serotype"
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x kmer -a Serotype -o {output} -f $i -m $j; done; done'
+        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000 & seq 3500 500 10000); do python src/model.py -x kmer -a Serotype -o {output} -f $i -m $j; done; done'
 
 rule omnilog_serotype:
     output:
@@ -31,7 +31,7 @@ rule kmer_host:
     output:
         "results/kmer_host"
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x kmer -a Host -o {output} -f $i -m $j; done; done'
+        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000 & seq 3500 500 10000); do python src/model.py -x kmer -a Host -o {output} -f $i -m $j; done; done'
 
 rule omnilog_host:
     output:
@@ -43,7 +43,7 @@ rule uk_host:
     output:
         "results/uk_host"
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x uk -a Host -o {output} -f $i -m $j; done; done'
+        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000 & seq 3500 500 10000); do python src/model.py -x uk -a Host -o {output} -f $i -m $j; done; done'
 
 rule us_host:
     output:
