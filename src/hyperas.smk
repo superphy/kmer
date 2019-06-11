@@ -1,10 +1,10 @@
-attributes = ["Host"]
+attributes = ["host"]
 splits = ["1","2","3","4","5"]
 dataset = ["kmer"]
 feats=[i for i in range(100,3000,100)]+[i for i in range(3000, 10500, 500)]
 rule all:
     input:
-        expand("results/{dataset}1_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation.pkl", attributes = attributes, feat = feats, dataset = dataset)
+        expand("results/{dataset}_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation.pkl", attributes = attributes, feat = feats, dataset = dataset)
 
 rule split:
     output:
@@ -30,7 +30,7 @@ rule average:
     input:
         expand("data/{attributes}/hyperas/{feat}feats_{split}.pkl", attributes = attributes, feat = feats, split = splits)
     output:
-        "results/{params.dataset}1_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{params.dataset}_testedOnaCrossValidation.pkl"
+        "results/{params.dataset}_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{params.dataset}_testedOnaCrossValidation.pkl"
     params:
         attributes = "{attributes}",
         feat = "{feat}"
