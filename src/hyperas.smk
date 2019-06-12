@@ -12,7 +12,7 @@ rule split:
     output:
         "data/hyp_splits/{dataset}-{attribute}/splits/set1/"
     shell:
-        'sbatch -c 144 --mem 400G --parition NMLResearch --wrap="python src/validation_split_hyperas.py kmer {attributes}"'
+        'sbatch -c 144 --mem 400G --partition NMLResearch --wrap="python src/validation_split_hyperas.py kmer {attributes}"'
 
 rule hyperas:
     input:
@@ -24,7 +24,7 @@ rule hyperas:
         attribute = '{attribute}',
         split = '{split}'
     shell:
-        'sbatch -c 144 --mem 400G --parition NMLResearch --wrap="python src/hyp.py {params.feat} {params.attribute} 10 {params.split} kmer"'
+        'sbatch -c 144 --mem 400G --partition NMLResearch --wrap="python src/hyp.py {params.feat} {params.attribute} 10 {params.split} kmer"'
 
 rule average:
     input:
@@ -32,4 +32,4 @@ rule average:
     output:
         "results/{dataset}_{attribute}/{attribute}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation_hyperas.pkl"
     shell:
-        'sbatch -c 144 --mem 400G --parition NMLResearch --wrap="python src/hyp_average.py {feat} {attribute} {dataset}"'
+        'sbatch -c 144 --mem 400G --partition NMLResearch --wrap="python src/hyp_average.py {feat} {attribute} {dataset}"'
