@@ -84,11 +84,11 @@ if __name__=='__main__':
         z_test  = Z[test]
 
         # save data
-        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits/set{}".format(dataset,attribute, set_count)):
-            os.mkdir(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits/set{}".format(dataset,attribute, set_count))
+        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, set_count)):
+            os.makedirs(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, set_count), exist_ok = True)
 
 
-        save_path = "data/hyp_splits/{}-{}/splits/set".format(dataset,attribute)+str(set_count)
+        save_path = "data/hyp_splits/{}-{}/splits/set".format(dataset, attribute)+str(set_count)
 
         # This just saves the testing set, so the data is split into 5ths, each set is 1/5th of the data
 

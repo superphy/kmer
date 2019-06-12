@@ -288,7 +288,7 @@ if __name__ == "__main__":
 
 
 	if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/"+dataset+'_'+attribute):
-		os.mkdir(os.path.abspath(os.path.curdir)+"/data/"+dataset+'_'+attribute)
+		os.makedirs(os.path.abspath(os.path.curdir)+"/data/"+dataset+'_'+attribute, exist_ok = True)
 
 	# ann_1d -> returns: (perc, mcc, prediction, actual)
 	results = ann_1d(best_model, test_data, test_names, 0)

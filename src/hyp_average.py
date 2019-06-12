@@ -59,4 +59,4 @@ if __name__ =="__main__":
     if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/split_accuracies"):
         os.mkdir(os.path.abspath(os.path.curdir)+"/data/split_accuracies")
     # saving the accuracies for each split
-    np.save('data/split_accuracies/'+attribute+'_'+str(feats)+'feats_ANNtrainedOnpublic_testedOnaCrossValidation.npy' ,np.vstack((OBN_accs,OBO_accs)))
+    np.save('data/split_accuracies/'+attribute+'_'+str(feats)+'feats_ANNtrainedOnpublic_testedOnaCrossValidation_hyperas.npy' ,np.vstack((OBN_accs,OBO_accs)))

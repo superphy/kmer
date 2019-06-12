@@ -29,16 +29,16 @@ def get_data(train, predict_for):
 	X = []
 	Y = []
 	if(train in ('kmer, omnilog')):
-		X = np.load('data/filtered/'+predict_for+'/'+train+'_matrix.npy')
-		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_'+predict_for+'.npy')
+		X = np.load('data/filtered/'+predict_for+'/'+train+'_matrix.npy', allow_pickle = True)
+		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_'+predict_for+'.npy', allow_pickle = True)
 
 	elif(train in ('uk', 'us','uk_us')):
-		X = np.load('data/uk_us_unfiltered/kmer_matrix.npy')
+		X = np.load('data/uk_us_unfiltered/kmer_matrix.npy', allow_pickle = True)
 		Y = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy')
 
 		if(train!='uk_us'):
 			#the US dataset has been labeled as Test and the UK set as Train, we need to load the correct one
-			dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy')
+			dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy', allow_pickle = True)
 			if(train=='us'):
 				us_mask = np.asarray([i =='Test' for i in dataset_array])
 				X = X[us_mask]
@@ -225,6 +225,7 @@ if __name__ == "__main__":
 			from keras.layers.core import Dense, Dropout, Activation
 			from keras.models import Sequential
 			from keras.utils import np_utils, to_categorical
+			from collections import Counter
 			from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 			y_train = to_categorical(y_train, num_classes)
@@ -242,16 +243,27 @@ if __name__ == "__main__":
 			model.add(Dense(62, activation='relu', kernel_initializer='uniform'))
 			model.add(Dropout(0.44))
 
-			if(num_classes==2 or (train_string == 'uk_us' and test_string == 'kmer')):
-				loss = 'binary_crossentropy'
-				num_outs = 1
-			else:
-				loss = 'poisson'
-				num_outs = num_classes
-			model.add(Dense(num_outs, kernel_initializer='uniform', activation='softmax'))
-			model.compile(loss=loss, metrics=['accuracy'], optimizer='adam')
+			#num_classes_obj = len(Counter(y_train).keys())
 
-			model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
+			try:
+				if(num_classes == 2 or (train_string == 'uk_us' and test_string == 'kmer')):
+					loss = 'binary_crossentropy'
+					num_outs = 1
+					other = 'poisson'
+				else:
+					loss = 'poisson'
+					num_outs = num_classes
+					other = 'binary_crossentropy'
+				model.add(Dense(num_outs, kernel_initializer='uniform', activation='softmax'))
+				model.compile(loss=loss, metrics=['accuracy'], optimizer='adam')
+
+				model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
+			except:
+				model.add(Dense(num_outs, kernel_initializer='uniform', activation='softmax'))
+				model.compile(loss=other, metrics=['accuracy'], optimizer='adam')
+
+				model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
+
 		else:
 			raise Exception('Unrecognized Model. Use XGB, SVM or ANN')
 

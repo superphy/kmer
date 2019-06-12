@@ -1,38 +1,35 @@
 attributes = ["Host"]
 splits = ["1","2","3","4","5"]
-dataset = ["kmer"]
-feats=[i for i in range(100,3000,100)]
+datasets = ["kmer"]
+feats=[i for i in range(100,3000,100)]+[i for i in range(3500,10500,500)]
 rule all:
     input:
-        expand("results/{dataset}_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation.pkl", attributes = attributes, feat = feats, dataset = dataset)
+        expand("results/{dataset}_{attribute}/{attribute}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation_hyperas.pkl", attribute = attributes, dataset = datasets, feat = feats)
 
 rule split:
+    input:
+        expand("data/filtered/{attribute}/{dataset}_matrix.npy", attribute = attributes, dataset = datasets)
     output:
-        "data/filtered/{attributes}/splits/set1/"
-    params:
-        attributes  = "{attributes}"
+        "data/hyp_splits/{dataset}-{attribute}/splits/set1/"
     shell:
-        "sbatch -c 1 --mem 32G --wrap='python src/validation_split_hyperas.py kmer {params.attributes}'"
+        'python src/validation_split_hyperas.py kmer {attributes}'
 
 rule hyperas:
     input:
-        expand("data/filtered/{attributes}/splits/set1/", attributes = attributes)
+        expand("data/hyp_splits/{dataset}-{attribute}/splits/set1/",dataset = datasets, attribute = attributes)
     output:
-        "data/{attributes}/hyperas/{feat}feats_{split}.pkl"
+        "data/{dataset}_{attribute}/{feat}feats_{split}.pkl"
     params:
-        attributes = "{attributes}",
-        split = "{split}",
-        feat = "{feat}"
+        feat = '{feat}',
+        attribute = '{attribute}',
+        split = '{split}'
     shell:
-        "sbatch -c 16 --mem 125G --wrap='python src/hyp.py {params.feat} {params.attributes} 10 {params.split} {params.dataset}'"
+        'python src/hyp.py {params.feat} {params.attribute} 10 {params.split} kmer'
 
 rule average:
     input:
-        expand("data/{attributes}/hyperas/{feat}feats_{split}.pkl", attributes = attributes, feat = feats, split = splits)
+        expand("data/{dataset}_{attribute}/{feat}feats_{split}.pkl",dataset = datasets, attribute = attributes, split = splits, feat = feats)
     output:
-        "results/{params.dataset}_{attributes}/{attributes}_{feat}feats_ANNtrainedOn{params.dataset}_testedOnaCrossValidation.pkl"
-    params:
-        attributes = "{attributes}",
-        feat = "{feat}"
+        "results/{dataset}_{attribute}/{attribute}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation_hyperas.pkl"
     shell:
-        "sbatch -c 1 --mem 2GB --wrap='python src/hyp_average.py {params.feat} {params.attributes} {params.dataset}'"
+        'python src/hyp_average.py {feat} {attribute} {dataset}'
