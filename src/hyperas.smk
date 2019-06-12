@@ -12,7 +12,7 @@ rule split:
     output:
         "data/hyp_splits/{dataset}-{attribute}/splits/set1/"
     shell:
-        'sbatch -c 144 --mem 400G --parition NMLResearch --wrap="python src/validation_split_hyperas.py kmer {attributes}""'
+        'sbatch -c 144 --mem 400G --parition NMLResearch --wrap="python src/validation_split_hyperas.py kmer {attributes}"'
 
 rule hyperas:
     input:
