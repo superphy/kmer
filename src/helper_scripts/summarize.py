@@ -3,10 +3,13 @@ import os
 
 
 results_list = []
-for filename in os.listdir('results/csv/summary'):
-    path = os.path.abspath('results/csv/summary/{}'.format(filename))
+path_to_dir = 'results/kmer_Host'
+for filename in os.listdir(path_to_dir):
+    path = os.path.abspath(path_to_dir+'/'+filename)
     with open(path) as file:
-        data = pd.read_csv(file)
+        print(path)
+        data = pd.read_pickle(path)
+        print(data)
         for index, row in data.iterrows():
             if "ANN" in row["model"] and row['feats'] == 1000 or row['feats'] == 190:
                 acc, model, train, test, feats, attribute = row['acc'], row['model'], row['train'], row['test'], row['feats'], row['attribute']

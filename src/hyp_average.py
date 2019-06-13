@@ -21,7 +21,7 @@ if __name__ =="__main__":
 
     # everything is saved in data/{path}{attribute}/hyperas/
     for i in range(1,6):
-        split_df = pd.read_pickle("data/"+attribute+"_"+dataset+"/"+str(feats)+"feats_"+str(i)+".pkl")
+        split_df = pd.read_pickle("data/"+dataset+"_"+attribute+"/"+str(feats)+"feats_"+str(i)+".pkl")
 
         # initialize new dataframe values
         if i==1:
@@ -54,9 +54,9 @@ if __name__ =="__main__":
 
     final_df = pd.DataFrame(data = final, index = index, columns = ['Precision','Recall', 'F-Score','Supports', '1D Acc'])
 
-    final_df.to_pickle("results/public1_"+attribute+"/"+attribute+"_"+feats+"feats_ANNtrainedOn{}_testedOnaCrossValidation.pkl".format(dataset))
+    final_df.to_pickle("results/"+dataset+"_"+attribute+"/"+attribute+"_"+feats+"feats_ANNtrainedOn{}_testedOnaCrossValidation.pkl".format(dataset))
 
     if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/split_accuracies"):
         os.mkdir(os.path.abspath(os.path.curdir)+"/data/split_accuracies")
     # saving the accuracies for each split
-    np.save('data/split_accuracies/'+attribute+'_'+str(feats)+'feats_ANNtrainedOnpublic_testedOnaCrossValidation_hyperas.npy' ,np.vstack((OBN_accs,OBO_accs)))
+    np.save('data/split_accuracies/'+attribute+'_'+str(feats)+'feats_ANNtrainedOnpublic_testedOnaCrossValidation.npy' ,np.vstack((OBN_accs,OBO_accs)))

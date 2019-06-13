@@ -4,7 +4,7 @@ datasets = ["kmer"]
 feats=[i for i in range(100,3000,100)]+[i for i in range(3500,10500,500)]
 rule all:
     input:
-        expand("results/{dataset}_{attribute}/{attribute}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation_hyperas.pkl", attribute = attributes, dataset = datasets, feat = feats)
+        expand("results/{dataset}_{attribute}/{attribute}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation.pkl", attribute = attributes, dataset = datasets, feat = feats)
 
 rule split:
     input:
@@ -12,7 +12,7 @@ rule split:
     output:
         "data/hyp_splits/{dataset}-{attribute}/splits/set1/"
     shell:
-        'sbatch -c 144 --mem 400G --partition NMLResearch --wrap="python src/validation_split_hyperas.py kmer {attributes}"'
+        'python src/validation_split_hyperas.py kmer {attributes}'
 
 rule hyperas:
     input:
@@ -24,12 +24,16 @@ rule hyperas:
         attribute = '{attribute}',
         split = '{split}'
     shell:
-        'sbatch -c 144 --mem 400G --partition NMLResearch --wrap="python src/hyp.py {params.feat} {params.attribute} 10 {params.split} kmer"'
+        'python src/hyp.py {params.feat} {params.attribute} 10 {params.split} kmer'
 
 rule average:
     input:
         expand("data/{dataset}_{attribute}/{feat}feats_{split}.pkl",dataset = datasets, attribute = attributes, split = splits, feat = feats)
     output:
-        "results/{dataset}_{attribute}/{attribute}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation_hyperas.pkl"
+        "results/{dataset}_{attribute}/{attribute}_{feat}feats_ANNtrainedOn{dataset}_testedOnaCrossValidation.pkl"
+    params:
+        feat = '{feat}',
+        attribute = '{attribute}',
+        dataset = '{dataset}'
     shell:
-        'sbatch -c 144 --mem 400G --partition NMLResearch --wrap="python src/hyp_average.py {feat} {attribute} {dataset}"'
+        'python src/hyp_average.py {params.feat} {params.attribute} {params.dataset}'
