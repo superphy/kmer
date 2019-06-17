@@ -158,7 +158,7 @@ def data():
 	# hyperas asks for train and test so the validation set is what comes last, to check the final model
 	# we need to save it to be used later, because we have the sk_obj now.
 	if(feats!=0):
-		sk_obj = SelectKBest(f_classif, k=all)
+		sk_obj = SelectKBest(f_classif, k=feats)
 		x_train = sk_obj.fit_transform(x_train, y_train)
 		x_test  = sk_obj.transform(x_test)
 		x_val  = sk_obj.transform(x_val)
