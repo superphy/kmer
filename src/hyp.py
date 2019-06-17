@@ -158,7 +158,7 @@ def data():
 	# hyperas asks for train and test so the validation set is what comes last, to check the final model
 	# we need to save it to be used later, because we have the sk_obj now.
 	if(feats!=0):
-		sk_obj = SelectKBest(f_classif, k=feats)
+		sk_obj = SelectKBest(f_classif, k=all)
 		x_train = sk_obj.fit_transform(x_train, y_train)
 		x_test  = sk_obj.transform(x_test)
 		x_val  = sk_obj.transform(x_val)
@@ -316,7 +316,7 @@ if __name__ == "__main__":
 		running_sum+=(row[1]*row[3]/(len(test_names)))
 
 	print("Predicting for", attribute)
-	print("on {} features using a {} trained on {} data, tested on {}".format(feats, 'ANN', 'public', t_string))
+	print("on {} features using a {} trained on {} data, tested on {}".format(feats, 'ANN', dataset, t_string))
 	print("Accuracy:", running_sum)
 	print(result_df)
 	out = "data/"+dataset+'_'+attribute+"/"
