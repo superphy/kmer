@@ -1,8 +1,9 @@
 import pandas as pd
 import os
+import sys
 
 accuracy = 0
-path_to_dir = 'results/kmer_Host'
+path_to_dir = sys.argv[1]
 for filename in os.listdir(path_to_dir):
     path = os.path.abspath(path_to_dir+'/'+filename)
     with open(path) as file:
