@@ -54,7 +54,7 @@ if __name__ =="__main__":
 
     final_df = pd.DataFrame(data = final, index = index, columns = ['Precision','Recall', 'F-Score','Supports', '1D Acc'])
 
-    final_df.to_pickle("results/"+dataset+"_"+attribute+"/"+attribute+"_"+feats+"feats_ANNtrainedOn{}_testedOnaCrossValidation.pkl".format(dataset))
+    final_df.to_pickle("results/"+dataset+"_"+attribute.lower()+"/"+attribute+"_"+feats+"feats_ANNtrainedOn{}_testedOnaCrossValidation.pkl".format(dataset))
 
     if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/split_accuracies"):
         os.mkdir(os.path.abspath(os.path.curdir)+"/data/split_accuracies")
