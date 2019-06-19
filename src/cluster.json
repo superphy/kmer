@@ -1,0 +1,29 @@
+{
+  "__default__":
+  {
+    "cores" : "4",
+    "mem" : "32G",
+    "partition" : "NMLResearch"
+  },
+
+  "split":
+  {
+    "cores" : "10",
+    "mem" : "100G",
+    "partition" : "NMLResearch"
+  },
+
+  "hyperas":
+  {
+    "cores" : "100",
+    "mem" : "400G",
+    "partition" : "NMLResearch"
+  },
+
+  "average":
+  {
+    "cores" : "10",
+    "mem" : "100G",
+    "partition" : "NMLResearch"
+  }
+}
