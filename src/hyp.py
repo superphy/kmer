@@ -167,6 +167,7 @@ def data():
 	y_train = to_categorical(y_train)
 	y_test  = to_categorical(y_test)
 
+	print(y_test)
 	return x_train, y_train, x_test, y_test
 
 
@@ -178,6 +179,7 @@ def create_model(x_train, y_train, x_test, y_test):
 
 	model = Sequential()
 	print(x_train.shape, y_train.shape, x_test.shape, y_test.shape, num_classes)
+	#print(y_test)
 	# how many hidden layers are in our model
 	num_layers = {{choice(['zero', 'one', 'two', 'three', 'four', 'five'])}}
 

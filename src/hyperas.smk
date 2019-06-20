@@ -9,23 +9,23 @@ rule all:
 
 rule kmer_split:
     input:
-        expand("data/filtered/{attribute}/kmer_matrix.npy", attribute = attributes)
+        expand("data/filtered/{attribute}/kmer_matrix.npy", attribute = attributes, split = splits)
     output:
-        "data/hyp_splits/kmer-{attribute}/splits/set1/"
+        "data/hyp_splits/kmer-{attribute}/splits/set{split}/"
     shell:
         'python src/validation_split_hyperas.py kmer {attributes}'
 
 rule omnilog_split:
     input:
-        expand("data/filtered/{attribute}/omnilog_matrix.npy", attribute = attributes)
+        expand("data/filtered/{attribute}/omnilog_matrix.npy", attribute = attributes, split = splits)
     output:
-        "data/hyp_splits/omnilog-{attribute}/splits/set1/"
+        "data/hyp_splits/omnilog-{attribute}/splits/set{split}/"
     shell:
         'python src/validation_split_hyperas.py omnilog {attributes}'
 
 rule kmer_hyperas:
     input:
-        expand("data/hyp_splits/kmer-{attribute}/splits/set1/", attribute = attributes)
+        expand("data/hyp_splits/kmer-{attribute}/splits/set{split}/", attribute = attributes, split = splits)
     output:
         "data/kmer_{attribute}/{kmer_feat}feats_{split}.pkl"
     params:
@@ -37,7 +37,7 @@ rule kmer_hyperas:
 
 rule omnilog_hyperas:
     input:
-        expand("data/hyp_splits/omnilog-{attribute}/splits/set1/", attribute = attributes)
+        expand("data/hyp_splits/omnilog-{attribute}/splits/set{split}/", attribute = attributes, split = splits)
     output:
         "data/omnilog_{attribute}/{omnilog_feat}feats_{split}.pkl"
     params:
