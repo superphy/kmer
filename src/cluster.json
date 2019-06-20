@@ -6,21 +6,42 @@
     "partition" : "NMLResearch"
   },
 
-  "split":
+  "kmer_split":
   {
     "cores" : "10",
     "mem" : "100G",
     "partition" : "NMLResearch"
   },
 
-  "hyperas":
+  "kmer_hyperas":
   {
     "cores" : "100",
     "mem" : "400G",
     "partition" : "NMLResearch"
   },
 
-  "average":
+  "kmer_average":
+  {
+    "cores" : "10",
+    "mem" : "100G",
+    "partition" : "NMLResearch"
+  },
+
+  "omnilog_split":
+  {
+    "cores" : "10",
+    "mem" : "100G",
+    "partition" : "NMLResearch"
+  },
+
+  "omnilog_hyperas":
+  {
+    "cores" : "100",
+    "mem" : "400G",
+    "partition" : "NMLResearch"
+  },
+
+  "omnilog_average":
   {
     "cores" : "10",
     "mem" : "100G",
