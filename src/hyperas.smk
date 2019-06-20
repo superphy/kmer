@@ -49,9 +49,9 @@ rule omnilog_hyperas:
 
 rule kmer_average:
     input:
-        expand("data/kmer_{attribute}/{feat}feats_{split}.pkl", attribute = attributes, split = splits, kmer_feat = kmer_feats)
+        expand("data/kmer_{attribute}/{kmer_feat}feats_{split}.pkl", attribute = attributes, split = splits, kmer_feat = kmer_feats)
     output:
-        "results/kmer_{attribute}/{attribute}_{feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl"
+        "results/kmer_{attribute}/{attribute}_{kmer_feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl"
     params:
         kmer_feat = '{kmer_feat}',
         attribute = '{attribute}'
@@ -60,8 +60,8 @@ rule kmer_average:
 
 rule omnilog_average:
     input:
-        expand("data/omnilog_{attribute}/{feat}feats_{split}.pkl", attribute = attributes, split = splits, omnilog_feat = omnilog_feats)
+        expand("data/omnilog_{attribute}/{omnilog_feat}feats_{split}.pkl", attribute = attributes, split = splits, omnilog_feat = omnilog_feats)
     output:
-        "results/omnilog_{attribute}/{attribute}_{feat}feats_ANNtrainedOnOmnilog_testedOnaCrossValidation.pkl"
+        "results/omnilog_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnOmnilog_testedOnaCrossValidation.pkl"
     shell:
         'python src/hyp_average.py {params.omnilog_feat} {params.attribute} omnilog'
