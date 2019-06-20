@@ -15,8 +15,10 @@ rule split:
         "data/hyp_splits/kmer-{attribute}/splits/set1/",
         "data/hyp_splits/omnilog-{attribute}/splits/set1/"
     shell:
-        'python src/validation_split_hyperas.py kmer {attributes}'
-        'python src/validation_split_hyperas.py omnilog {attributes}'
+        """
+        python src/validation_split_hyperas.py kmer {attributes}
+        python src/validation_split_hyperas.py omnilog {attributes}
+        """
 
 rule hyperas:
     input:
@@ -31,8 +33,10 @@ rule hyperas:
         attribute = '{attribute}',
         split = '{split}'
     shell:
-        'python src/hyp.py {params.kmer_feat} {params.attribute} 10 {params.split} kmer',
-        'python src/hyp.py {params.omnilog_feat} {params.attribute} 10 {params.split} omnilog'
+        """
+        python src/hyp.py {params.kmer_feat} {params.attribute} 10 {params.split} kmer
+        python src/hyp.py {params.omnilog_feat} {params.attribute} 10 {params.split} omnilog
+        """
 
 rule average:
     input:
@@ -46,5 +50,7 @@ rule average:
         omnilog_feat = '{omnilog_feat}',
         attribute = '{attribute}'
     shell:
-        'python src/hyp_average.py {params.kmer_feat} {params.attribute} kmer',
-        'python src/hyp_average.py {params.omnilog_feat} {params.attribute} omnilog'
+        """
+        python src/hyp_average.py {params.kmer_feat} {params.attribute} kmer
+        python src/hyp_average.py {params.omnilog_feat} {params.attribute} omnilog
+        """
