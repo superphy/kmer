@@ -63,5 +63,8 @@ rule omnilog_average:
         expand("data/omnilog_{attribute}/{omnilog_feat}feats_{split}.pkl", attribute = attributes, split = splits, omnilog_feat = omnilog_feats)
     output:
         "results/omnilog_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnOmnilog_testedOnaCrossValidation.pkl"
+    params:
+        omnilog_feat = '{omnilog_feat}',
+        attribute = '{attribute}'
     shell:
         'python src/hyp_average.py {params.omnilog_feat} {params.attribute} omnilog'
