@@ -146,7 +146,7 @@ def data():
 
 	# merge the 3 training sets into 1
 	x_train = np.vstack((x_train1, x_train2, x_train3))
-	y_train = np.concatenate((y_train1, y_train2, y_train3))
+	y_train = np.concatenate((y_train1, y_train2, y_train3, y_train4))
 
 	num_classes = max(Counter(all_y_trains).keys()) + 1
 
