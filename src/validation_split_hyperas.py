@@ -88,10 +88,11 @@ if __name__=='__main__':
             os.makedirs(os.path.abspath(os.path.curdir)+"/data/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, set_count), exist_ok = True)
 
 
-        save_path = "data/hyp_splits/{}-{}/splits/set".format(dataset, attribute)+str(set_count)
+        save_path = "data/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, str(set_count))
 
         # This just saves the testing set, so the data is split into 5ths, each set is 1/5th of the data
 
+        #print(x_test, y_test, z_test)
         np.save(save_path+'/x.npy', x_test)
         np.save(save_path+'/y.npy', y_test)
         np.save(save_path+'/z.npy', z_test)
