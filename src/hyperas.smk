@@ -12,16 +12,20 @@ rule kmer_split:
         expand("data/filtered/{attribute}/kmer_matrix.npy", attribute = attributes)
     output:
         "data/hyp_splits/kmer-{attribute}/splits/set{split}/"
+    params:
+        attribute = '{attribute}'
     shell:
-        'python src/validation_split_hyperas.py kmer {attributes}'
+        'python src/validation_split_hyperas.py kmer {params.attribute}'
 
 rule omnilog_split:
     input:
         expand("data/filtered/{attribute}/omnilog_matrix.npy", attribute = attributes)
     output:
         "data/hyp_splits/omnilog-{attribute}/splits/set{split}/"
+    params:
+        attribute = '{attribute}'
     shell:
-        'python src/validation_split_hyperas.py omnilog {attributes}'
+        'python src/validation_split_hyperas.py omnilog {params.attribute}'
 
 rule kmer_hyperas:
     input:
