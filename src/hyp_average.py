@@ -22,6 +22,7 @@ if __name__ =="__main__":
     # everything is saved in data/{path}{attribute}/hyperas/
     for i in range(1,6):
         split_df = pd.read_pickle("data/"+dataset+"_"+attribute+"/"+str(feats)+"feats_"+str(i)+".pkl")
+        print(split_df)
 
         # initialize new dataframe values
         if i==1:
@@ -38,6 +39,7 @@ if __name__ =="__main__":
         # append splits 1-D and direct accuracies to be saved
         OBN_accs.append(running_sum)
         OBO_accs.append(split_df.values[0,4])
+        print(OBN_accs, OBO_accs)
 
         # add values to new dataframe
         for i, row in enumerate(split_df.values):
@@ -53,13 +55,14 @@ if __name__ =="__main__":
 
 
     final_df = pd.DataFrame(data = final, index = index, columns = ['Precision','Recall', 'F-Score','Supports', '1D Acc'])
+    print(final_df)
 
-    if not os.path.exists(os.path.abspath(os.path.curdir)+"/results/"+dataset+"_"+attribute.lower()+"/"):
-        os.mkdir(os.path.abspath(os.path.curdir)+"/results/"+dataset+"_"+attribute.lower()+"/")
+    if not os.path.exists(os.path.abspath(os.path.curdir)+"/results/"+dataset+"_"+attribute+"/"):
+        os.mkdir(os.path.abspath(os.path.curdir)+"/results/"+dataset+"_"+attribute+"/")
 
-    final_df.to_pickle("results/"+dataset+"_"+attribute.lower()+"/"+attribute+"_"+feats+"feats_ANNtrainedOn{}_testedOnaCrossValidation.pkl".format(dataset))
+    final_df.to_pickle("results/"+dataset+"_"+ attribute +"/"+attribute + "_" +feats + "feats_ANNtrainedOn{}_testedOnaCrossValidation.pkl".format(dataset))
 
     if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/split_accuracies"):
         os.mkdir(os.path.abspath(os.path.curdir)+"/data/split_accuracies")
     # saving the accuracies for each split
-    np.save('data/split_accuracies/'+attribute+'_'+str(feats)+'feats_ANNtrainedOnpublic_testedOnaCrossValidation.npy' ,np.vstack((OBN_accs,OBO_accs)))
+    np.save('data/split_accuracies/'+attribute+'_'+str(feats)+'feats_ANNtrainedOn{}_testedOnaCrossValidation.npy'.format(attribute) ,np.vstack((OBN_accs,OBO_accs)))

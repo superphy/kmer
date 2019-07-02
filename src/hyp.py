@@ -134,14 +134,14 @@ def data():
 
 
 	# load the relevant training sets and labels
-	x_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[0]))
-	x_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[1]))
-	x_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[2]))
-	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]))
-	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]))
-	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]))
-	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]))
-	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]))
+	x_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
+	x_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
+	x_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
+	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
+	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
+	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
+	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
+	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
 	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
 
 	# merge the 3 training sets into 1
@@ -150,10 +150,10 @@ def data():
 
 	num_classes = max(Counter(all_y_trains).keys()) + 1
 
-	x_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[3]))
-	y_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]))
+	x_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
+	y_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
 
-	x_val  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[4]))
+	x_val  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
 
 	# hyperas asks for train and test so the validation set is what comes last, to check the final model
 	# we need to save it to be used later, because we have the sk_obj now.
@@ -258,15 +258,15 @@ if __name__ == "__main__":
 	train_sets = [(i+int(fold)-1)%5 for i in range(5)]
 	train_sets = [str(i+1) for i in train_sets]
 
-	test_names  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]))
-	test_data = np.load('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)))
+	test_names  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+	test_data = np.load('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), allow_pickle = True)
 	from keras.utils import to_categorical
 	from collections import Counter
-	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]))
-	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]))
-	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]))
-	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]))
-	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]))
+	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
+	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
+	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
+	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
+	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
 	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
 	num_classes = max(Counter(all_y_trains).keys()) + 1
 	test_names = to_categorical(test_names, num_classes)

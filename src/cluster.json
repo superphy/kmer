@@ -50,71 +50,99 @@
 
   "kmer_serotype":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "50",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "omnilog_serotype":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "kmer_host":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "omnilog_host":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "uk_host":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "us_host":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "ukus_host":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "us2uk_host":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "uk2us_host":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 
   "ukus2kmer_host":
   {
-    "cores" : "8",
-    "mem" : "15G",
+    "cores" : "80",
+    "mem" : "150G",
+    "partition" : "NMLResearch"
+  },
+
+  "kmer_otype":
+  {
+    "cores" : "80",
+    "mem" : "150G",
+    "partition" : "NMLResearch"
+  },
+
+  "kmer_htype":
+  {
+    "cores" : "80",
+    "mem" : "150G",
+    "partition" : "NMLResearch"
+  },
+
+  "omnilog_otype":
+  {
+    "cores" : "80",
+    "mem" : "150G",
+    "partition" : "NMLResearch"
+  },
+
+  "omnilog_htype":
+  {
+    "cores" : "80",
+    "mem" : "150G",
     "partition" : "NMLResearch"
   },
 

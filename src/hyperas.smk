@@ -2,10 +2,12 @@ attributes = ["Host", "Serotype", "Otype", "Htype"]
 splits = ["1","2","3","4","5"]
 kmer_feats = [i for i in range(100,3000,100)]
 omnilog_feats = [i for i in range(10,190,10)]
+omnilog_dataset = "omnilog"
+kmer_dataset = "kmer"
 rule all:
     input:
         expand("results/kmer_{attribute}/{attribute}_{kmer_feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl", attribute = attributes, kmer_feat = kmer_feats),
-        expand("results/omnilog_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnOmnilog_testedOnaCrossValidation.pkl", attribute = attributes, omnilog_feat = omnilog_feats)
+        expand("results/omnilog_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnomnilog_testedOnaCrossValidation.pkl", attribute = attributes, omnilog_feat = omnilog_feats)
 
 rule kmer_split:
     input:
@@ -53,22 +55,24 @@ rule omnilog_hyperas:
 
 rule kmer_average:
     input:
-        expand("data/kmer_{attribute}/{kmer_feat}feats_{split}.pkl", attribute = attributes, split = splits, kmer_feat = kmer_feats)
+        expand("data/{kmer}_{attribute}/{kmer_feat}feats_{split}.pkl", attribute = attributes, split = splits, kmer_feat = kmer_feats, kmer = kmer_dataset)
     output:
-        "results/kmer_{attribute}/{attribute}_{kmer_feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl"
+        "results/{kmer}_{attribute}/{attribute}_{kmer_feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl"
     params:
         kmer_feat = '{kmer_feat}',
-        attribute = '{attribute}'
+        attribute = '{attribute}',
+        kmer = '{kmer}'
     shell:
-        'python src/hyp_average.py {params.kmer_feat} {params.attribute} kmer'
+        'python src/hyp_average.py {params.kmer_feat} {params.attribute} {params.kmer}'
 
 rule omnilog_average:
     input:
-        expand("data/omnilog_{attribute}/{omnilog_feat}feats_{split}.pkl", attribute = attributes, split = splits, omnilog_feat = omnilog_feats)
+        expand("data/{omnilog}_{attribute}/{omnilog_feat}feats_{split}.pkl", attribute = attributes, split = splits, omnilog_feat = omnilog_feats, omnilog = omnilog_dataset)
     output:
-        "results/omnilog_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnOmnilog_testedOnaCrossValidation.pkl"
+        "results/{omnilog}_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnomnilog_testedOnaCrossValidation.pkl"
     params:
         omnilog_feat = '{omnilog_feat}',
-        attribute = '{attribute}'
+        attribute = '{attribute}',
+        omnilog = '{omnilog}'
     shell:
-        'python src/hyp_average.py {params.omnilog_feat} {params.attribute} omnilog'
+        'python src/hyp_average.py {params.omnilog_feat} {params.attribute} {params.omnilog}'

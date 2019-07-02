@@ -28,7 +28,7 @@ from data_transformers import *
 def get_data(train, predict_for):
 	X = []
 	Y = []
-	if(train in ('kmer, omnilog')):
+	if(train in ('kmer, omnilog, Otype, Htype')):
 		X = np.load('data/filtered/'+predict_for+'/'+train+'_matrix.npy', allow_pickle = True)
 		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_'+predict_for+'.npy', allow_pickle = True)
 
