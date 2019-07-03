@@ -309,5 +309,8 @@ if __name__ == "__main__":
 	if(out!='print'):
 		if not (out.endswith('/')):
 			out = out + '/'
+		if not os.path.exists(os.path.abspath(os.path.curdir)+'/'+out):
+			os.mkdir(os.path.abspath(os.path.curdir)+'/'+out)
 		out = out+predict_for+'_'+str(num_feats)+'feats_'+model_type+'trainedOn'+train_string+'_testedOn'+t_string+'.pkl'
+
 		result_df.to_pickle(out)

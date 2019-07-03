@@ -1,110 +1,120 @@
+attributes = ["Host", "Serotype", "Otype", "Htype"]
+models = ["SVM", "XGB", "ANN"]
+splits = ["1","2","3","4","5"]
+kmer_feats = [i for i in range(100,3000,100)]
+omnilog_feats = [i for i in range(10,190,10)]
+omnilog_dataset = "omnilog"
+kmer_dataset = "kmer"
 
 rule all:
     input:
-        "results/kmer_serotype",
-        "results/omnilog_serotype",
-        "results/kmer_host",
-        "results/omnilog_host",
-        "results/uk_host",
-        "results/us_host",
-        "results/ukus_host",
-        "results/uk2us_host",
-        "results/us2uk_host",
-        "results/kmer2ukus_host",
-        "results/kmer_otype",
-        "results/kmer_htype",
-        "results/omnilog_otype",
-        "results/omnilog_htype"
-    shell:
-        "echo All tests deployed"
+        expand("results/kmer_{attribute}/{attribute}_{kmer_feat}feats_{model}trainedOnkmer_testedOnaCrossValidation.pkl", attribute = attributes, kmer_feat = kmer_feats, model = models),
+        expand("results/omnilog_{attribute}/{attribute}_{omnilog_feat}feats_{model}trainedOnomnilog_testedOnaCrossValidation.pkl", attribute = attributes, omnilog_feat = omnilog_feats, model = models),
+        expand("results/uk_host/Host_{kmer_feat}feats_{model}trainedOnuk_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats, model = models),
+        expand("results/uk2us_host/Host_{kmer_feat}feats_{model}trainedOnuk_testedOnus.pkl", kmer_feat = kmer_feats, model = models),
+        expand("results/ukus_host/Host_{kmer_feat}feats_{model}trainedOnukus_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats, model = models),
+        expand("results/ukus2kmer_host/Host_{kmer_feat}feats_{model}trainedOnukus_testedOnkmer.pkl", kmer_feat = kmer_feats, model = models),
+        expand("results/us_host/Host_{kmer_feat}feats_{model}trainedOnus_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats, model = models),
+        expand("results/us2uk_host/Host_{kmer_feat}feats_{model}trainedOnus_testedOnuk.pkl", kmer_feat = kmer_feats, model = models),
+        expand("results/kmer2ukus_host/Host_{kmer_feat}feats_{model}trainedOnkmer_testedOnukus.pkl", kmer_feat = kmer_feats, model = models)
 
-rule kmer_serotype:
+rule kmer:
+    input:
+        expand("data/filtered/{attribute}/kmer_matrix.npy", attribute = attributes)
     output:
-        "results/kmer_serotype"
+        "results/kmer_{attribute}/{attribute}_{kmer_feat}feats_{model}trainedOnkmer_testedOnaCrossValidation.pkl"
+    params:
+        kmer_feat = '{kmer_feat}',
+        model = '{model}',
+        attribute = '{attribute}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x kmer -a Serotype -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x kmer -a {params.attribute} -o results/kmer_{params.attribute} -f {params.kmer_feat} -m {params.model}'
 
-rule omnilog_serotype:
+rule omnilog:
+    input:
+        expand("data/filtered/{attribute}/omnilog_matrix.npy", attribute = attributes)
     output:
-        "results/omnilog_serotype"
+        "results/omnilog_{attribute}/{attribute}_{omnilog_feat}feats_{model}trainedOnomnilog_testedOnaCrossValidation.pkl"
+    params:
+        omnilog_feat = '{omnilog_feat}',
+        model = '{model}',
+        attribute = '{attribute}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 10 10 190); do python src/model.py -x omnilog -a Serotype -o {output} -f $i -m $j; done; done'
-
-rule kmer_host:
-    output:
-        "results/kmer_host"
-    shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x kmer -a Host -o {output} -f $i -m $j; done; done'
-
-rule omnilog_host:
-    output:
-        "results/omnilog_host"
-    shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 10 10 190); do python src/model.py -x omnilog -a Host -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x kmer -a {params.attribute} -o results/omnilog_{params.attribute} -f {params.kmer_feat} -m {params.model}'
 
 rule uk_host:
+    input:
+        'data/uk_us_unfiltered/kmer_matrix.npy'
     output:
-        "results/uk_host"
+        "results/uk_host/Host_{kmer_feat}feats_{model}trainedOnuk_testedOnaCrossValidation.pkl"
+    params:
+        kmer_feat = '{kmer_feat}',
+        model = '{model}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x uk -a Host -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x uk -a Host -o results/uk_host -f {params.kmer_feat} -m {params.model}'
 
 rule us_host:
+    input:
+        'data/uk_us_unfiltered/kmer_matrix.npy'
     output:
-        "results/us_host"
+        "results/us_host/Host_{kmer_feat}feats_{model}trainedOnus_testedOnaCrossValidation.pkl"
+    params:
+        kmer_feat = '{kmer_feat}',
+        model = '{model}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x us -a Host -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x us -a Host -o results/us_host -f {params.kmer_feat} -m {params.model}'
 
 rule ukus_host:
+    input:
+        'data/uk_us_unfiltered/kmer_matrix.npy'
     output:
-        "results/ukus_host"
+        "results/ukus_host/Host_{kmer_feat}feats_{model}trainedOnukus_testedOnaCrossValidation.pkl"
+    params:
+        kmer_feat = '{kmer_feat}',
+        model = '{model}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x uk_us -a Host -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x uk_us -a Host -o results/ukus_host -f {params.kmer_feat} -m {params.model}'
 
 rule us2uk_host:
+    input:
+        'data/uk_us_unfiltered/kmer_matrix.npy'
     output:
-        "results/us2uk_host"
+        "results/us2uk_host/Host_{kmer_feat}feats_{model}trainedOnus_testedOnuk.pkl"
+    params:
+        kmer_feat = '{kmer_feat}',
+        model = '{model}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x us -y uk -a Host -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x us -y uk -a Host -o results/us2uk_host -f {params.kmer_feat} -m {parmas.model}'
 
 rule uk2us_host:
+    input:
+        'data/uk_us_unfiltered/kmer_matrix.npy'
     output:
-        "results/uk2us_host"
+        "results/uk2us_host/Host_{kmer_feat}feats_{model}trainedOnuk_testedOnus.pkl"
+    params:
+        kmer_feat = '{kmer_feat}',
+        model = '{model}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x uk -y us -a Host -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x uk -y us -a Host -o results/uk2us_host -f {params.kmer_feat} -m {params.model}'
 
 rule kmer2ukus_host:
+    input:
+        'data/uk_us_unfiltered/kmer_matrix.npy'
     output:
-        "results/kmer2ukus_host"
+        "results/kmer2ukus_host/Host_{kmer_feat}feats_{model}trainedOnkmer_testedOnukus.pkl"
+    params:
+        kmer_feat = '{kmer_feat}',
+        model = '{model}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x kmer -y uk_us -a Host -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x kmer -y uk_us -a Host -o results/kmer2ukus_host -f {params.kmer_feat} -m {params.model}'
 
 rule ukus2kmer_host:
+    input:
+        'data/uk_us_unfiltered/kmer_matrix.npy'
     output:
-        "results/ukus2kmer_host"
+        "results/ukus2kmer_host/Host_{kmer_feat}feats_{model}trainedOnukus_testedOnkmer.pkl"
+    params:
+        kmer_feat = '{kmer_feat}',
+        model = '{model}'
     shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x uk_us -y kmer -a Host -o {output} -f $i -m $j; done; done'
-
-rule kmer_otype:
-    output:
-        "results/kmer_otype"
-    shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x kmer -a Otype -o {output} -f $i -m $j; done; done'
-
-rule kmer_htype:
-    output:
-        "results/kmer_htype"
-    shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 100 100 3000); do python src/model.py -x kmer -a Htype -o {output} -f $i -m $j; done; done'
-
-
-rule omnilog_otype:
-    output:
-        "results/omnilog_otype"
-    shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 10 10 190); do python src/model.py -x omnilog -a Otype -o {output} -f $i -m $j; done; done'
-
-rule omnilog_htype:
-    output:
-        "results/omnilog_htype"
-    shell:
-        'mkdir {output} && for j in SVM ANN XGB; do for i in $(seq 10 10 190); do python src/model.py -x omnilog -a Htype -o {output} -f $i -m $j; done; done'
+        'python src/model.py -x uk_us -y kmer -a Host -o results/ukus2kmer_host -f {params.kmer_feat} -m {params.model}'

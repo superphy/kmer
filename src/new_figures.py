@@ -14,8 +14,16 @@ if __name__ == "__main__":
     for filename in os.listdir(path_to_dir):
         path = os.path.abspath(path_to_dir+'/'+filename)
         data = pd.read_pickle(path)
-
+        #print(data, path)
         acc = sum(data['Recall'] * data['Supports']) / sum(data['Supports'])
+
+        '''
+        class_acc = data['Recall']
+        bovine = class_acc[0]
+        human = class_acc[1]
+        ovine = class_acc[2]
+        water = class_acc[3]
+        '''
 
         attribute, num_feats, train, test = filename.split('_')
         num_feats = int(num_feats[:-5]) # all but last 5 chars
@@ -28,5 +36,17 @@ if __name__ == "__main__":
         #print(acc, filename)
         #break
 
+
+    #master_df = pd.DataFrame(data = list, columns = ["Dataset", "Attribute", "Features", "Accuracy", "Model", "Class"])
     master_df = pd.DataFrame(data = list, columns = ["Dataset", "Attribute", "Features", "Accuracy", "Model"])
-    print(master_df)
+
+    idk = sns.relplot(x="Features", y="Accuracy", hue="Model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN"])
+    title_string = "{0} predicted using {1} on a Crossvalidation - Water".format(attribute, train)
+
+    if not os.path.exists(os.path.abspath(os.path.curdir)+"/results/figures"):
+        os.mkdir(os.path.abspath(os.path.curdir)+"/results/figures")
+
+    plt.title(title_string)
+    plt.savefig('results/figures/test.png')
+
+    #print(master_df)
