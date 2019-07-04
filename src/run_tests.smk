@@ -84,7 +84,7 @@ rule us2uk_host:
         kmer_feat = '{kmer_feat}',
         model = '{model}'
     shell:
-        'python src/model.py -x us -y uk -a Host -o results/us2uk_host -f {params.kmer_feat} -m {parmas.model}'
+        'python src/model.py -x us -y uk -a Host -o results/us2uk_host -f {params.kmer_feat} -m {params.model}'
 
 rule uk2us_host:
     input:

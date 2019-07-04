@@ -239,27 +239,26 @@ if __name__ == "__main__":
 			model = Sequential()
 			#This model currently has an input layer of num_feats neurons, 16% dropout, a hidden layer with 62 neurons, 44% dropout, and an output layer with num_classes outputs (or 1 if binary)
 			model.add(Dense(num_feats,activation='relu',input_dim=(num_feats)))
-			model.add(Dropout(0.16))
-			model.add(Dense(62, activation='relu', kernel_initializer='uniform'))
-			model.add(Dropout(0.44))
+			model.add(Dropout(0.5))
+			model.add(Dense(int((num_feats + num_classes) / 2) , activation='relu', kernel_initializer='uniform'))
+			model.add(Dropout(0.5))
+			model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
 
 			#num_classes_obj = len(Counter(y_train).keys())
-
+			print(num_classes)
+			if(num_classes == 2 or (train_string == 'uk_us' and test_string == 'kmer')):
+				loss = 'binary_crossentropy'
+				num_outs = 1
+				other = 'poisson'
+			else:
+				loss = 'poisson'
+				num_outs = num_classes
+				other = 'binary_crossentropy'
 			try:
-				if(num_classes == 2 or (train_string == 'uk_us' and test_string == 'kmer')):
-					loss = 'binary_crossentropy'
-					num_outs = 1
-					other = 'poisson'
-				else:
-					loss = 'poisson'
-					num_outs = num_classes
-					other = 'binary_crossentropy'
-				model.add(Dense(num_outs, kernel_initializer='uniform', activation='softmax'))
 				model.compile(loss=loss, metrics=['accuracy'], optimizer='adam')
 
 				model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
 			except:
-				model.add(Dense(num_outs, kernel_initializer='uniform', activation='softmax'))
 				model.compile(loss=other, metrics=['accuracy'], optimizer='adam')
 
 				model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
