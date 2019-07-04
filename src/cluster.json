@@ -64,50 +64,50 @@
 
   "uk_host":
   {
-    "cores" : "80",
-    "mem" : "150G",
+    "cores" : "100",
+    "mem" : "300G",
     "partition" : "NMLResearch"
   },
 
   "us_host":
   {
-    "cores" : "80",
-    "mem" : "150G",
+    "cores" : "100",
+    "mem" : "300G",
     "partition" : "NMLResearch"
   },
 
   "ukus_host":
   {
-    "cores" : "80",
-    "mem" : "150G",
+    "cores" : "100",
+    "mem" : "300G",
     "partition" : "NMLResearch"
   },
 
   "us2uk_host":
   {
-    "cores" : "80",
-    "mem" : "150G",
+    "cores" : "100",
+    "mem" : "300G",
     "partition" : "NMLResearch"
   },
 
   "uk2us_host":
   {
-    "cores" : "80",
-    "mem" : "150G",
+    "cores" : "100",
+    "mem" : "300G",
     "partition" : "NMLResearch"
   },
 
   "kmer2ukus_host":
   {
-    "cores" : "80",
-    "mem" : "150G",
+    "cores" : "100",
+    "mem" : "300G",
     "partition" : "NMLResearch"
   },
 
   "ukus2kmer_host":
   {
-    "cores" : "80",
-    "mem" : "150G",
+    "cores" : "100",
+    "mem" : "300G",
     "partition" : "NMLResearch"
   },
 
