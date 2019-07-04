@@ -40,7 +40,7 @@ rule omnilog:
         model = '{model}',
         attribute = '{attribute}'
     shell:
-        'python src/model.py -x kmer -a {params.attribute} -o results/omnilog_{params.attribute} -f {params.omnilog_feat} -m {params.model}'
+        'python src/model.py -x omnilog -a {params.attribute} -o results/omnilog_{params.attribute} -f {params.omnilog_feat} -m {params.model}'
 
 rule uk_host:
     input:
