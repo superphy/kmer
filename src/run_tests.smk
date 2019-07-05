@@ -1,5 +1,5 @@
 attributes = ["Host", "Serotype", "Otype", "Htype"]
-models = ["SVM", "XGB", "ANN"]
+models = ["SVM", "XGB"]
 splits = ["1","2","3","4","5"]
 kmer_feats = [i for i in range(100,3000,100)]
 omnilog_feats = [i for i in range(10,190,10)]

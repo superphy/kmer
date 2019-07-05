@@ -41,12 +41,13 @@ if __name__ == "__main__":
     master_df = pd.DataFrame(data = list, columns = ["Dataset", "Attribute", "Features", "Accuracy", "Model"])
 
     idk = sns.relplot(x="Features", y="Accuracy", hue="Model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN"])
-    title_string = "{0} predicted using {1} on a Crossvalidation - Water".format(attribute, train)
+    title_string = "{0} predicted using {1} on a Crossvalidation".format(attribute, train)
 
-    if not os.path.exists(os.path.abspath(os.path.curdir)+"/results/figures"):
-        os.mkdir(os.path.abspath(os.path.curdir)+"/results/figures")
+    if not os.path.exists(os.path.abspath(os.path.curdir)+"/figures"):
+        os.mkdir(os.path.abspath(os.path.curdir)+"/figures")
 
     plt.title(title_string)
-    plt.savefig('results/figures/test.png')
+    plt.ylim(0,1)
+    plt.savefig('figures/test.png')
 
     #print(master_df)

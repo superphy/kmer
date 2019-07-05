@@ -17,3 +17,7 @@ kmerprediction/Data/.~lock*
 stype*
 *touchfile*
 data/filtered*
+data/*
+results*
+kmer_omnilog_hyperas*
+kmer_Host/*
