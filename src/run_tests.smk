@@ -17,6 +17,9 @@ rule all:
         expand("results/us_host/Host_{kmer_feat}feats_{model}trainedOnus_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats, model = models),
         expand("results/us2uk_host/Host_{kmer_feat}feats_{model}trainedOnus_testedOnuk.pkl", kmer_feat = kmer_feats, model = models),
         expand("results/kmer2ukus_host/Host_{kmer_feat}feats_{model}trainedOnkmer_testedOnukus.pkl", kmer_feat = kmer_feats, model = models)
+    run:
+        shell("snakemake -s src/hyperas.smk")
+        shell("snakemake -s src/ukus_hyperas.smk")
 
 rule kmer:
     input:

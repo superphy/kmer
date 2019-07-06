@@ -5,7 +5,7 @@ rule all:
     input:
         expand("results/uk_host/host_{kmer_feat}feats_ANNtrainedOnuk_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats),
         #expand("results/uk2us_host/Host_{kmer_feat}feats_ANNtrainedOnuk_testedOnus.pkl", kmer_feat = kmer_feats),
-        expand("results/ukus_host/host_{kmer_feat}feats_ANNtrainedOnukus_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats),
+        expand("results/uk_us_host/host_{kmer_feat}feats_ANNtrainedOnuk_us_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats),
         #expand("results/ukus2kmer_host/Host_{kmer_feat}feats_ANNtrainedOnukus_testedOnkmer.pkl", kmer_feat = kmer_feats),
         expand("results/us_host/host_{kmer_feat}feats_ANNtrainedOnus_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats),
         #expand("results/us2uk_host/Host_{kmer_feat}feats_ANNtrainedOnus_testedOnuk.pkl", kmer_feat = kmer_feats),
@@ -63,7 +63,7 @@ rule uk_us_host_average:
     input:
         expand("data/uk_us_host/{kmer_feat}feats_{split}.pkl", split = splits, kmer_feat = kmer_feats)
     output:
-        "results/ukus_host/host_{kmer_feat}feats_ANNtrainedOnukus_testedOnaCrossValidation.pkl"
+        "results/uk_us_host/host_{kmer_feat}feats_ANNtrainedOnuk_us_testedOnaCrossValidation.pkl"
     params:
         kmer_feat = '{kmer_feat}'
     shell:

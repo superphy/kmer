@@ -7,10 +7,11 @@ import os, sys
 
 
 if __name__ == "__main__":
-    path_to_dir = sys.argv[1]
+    directory = sys.argv[1]
     list = []
     temp_list = []
-
+    
+for path_to_dir in os.listdir(directory):
     for filename in os.listdir(path_to_dir):
         path = os.path.abspath(path_to_dir+'/'+filename)
         data = pd.read_pickle(path)
@@ -48,6 +49,6 @@ if __name__ == "__main__":
 
     plt.title(title_string)
     plt.ylim(0,1)
-    plt.savefig('figures/test.png')
+    plt.savefig('figures/{}.png'.format(title_string))
 
     #print(master_df)
