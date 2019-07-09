@@ -29,16 +29,16 @@ def get_data(train, predict_for):
 	X = []
 	Y = []
 	if(train in ('kmer, omnilog')):
-		X = np.load('data/filtered/'+predict_for+'/'+train+'_matrix.npy')
-		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_'+predict_for+'.npy')
+		X = np.load('data/filtered/'+predict_for+'/'+train+'_matrix.npy', allow_pickle = True)
+		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_'+predict_for+'.npy', allow_pickle = True)
 
 	elif(train in ('uk', 'us','uk_us')):
-		X = np.load('data/uk_us_unfiltered/kmer_matrix.npy')
-		Y = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy')
+		X = np.load('data/uk_us_unfiltered/kmer_matrix.npy', allow_pickle = True)
+		Y = np.load('data/uk_us_unfiltered/kmer_rows_Class.npy', allow_pickle = True)
 
 		if(train!='uk_us'):
 			#the US dataset has been labeled as Test and the UK set as Train, we need to load the correct one
-			dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy')
+			dataset_array = np.load('data/uk_us_unfiltered/kmer_rows_Dataset.npy', allow_pickle = True)
 			if(train=='us'):
 				us_mask = np.asarray([i =='Test' for i in dataset_array])
 				X = X[us_mask]
@@ -242,10 +242,8 @@ if __name__ == "__main__":
 
 			model = Sequential()
 			#This model currently has an input layer of num_feats neurons, 16% dropout, a hidden layer with 62 neurons, 44% dropout, and an output layer with num_classes outputs (or 1 if binary)
-			model.add(Dense(num_feats,activation='relu',input_dim=(num_feats)))
-			model.add(Dropout(0.16))
-			model.add(Dense(62, activation='relu', kernel_initializer='uniform'))
-			model.add(Dropout(0.44))
+			model.add(Dense(int((num_feats + num_classes)/2),activation='relu',input_dim=(num_feats)))
+			model.add(Dropout(0.5))
 
 			if(num_classes==2 or (train_string == 'uk_us' and test_string == 'kmer')):
 				loss = 'binary_crossentropy'
@@ -253,9 +251,10 @@ if __name__ == "__main__":
 			else:
 				loss = 'poisson'
 				num_outs = num_classes
-			model.add(Dense(num_outs, kernel_initializer='uniform', activation='softmax'))
+			model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
+			#model.add(Dropout(0.5))
 			model.compile(loss=loss, metrics=['accuracy'], optimizer='adam')
-
+			print(loss)
 			model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
 		else:
 			raise Exception('Unrecognized Model. Use XGB, SVM or ANN')
