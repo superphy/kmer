@@ -10,10 +10,10 @@ if __name__ == "__main__":
     directory = sys.argv[1]
     list = []
     temp_list = []
-    
+
 for path_to_dir in os.listdir(directory):
-    for filename in os.listdir(path_to_dir):
-        path = os.path.abspath(path_to_dir+'/'+filename)
+    for filename in os.listdir(os.path.abspath(directory + path_to_dir)):
+        path = os.path.abspath(directory + path_to_dir+'/'+filename)
         data = pd.read_pickle(path)
         #print(data, path)
         acc = sum(data['Recall'] * data['Supports']) / sum(data['Supports'])
@@ -49,6 +49,9 @@ for path_to_dir in os.listdir(directory):
 
     plt.title(title_string)
     plt.ylim(0,1)
-    plt.savefig('figures/{}.png'.format(title_string))
+    plt.tight_layout(pad = 5.5)
+    plt.savefig('figures/'+(title_string.replace(" ",""))+'.png')
+    print(path)
+    break
 
     #print(master_df)

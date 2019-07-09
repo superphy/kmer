@@ -15,7 +15,10 @@ from tensorflow import set_random_seed
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import cpu_count
 
-session_conf = tensorflow.ConfigProto(intra_op_parallelism_threads=16,inter_op_parallelism_threads=16)
+os.environ['PYTHONHASHSEED'] = '0'
+
+session_conf = tensorflow.ConfigProto(intra_op_parallelism_threads=1,inter_op_parallelism_threads=1)
+tensorflow.set_random_seed(913824)
 sess = tensorflow.Session(config=session_conf)
 
 from hyperopt import Trials, STATUS_OK, tpe
@@ -40,7 +43,7 @@ from model_evaluators import *
 from data_transformers import *
 
 seed(913824)
-set_random_seed(913824)
+#set_random_seed(913824)
 
 def eval_model(model, test_data, test_names):
 	'''
@@ -126,6 +129,7 @@ def data():
 	attribute  = sys.argv[2]
 	fold  = sys.argv[4]
 	dataset = sys.argv[5]
+	range = sys.argv[6]
 
 	# fold 1 uses sets 1,2,3 to train, 4 to test, fold 2 uses sets 2,3,4 to train, 5 to test, etc
 	train_sets = [(i+int(fold)-1)%5 for i in range(5)]
@@ -134,14 +138,14 @@ def data():
 
 
 	# load the relevant training sets and labels
-	x_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
-	x_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
-	x_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
-	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
-	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
-	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
-	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
-	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+	x_train1 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
+	x_train2 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
+	x_train3 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
+	y_train1 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
+	y_train2 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
+	y_train3 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
+	y_train4 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
+	y_train5 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
 	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
 
 	# merge the 3 training sets into 1
@@ -150,10 +154,10 @@ def data():
 
 	num_classes = max(Counter(all_y_trains).keys()) + 1
 
-	x_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
-	y_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
+	x_test  = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
+	y_test  = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
 
-	x_val  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+	x_val  = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
 
 	# hyperas asks for train and test so the validation set is what comes last, to check the final model
 	# we need to save it to be used later, because we have the sk_obj now.
@@ -162,7 +166,7 @@ def data():
 		x_train = sk_obj.fit_transform(x_train, y_train)
 		x_test  = sk_obj.transform(x_test)
 		x_val  = sk_obj.transform(x_val)
-		np.save('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), x_val)
+		np.save('data'+range+'/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), x_val)
 
 	y_train = to_categorical(y_train, num_classes)
 	y_test  = to_categorical(y_test)
@@ -237,6 +241,7 @@ if __name__ == "__main__":
 	max_evals = int(sys.argv[3])
 	fold  = sys.argv[4]
 	dataset = sys.argv[5]
+	range = sys.argv[6]
 
 	# Useful to have in the slurm output
 	print("************************************")
@@ -258,15 +263,15 @@ if __name__ == "__main__":
 	train_sets = [(i+int(fold)-1)%5 for i in range(5)]
 	train_sets = [str(i+1) for i in train_sets]
 
-	test_names  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
-	test_data = np.load('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), allow_pickle = True)
+	test_names  = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+	test_data = np.load('data'+range+'/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), allow_pickle = True)
 	from keras.utils import to_categorical
 	from collections import Counter
-	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
-	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
-	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
-	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
-	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+	y_train1 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
+	y_train2 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
+	y_train3 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
+	y_train4 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
+	y_train5 = np.load('data'+range+'/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
 	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
 	num_classes = max(Counter(all_y_trains).keys()) + 1
 	test_names = to_categorical(test_names, num_classes)
@@ -289,8 +294,8 @@ if __name__ == "__main__":
 	################################################################
 
 
-	if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/"+dataset+'_'+attribute):
-		os.makedirs(os.path.abspath(os.path.curdir)+"/data/"+dataset+'_'+attribute, exist_ok = True)
+	if not os.path.exists(os.path.abspath(os.path.curdir)+"/data"+range+"/"+dataset+'_'+attribute):
+		os.makedirs(os.path.abspath(os.path.curdir)+"/data"+range+"/"+dataset+'_'+attribute, exist_ok = True)
 
 	# ann_1d -> returns: (perc, mcc, prediction, actual)
 	results = ann_1d(best_model, test_data, test_names, 0)
@@ -321,6 +326,6 @@ if __name__ == "__main__":
 	print("on {} features using a {} trained on {} data, tested on {}".format(feats, 'ANN', dataset, t_string))
 	print("Accuracy:", running_sum)
 	print(result_df)
-	out = "data/"+dataset+'_'+attribute+"/"
+	out = "data"+range+"/"+dataset+'_'+attribute+"/"
 	out = out+str(feats)+'feats_'+fold+'.pkl'
 	result_df.to_pickle(out)

@@ -3,132 +3,132 @@
   {
     "cores" : "4",
     "mem" : "32G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "kmer_split":
   {
     "cores" : "10",
     "mem" : "100G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "kmer_hyperas":
   {
     "cores" : "100",
     "mem" : "400G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "kmer_average":
   {
     "cores" : "10",
     "mem" : "100G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "omnilog_split":
   {
     "cores" : "10",
     "mem" : "100G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "omnilog_hyperas":
   {
     "cores" : "100",
     "mem" : "400G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "omnilog_average":
   {
     "cores" : "10",
     "mem" : "100G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "kmer":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "omnilog":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "uk_host":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "us_host":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "ukus_host":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "us2uk_host":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "uk2us_host":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "kmer2ukus_host":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "ukus2kmer_host":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "count":
   {
     "cores" : "8",
     "mem" : "64G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "dump":
   {
     "cores" : "8",
     "mem" : "32G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   },
 
   "matrix":
   {
     "cores" : "100",
     "mem" : "300G",
-    "partition" : "NMLResearch"
+    "partition" : "ExternalResearch"
   }
 }
