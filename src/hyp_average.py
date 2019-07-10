@@ -22,7 +22,7 @@ if __name__ =="__main__":
 
     # everything is saved in data/{path}{attribute}/hyperas/
     for i in range(1,6):
-        split_df = pd.read_pickle("data/"+dataset+"_"+attribute+"/"+str(feats)+"feats_"+str(i)+".pkl")
+        split_df = pd.read_pickle("data"+range+"/"+dataset+"_"+attribute+"/"+str(feats)+"feats_"+str(i)+".pkl")
         print(split_df)
 
         # initialize new dataframe values
