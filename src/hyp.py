@@ -169,7 +169,7 @@ def data():
 		np.save('data'+run+'/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), x_val)
 
 	y_train = to_categorical(y_train, num_classes)
-	y_test  = to_categorical(y_test)
+	y_test  = to_categorical(y_test, num_classes)
 
 	#print(y_test)
 	return x_train, y_train, x_test, y_test
