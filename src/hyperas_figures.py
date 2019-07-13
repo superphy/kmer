@@ -5,42 +5,19 @@ import matplotlib.pyplot as plt
 sns.set(style="darkgrid")
 import os, sys
 
-def average_files(list):
-    highest = 0
-    lowest  = 100
-    average_data = []
-    attribute_list = ["kmer-Host", "kmer-Serotype", "kmer-Otype", "kmer-Htype", "omnilog-Host", "omnilog-Serotype", "omnilog-Otype", "omnilog-Htype"]
-    for i in range(100 ,3000, 10):
-        for attribute in attribute_list:
-            for row in list:
-                if row[2] == i and row[5] == attribute:
-                    acc_list = []
-                    acc_list.append(row[3])
-                    avg_acc = sum(acc_list) / len(acc_list)
-
-                    if row[2] > highest:
-                        highest = row[2]
-                    if row[2] < lowest:
-                        lowest = row[2]
-
-            Dataset, Attribute = attribute.split('-')
-            temp_list = [Dataset, Attribute, i, avg_acc, highest, lowest]
-            average_data.append(temp_list)
-    return average_data
-
-
 
 if __name__ == "__main__":
     directory = sys.argv[1]
-    list = []
-    temp_list = []
+    acc_list = []
+    avg_list = []
+    average_data = []
+    final_data = []
 
     for path_to_dir in os.listdir(directory): #results_hyperas
         for dir in os.listdir(os.path.abspath(directory + path_to_dir)): # results1 ... results2 ... results3
-            for filename in os.listdir(os.path.abspath(directory + path_to_dir + dir)): # kmer-Host ... kmer-Serotype ... omnilog-Host
-                path = os.path.abspath(directory + path_to_dir + dir + '/' + filename)
+            for filename in os.listdir(os.path.abspath(directory + path_to_dir + '/' + dir)): # kmer-Host ... kmer-Serotype ... omnilog-Host
+                path = os.path.abspath(directory + path_to_dir + '/' + dir + '/' + filename)
                 data = pd.read_pickle(path)
-                #print(data, path)
                 acc = sum(data['Recall'] * data['Supports']) / sum(data['Supports'])
 
                 attribute, num_feats, train, test = filename.split('_')
@@ -48,24 +25,41 @@ if __name__ == "__main__":
                 model = train[:3] # first 3 chars
                 train = train[12:] # all but first 12
                 test = test[8:] # all but last 8
+                temp_list = [path_to_dir, dir, acc, num_feats]
+                acc_list.append(temp_list)
 
-                temp_list = [train, attribute, num_feats, acc, model, dir]
-                list.append(temp_list)
-        average_data = average_files(list)
+    length = 0
+    for x in acc_list:
+        length = length + 1
 
-        master_df = pd.DataFrame(data = average_data, columns = ["Dataset", "Attribute", "Features", "Accuracy", "Highest", "Lowest"])
+    #for attribute in ["kmer_Host", "kmer_Serotype", "kmer_Otype", "kmer_Htype", "omnilog_Host", "omnilog_Serotype", "omnilog_Otype", "omnilog_Htype"]:
+    for i in range(length - 1):
+        for j in range(length - 1):
+            if acc_list[i][1] == acc_list[j][1] and acc_list[i][3] == acc_list[j][3]:
+                avg_list.append(acc_list[j][2])
+        avg = sum(avg_list) / len(avg_list)
+        temp_list = [acc_list[i][1], acc_list[i][3], avg]
+        average_data.append(temp_list)
 
-        idk = sns.relplot(x="Features", y="Accuracy", kind="line", data=master_df)
-        title_string = "{0} predicted using {1} on a Crossvalidation".format(attribute, train)
+    for i in range(0, 188, 1):
+        final_data.append(average_data[i])
+    for list in final_data:
+        print(list)
 
-        if not os.path.exists(os.path.abspath(os.path.curdir)+"/figures"):
-            os.mkdir(os.path.abspath(os.path.curdir)+"/figures")
 
-        plt.title(title_string)
-        plt.ylim(0,1)
-        plt.tight_layout(pad = 5.5)
-        plt.savefig('figures/'+(title_string.replace(" ",""))+'.png')
-        print(path)
-        break
+    master_df = pd.DataFrame(data = average_data, columns = ["Attribute", "Features", "Accuracy"])
+
+    idk = sns.relplot(x="Features", y="Accuracy", hue = "Attribute", kind="line", data=master_df, hue_order = ["kmer_Host", "kmer_Serotype", "kmer_Otype", "kmer_Htype", "omnilog_Host", "omnilog_Serotype", "omnilog_Otype", "omnilog_Htype"])
+    #title_string = "{0} predicted using {1} on a Crossvalidation".format(attribute, train)
+
+    if not os.path.exists(os.path.abspath(os.path.curdir)+"/figures"):
+        os.mkdir(os.path.abspath(os.path.curdir)+"/figures")
+
+    #plt.title(title_string)
+    plt.ylim(0,1)
+    plt.tight_layout(pad = 5.5)
+    plt.savefig('figures/test.png')
+    print(path)
+    #break
 
         #print(master_df)
