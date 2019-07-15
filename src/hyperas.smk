@@ -2,7 +2,7 @@ attributes = ["Host", "Serotype", "Otype", "Htype"]
 splits = ["1","2","3","4","5"]
 kmer_feats = [i for i in range(100,3000,100)]
 omnilog_feats = [i for i in range(10,190,10)]
-ranges = [i for i in range(1, 6, 1)]
+ranges = [i for i in range(1, 16, 1)]
 omnilog_dataset = "omnilog"
 kmer_dataset = "kmer"
 rule all:
