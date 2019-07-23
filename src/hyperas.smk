@@ -7,8 +7,8 @@ omnilog_dataset = "omnilog"
 kmer_dataset = "kmer"
 rule all:
     input:
-        expand("results{range}/kmer_{attribute}/{attribute}_{kmer_feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl", attribute = attributes, kmer_feat = kmer_feats, range = ranges),
-        expand("results{range}/omnilog_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnomnilog_testedOnaCrossValidation.pkl", attribute = attributes, omnilog_feat = omnilog_feats, range = ranges)
+        expand("data{range}/kmer_{attribute}/{kmer_feat}feats_{split}.pkl", attribute = attributes, kmer_feat = kmer_feats, range = ranges, split = splits),
+        expand("data{range}/omnilog_{attribute}/{omnilog_feat}feats_{split}.pkl", attribute = attributes, omnilog_feat = omnilog_feats, range = ranges, split = splits)
 
 rule kmer_split:
     input:
@@ -57,29 +57,3 @@ rule omnilog_hyperas:
         range = '{range}'
     shell:
         'python src/hyp.py {params.omnilog_feat} {params.attribute} 10 {params.split} omnilog {params.range}'
-
-rule kmer_average:
-    input:
-        "data{range}/{kmer}_{attribute}/{kmer_feat}feats_{params.split}.pkl"
-    output:
-        "results{range}/{kmer}_{attribute}/{attribute}_{kmer_feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl"
-    params:
-        kmer_feat = '{kmer_feat}',
-        attribute = '{attribute}',
-        kmer = '{kmer}',
-        range = '{range}'
-    shell:
-        'python src/hyp_average.py {params.kmer_feat} {params.attribute} {params.kmer} {params.range}'
-
-rule omnilog_average:
-    input:
-        "data{range}/{omnilog}_{attribute}/{omnilog_feat}feats_{params.split}.pkl"
-    output:
-        "results{range}/{omnilog}_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnomnilog_testedOnaCrossValidation.pkl"
-    params:
-        omnilog_feat = '{omnilog_feat}',
-        attribute = '{attribute}',
-        omnilog = '{omnilog}',
-        range = '{range}'
-    shell:
-        'python src/hyp_average.py {params.omnilog_feat} {params.attribute} {params.omnilog} {params.range}'
