@@ -2,7 +2,7 @@ attributes = ["Host", "Serotype", "Otype", "Htype"]
 splits = ["1","2","3","4","5"]
 kmer_feats = [i for i in range(100,3000,100)]
 omnilog_feats = [i for i in range(10,190,10)]
-ranges = [i for i in range(1, 21, 1)]
+ranges = [i for i in range(1, 51, 1)]
 omnilog_dataset = "omnilog"
 kmer_dataset = "kmer"
 rule all:
@@ -12,7 +12,7 @@ rule all:
 
 rule kmer_split:
     input:
-        expand("data/filtered/{attribute}/kmer_matrix.npy", attribute = attributes)
+        "data/filtered/{attribute}/kmer_matrix.npy"
     output:
         "data{range}/hyp_splits/kmer-{attribute}/splits/set{split}/"
     params:
@@ -23,7 +23,7 @@ rule kmer_split:
 
 rule omnilog_split:
     input:
-        expand("data/filtered/{attribute}/omnilog_matrix.npy", attribute = attributes)
+        "data/filtered/{attribute}/omnilog_matrix.npy"
     output:
         "data{range}/hyp_splits/omnilog-{attribute}/splits/set{split}/"
     params:
@@ -34,7 +34,7 @@ rule omnilog_split:
 
 rule kmer_hyperas:
     input:
-        expand("data{range}/hyp_splits/kmer-{attribute}/splits/set{split}/", attribute = attributes, split = splits, range = ranges)
+        "data{range}/hyp_splits/kmer-{attribute}/splits/set{split}/"
     output:
         "data{range}/kmer_{attribute}/{kmer_feat}feats_{split}.pkl"
     params:
@@ -47,7 +47,7 @@ rule kmer_hyperas:
 
 rule omnilog_hyperas:
     input:
-        expand("data{range}/hyp_splits/omnilog-{attribute}/splits/set{split}/", attribute = attributes, split = splits, range = ranges)
+        "data{range}/hyp_splits/omnilog-{attribute}/splits/set{split}/"
     output:
         "data{range}/omnilog_{attribute}/{omnilog_feat}feats_{split}.pkl"
     params:
@@ -60,7 +60,7 @@ rule omnilog_hyperas:
 
 rule kmer_average:
     input:
-        expand("data{range}/{kmer}_{attribute}/{kmer_feat}feats_{split}.pkl", attribute = attributes, split = splits, kmer_feat = kmer_feats, kmer = kmer_dataset, range = ranges)
+        "data{range}/{kmer}_{attribute}/{kmer_feat}feats_{params.split}.pkl"
     output:
         "results{range}/{kmer}_{attribute}/{attribute}_{kmer_feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl"
     params:
@@ -73,7 +73,7 @@ rule kmer_average:
 
 rule omnilog_average:
     input:
-        expand("data{range}/{omnilog}_{attribute}/{omnilog_feat}feats_{split}.pkl", attribute = attributes, split = splits, omnilog_feat = omnilog_feats, omnilog = omnilog_dataset, range = ranges)
+        "data{range}/{omnilog}_{attribute}/{omnilog_feat}feats_{params.split}.pkl"
     output:
         "results{range}/{omnilog}_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnomnilog_testedOnaCrossValidation.pkl"
     params:
