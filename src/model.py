@@ -178,13 +178,13 @@ if __name__ == "__main__":
 			"""
 			if(imp_feats):
 				if(train_string == 'omnilog'):
-					cols = np.load('data/unfiltered/omnilog_cols.npy')
+					cols = np.load('data/unfiltered/omnilog_cols.npy', allow_pickle = True)
 				else:
-					cols = np.load('data/unfiltered/kmer_cols.npy')
+					cols = np.load('data/unfiltered/kmer_cols.npy', allow_pickle = True)
 
 				#creating an array of features that are persiting past feature selection
 				feat_indices = np.zeros(len(cols))
-				feat_indices = [i for i in range(len(cols))]
+				feat_indices = np.asarray([i for i in range(len(cols))])
 
 				feat_indices = sk_obj.transform(feat_indices.reshape(1,-1))
 				feat_indices = feat_indices.flatten()
