@@ -13,7 +13,7 @@ rule all:
 
 rule kmer_average:
     input:
-        "data{range}/{kmer}_{attribute}/{kmer_feat}feats_{split}.pkl", kmer = kmer_dataset, attribute = attributes, kmer_feat = kmer_feats, range = ranges, split = splits
+        "data{range}/{kmer}_{attribute}/{kmer_feat}feats_{split}.pkl"
     output:
         "results{range}/{kmer}_{attribute}/{attribute}_{kmer_feat}feats_ANNtrainedOnkmer_testedOnaCrossValidation.pkl"
     params:
@@ -26,7 +26,7 @@ rule kmer_average:
 
 rule omnilog_average:
     input:
-        "data{range}/{omnilog}_{attribute}/{omnilog_feat}feats_{split}.pkl",omnilog = omnilog_dataset, attribute = attributes, omnilog_feat = omnilog_feats, range = ranges, split = splits
+        "data{range}/{omnilog}_{attribute}/{omnilog_feat}feats_{split}.pkl"
     output:
         "results{range}/{omnilog}_{attribute}/{attribute}_{omnilog_feat}feats_ANNtrainedOnomnilog_testedOnaCrossValidation.pkl"
     params:
