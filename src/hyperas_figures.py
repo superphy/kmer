@@ -46,20 +46,35 @@ if __name__ == "__main__":
     for list in final_data:
         print(list)
 
+    '''
+    for list in acc_list:
+        print(list)
+    #for attribute in ["kmer_Host", "kmer_Serotype", "kmer_Otype", "kmer_Htype", "omnilog_Host", "omnilog_Serotype", "omnilog_Otype", "omnilog_Htype"]:
+    for attribute in ["omnilog_Serotype"]:
+        attribute_list = []
+        for i in range(length - 1):
+            if acc_list[i][1] == attribute:
+                attribute_list.append(acc_list[i])
+                test, train = attribute.split('_')
+                #print(test, train)
+
+        df = pd.DataFrame(data = attribute_list, columns = ["Run", "Data", "Accuracy", "Features"])
+    '''
 
     master_df = pd.DataFrame(data = average_data, columns = ["Attribute", "Features", "Accuracy"])
 
     idk = sns.relplot(x="Features", y="Accuracy", hue = "Attribute", kind="line", data=master_df, hue_order = ["kmer_Host", "kmer_Serotype", "kmer_Otype", "kmer_Htype", "omnilog_Host", "omnilog_Serotype", "omnilog_Otype", "omnilog_Htype"])
-    #title_string = "{0} predicted using {1} on a Crossvalidation".format(attribute, train)
+
+    title_string = "{0} predicted using {1} on a Crossvalidation".format(train, test)
+
+        #kmer = sns.relplot(x="Features", y="Accuracy", hue = "Run", kind="line", data=df, hue_order = ["results1", "results2", "results3", "results4", "results5"])
 
     if not os.path.exists(os.path.abspath(os.path.curdir)+"/figures"):
         os.mkdir(os.path.abspath(os.path.curdir)+"/figures")
 
-    #plt.title(title_string)
+    plt.title(title_string)
     plt.ylim(0,1)
-    plt.tight_layout(pad = 5.5)
-    plt.savefig('figures/test.png')
+    #plt.tight_layout(pad = 5.5)
+    plt.savefig('figures/'+train+'_'+test+'.png')
+    plt.clf()
     print(path)
-    #break
-
-        #print(master_df)

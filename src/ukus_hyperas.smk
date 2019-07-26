@@ -4,7 +4,7 @@ kmer_feats = [i for i in range(100,3000,100)]
 rule all:
     input:
         expand("results/uk_host/host_{kmer_feat}feats_ANNtrainedOnuk_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats),
-        #expand("results/uk2us_host/Host_{kmer_feat}feats_ANNtrainedOnuk_testedOnus.pkl", kmer_feat = kmer_feats),
+        expand("results/uk2us_host/Host_{kmer_feat}feats_ANNtrainedOnuk_testedOnus.pkl", kmer_feat = kmer_feats),
         expand("results/uk_us_host/host_{kmer_feat}feats_ANNtrainedOnuk_us_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats),
         #expand("results/ukus2kmer_host/Host_{kmer_feat}feats_ANNtrainedOnukus_testedOnkmer.pkl", kmer_feat = kmer_feats),
         expand("results/us_host/host_{kmer_feat}feats_ANNtrainedOnus_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats),
@@ -97,3 +97,13 @@ rule us_host_average:
         kmer_feat = '{kmer_feat}'
     shell:
         'python src/hyp_average.py {params.kmer_feat} host us'
+
+rule uk2us_host_split:
+    input:
+        'data/uk_us_unfiltered/kmer_matrix.npy'
+    output:
+        "data/hyp_splits/uk-host/splits/set{split}/"
+    shell:
+        'python src/validation_split_hyperas.py uk host'
+
+rule uk2us_host_hyperas:
