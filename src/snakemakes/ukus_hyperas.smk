@@ -71,7 +71,7 @@ rule uk_us_host_average:
 
 rule us_host_split:
     input:
-        'data/ukus_unfiltered/kmer_matrix.npy'
+        'data/uk_us_unfiltered/kmer_matrix.npy'
     output:
         "data/hyp_splits/us-host/splits/set{split}/"
     shell:
@@ -97,13 +97,3 @@ rule us_host_average:
         kmer_feat = '{kmer_feat}'
     shell:
         'python src/hyp_average.py {params.kmer_feat} host us'
-
-rule uk2us_host_split:
-    input:
-        'data/uk_us_unfiltered/kmer_matrix.npy'
-    output:
-        "data/hyp_splits/uk-host/splits/set{split}/"
-    shell:
-        'python src/validation_split_hyperas.py uk host'
-
-rule uk2us_host_hyperas:

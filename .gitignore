@@ -21,3 +21,5 @@ data/*
 results*
 kmer_omnilog_hyperas*
 kmer_Host/*
+data*
+figures*

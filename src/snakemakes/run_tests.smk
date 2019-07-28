@@ -1,5 +1,5 @@
 attributes = ["Host", "Serotype", "Otype", "Htype"]
-models = ["SVM", "XGB"]
+models = ["XGB"]
 splits = ["1","2","3","4","5"]
 kmer_feats = [i for i in range(100,3000,100)]
 omnilog_feats = [i for i in range(10,190,10)]
@@ -17,9 +17,9 @@ rule all:
         expand("results/us_host/Host_{kmer_feat}feats_{model}trainedOnus_testedOnaCrossValidation.pkl", kmer_feat = kmer_feats, model = models),
         expand("results/us2uk_host/Host_{kmer_feat}feats_{model}trainedOnus_testedOnuk.pkl", kmer_feat = kmer_feats, model = models),
         expand("results/kmer2ukus_host/Host_{kmer_feat}feats_{model}trainedOnkmer_testedOnukus.pkl", kmer_feat = kmer_feats, model = models)
-    run:
-        shell("snakemake -s src/hyperas.smk")
-        shell("snakemake -s src/ukus_hyperas.smk")
+    #run:
+        #shell("snakemake -s src/hyperas.smk")
+        #shell("snakemake -s src/ukus_hyperas.smk")
 
 rule kmer:
     input:
@@ -31,7 +31,7 @@ rule kmer:
         model = '{model}',
         attribute = '{attribute}'
     shell:
-        'python src/model.py -x kmer -a {params.attribute} -o results/kmer_{params.attribute} -f {params.kmer_feat} -m {params.model}'
+        'python src/model.py -i -x kmer -a {params.attribute} -o results/kmer_{params.attribute} -f {params.kmer_feat} -m {params.model}'
 
 rule omnilog:
     input:
@@ -43,7 +43,7 @@ rule omnilog:
         model = '{model}',
         attribute = '{attribute}'
     shell:
-        'python src/model.py -x omnilog -a {params.attribute} -o results/omnilog_{params.attribute} -f {params.omnilog_feat} -m {params.model}'
+        'python src/model.py -i -x omnilog -a {params.attribute} -o results/omnilog_{params.attribute} -f {params.omnilog_feat} -m {params.model}'
 
 rule uk_host:
     input:
@@ -54,7 +54,7 @@ rule uk_host:
         kmer_feat = '{kmer_feat}',
         model = '{model}'
     shell:
-        'python src/model.py -x uk -a Host -o results/uk_host -f {params.kmer_feat} -m {params.model}'
+        'python src/model.py -i -x uk -a Host -o results/uk_host -f {params.kmer_feat} -m {params.model}'
 
 rule us_host:
     input:
@@ -65,7 +65,7 @@ rule us_host:
         kmer_feat = '{kmer_feat}',
         model = '{model}'
     shell:
-        'python src/model.py -x us -a Host -o results/us_host -f {params.kmer_feat} -m {params.model}'
+        'python src/model.py -i -x us -a Host -o results/us_host -f {params.kmer_feat} -m {params.model}'
 
 rule ukus_host:
     input:
@@ -76,7 +76,7 @@ rule ukus_host:
         kmer_feat = '{kmer_feat}',
         model = '{model}'
     shell:
-        'python src/model.py -x uk_us -a Host -o results/ukus_host -f {params.kmer_feat} -m {params.model}'
+        'python src/model.py -i -x uk_us -a Host -o results/ukus_host -f {params.kmer_feat} -m {params.model}'
 
 rule us2uk_host:
     input:
@@ -87,7 +87,7 @@ rule us2uk_host:
         kmer_feat = '{kmer_feat}',
         model = '{model}'
     shell:
-        'python src/model.py -x us -y uk -a Host -o results/us2uk_host -f {params.kmer_feat} -m {params.model}'
+        'python src/model.py -i -x us -y uk -a Host -o results/us2uk_host -f {params.kmer_feat} -m {params.model}'
 
 rule uk2us_host:
     input:
@@ -98,7 +98,7 @@ rule uk2us_host:
         kmer_feat = '{kmer_feat}',
         model = '{model}'
     shell:
-        'python src/model.py -x uk -y us -a Host -o results/uk2us_host -f {params.kmer_feat} -m {params.model}'
+        'python src/model.py -i -x uk -y us -a Host -o results/uk2us_host -f {params.kmer_feat} -m {params.model}'
 
 rule kmer2ukus_host:
     input:
@@ -109,7 +109,7 @@ rule kmer2ukus_host:
         kmer_feat = '{kmer_feat}',
         model = '{model}'
     shell:
-        'python src/model.py -x kmer -y uk_us -a Host -o results/kmer2ukus_host -f {params.kmer_feat} -m {params.model}'
+        'python src/model.py -i -x kmer -y uk_us -a Host -o results/kmer2ukus_host -f {params.kmer_feat} -m {params.model}'
 
 rule ukus2kmer_host:
     input:
@@ -120,4 +120,4 @@ rule ukus2kmer_host:
         kmer_feat = '{kmer_feat}',
         model = '{model}'
     shell:
-        'python src/model.py -x uk_us -y kmer -a Host -o results/ukus2kmer_host -f {params.kmer_feat} -m {params.model}'
+        'python src/model.py -i -x uk_us -y kmer -a Host -o results/ukus2kmer_host -f {params.kmer_feat} -m {params.model}'
