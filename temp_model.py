@@ -218,10 +218,10 @@ if(feats!=0):
 	x_val  = sk_obj.transform(x_val)
 	np.save('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), x_val)
 
-num_classes = max(Counter(all_y_trains).keys()) + 2
+num_classes = max(Counter(all_y_trains).keys()) + 1
 y_train = to_categorical(y_train, num_classes)
 
-num_classes = max(Counter(y_test).keys()) + 1
+num_classes = max(Counter(y_test).keys()) + 2
 y_test  = to_categorical(y_test, num_classes)
 
 #print(y_test)

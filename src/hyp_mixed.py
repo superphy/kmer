@@ -168,10 +168,10 @@ def data():
 		x_val  = sk_obj.transform(x_val)
 		np.save('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), x_val)
 
-	num_classes = max(Counter(all_y_trains).keys()) + 2
+	num_classes = max(Counter(all_y_trains).keys()) + 1
 	y_train = to_categorical(y_train, num_classes)
 
-	num_classes = max(Counter(y_test).keys()) + 1
+	num_classes = max(Counter(y_test).keys()) + 2
 	y_test  = to_categorical(y_test, num_classes)
 
 	#print(y_test)
@@ -276,7 +276,7 @@ if __name__ == "__main__":
 	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
 	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
 	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
-	num_classes = max(Counter(all_y_trains).keys()) + 2
+	num_classes = max(Counter(all_y_trains).keys()) + 1
 	test_names = to_categorical(test_names, num_classes)
 
 	## Score #######################################################

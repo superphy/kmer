@@ -6,6 +6,17 @@ sns.set(style="darkgrid")
 import os, sys
 
 
+def add_lupolova(list, train, attribute, num_feats, acc, model, test):
+    #print(train, test)
+    if train  == "uk" and test == "us.pkl":
+        temp_list = [train, attribute, num_feats, 0.82, "Lupolova"]
+        list.append(temp_list)
+    else:
+        temp_list = [train, attribute, num_feats, 0.78, "Lupolova"]
+        list.append(temp_list)
+
+    return list
+
 if __name__ == "__main__":
     directory = sys.argv[1]
 
@@ -41,15 +52,14 @@ if __name__ == "__main__":
 
             temp_list = [train, attribute, num_feats, acc, model]
             list.append(temp_list)
-            #print(acc, filename)
-            #break
 
-
+            list = add_lupolova(list, train, attribute, num_feats, acc, model, test)
+        #print(list)
         #master_df = pd.DataFrame(data = list, columns = ["Dataset", "Attribute", "Features", "Accuracy", "Model", "Class"])
         master_df = pd.DataFrame(data = list, columns = ["Dataset", "Attribute", "Features", "Accuracy", "Model"])
-
-        idk = sns.relplot(x="Features", y="Accuracy", hue="Model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN"])
-        title_string = filename
+        #print(master_df)
+        idk = sns.relplot(x="Features", y="Accuracy", hue="Model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN", "Lupolova"])
+        title_string = path_to_dir
 
         if not os.path.exists(os.path.abspath(os.path.curdir)+"/figures_uk_us"):
             os.mkdir(os.path.abspath(os.path.curdir)+"/figures_uk_us")

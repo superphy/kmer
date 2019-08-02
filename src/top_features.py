@@ -27,7 +27,7 @@ if __name__ =="__main__":
     import numpy as np
     import pandas as pd
 
-    # where we load the features from
+    # where we load the features from data/features
     input_arr = sys.argv[1]
     top_feats_list = []
     for array in os.listdir(input_arr):
@@ -74,8 +74,19 @@ if __name__ =="__main__":
             #print(top_feats)
             top_feats_list.append(top_feats)
 
-    df = pd.DataFrame(data = top_feats_list, columns = ["feat1", "feat2", "feat3", "feat4", "feat5", "Attribute", "Features", "Dataset", "Fold"])
-    df.to_csv("data/top_features.csv", index = False)
+
+    top_feat_dict = {}
+    for i in range(len(top_feats_list)):
+        for j in range(0, 5, 1):
+            top_feat_dict[top_feats_list[i][j]] = 0
+    for i in range(len(top_feats_list)):
+        for j in range(0, 5, 1):
+            top_feat_dict[top_feats_list[i][j]] += 1
+
+    print(sorted(top_feat_dict.items(), key = lambda kv:(kv[1], kv[0])))
+
+    #df = pd.DataFrame(data = top_feats_list, columns = ["feat1", "feat2", "feat3", "feat4", "feat5", "Attribute", "Features", "Dataset", "Fold"])
+    #df.to_csv("data/top_features.csv", index = False)
             #print(top_feats)
 
             #np.save(output, top_feats)
