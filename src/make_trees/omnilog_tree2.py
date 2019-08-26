@@ -17,6 +17,6 @@ for list in temp:
 df = pd.DataFrame(data = temp, columns = ["Strain", "Substrate", "AUC", "AUC"])
 print(df.iloc[:, 2:])
 
-distance = pd.DataFrame(squareform(pdist(df.iloc[:, 2:])), columns=df.Strain.unique(), index=df.Strain.unique())
+distance = pd.DataFrame(squareform(pdist(df.iloc[:, 2:])), columns=df['Strain'], index=df['Strain'])
 
 tree = nj(distance)
