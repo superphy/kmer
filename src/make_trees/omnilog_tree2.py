@@ -18,5 +18,6 @@ df = pd.DataFrame(data = temp, columns = ["Strain", "Substrate", "AUC", "AUC"])
 print(df.iloc[:, 2:])
 
 distance = pd.DataFrame(data = squareform(pdist(df.iloc[:, 2:])), columns=df['Strain'], index=df['Strain'])
+distance.to_pickle("data/distance.pkl")
 print(distance)
 tree = nj(distance)
