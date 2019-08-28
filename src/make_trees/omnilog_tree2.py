@@ -1,5 +1,6 @@
 import pandas as pd
 from scipy.spatial.distance import squareform, pdist
+from skbio import DistanceMatrix
 from skbio.tree import nj
 
 temp = []
@@ -14,10 +15,14 @@ for list in temp:
     list[2] = num
     list.append(num)
 
-df = pd.DataFrame(data = temp, columns = ["Strain", "Substrate", "AUC", "AUC"])
-print(df.iloc[:, 2:])
+#df = pd.DataFrame(data = temp, columns = ["Strain", "Substrate", "AUC", "AUC"])
+#print(df.iloc[:, 2:])
 
-distance = pd.DataFrame(data = squareform(pdist(df.iloc[:, 2:])), columns=df['Strain'], index=df['Strain'])
-distance.to_pickle("data/distance.pkl")
-print(distance)
+#distance = pd.DataFrame(data = squareform(pdist(df.iloc[:, 2:])), columns=df['Strain'], index=df['Strain'])
+#distance.to_pickle("data/distance.pkl")
+#print(distance)
+
+distance = pd.read_pickle("data/distance.pkl")
+distance = distance(data, distance["Strain"])
 tree = nj(distance)
+print(tree.ascii_art())
