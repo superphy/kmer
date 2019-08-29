@@ -23,6 +23,6 @@ for list in temp:
 #print(distance)
 
 distance = pd.read_pickle("data/distance.pkl")
-distance = distance(data, distance["Strain"])
+distance = DistanceMatrix(distance, distance["Strain"])
 tree = nj(distance)
 print(tree.ascii_art())
