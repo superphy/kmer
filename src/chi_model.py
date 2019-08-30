@@ -31,7 +31,8 @@ def get_data(train, predict_for):
 	Y = []
 	if(train in ('kmer, omnilog, Otype, Htype')):
 		X = np.load('data/filtered/'+predict_for+'/'+train+'_matrix.npy', allow_pickle = True)
-		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_Serotype2.npy', allow_pickle = True)
+		Y = np.load('data/filtered/'+predict_for+'/'+train+'_rows_Host2.npy', allow_pickle = True)
+		print("loaded data")
 
 	elif(train in ('uk', 'us','uk_us')):
 		X = np.load('data/uk_us_unfiltered/kmer_matrix.npy', allow_pickle = True)
@@ -168,7 +169,6 @@ if __name__ == "__main__":
 		#feature selection
 		if(num_feats!=0):
 			sk_obj = SelectKBest(chi2, k='all').fit(x_train,y_train)
-
 			"""
 			#uncomment this section if you want to save datasets for hyp.property
 			np.save('x_test.npy', x_test)

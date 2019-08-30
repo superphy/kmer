@@ -8,11 +8,11 @@ import os, sys
 
 def add_lupolova(list, train, attribute, num_feats, acc, model, test):
     #print(train, test)
-    if train  == "uk" and test == "us.pkl":
-        temp_list = [train, attribute, num_feats, 0.82, "Lupolova"]
+    if train  == "us" and test == "uk.pkl":
+        temp_list = [train, attribute, num_feats, 0.79, "Lupolova"]
         list.append(temp_list)
     else:
-        temp_list = [train, attribute, num_feats, 0.78, "Lupolova"]
+        temp_list = [train, attribute, num_feats, 0.79, "Lupolova"]
         list.append(temp_list)
 
     return list
@@ -57,7 +57,9 @@ if __name__ == "__main__":
         #print(list)
         #master_df = pd.DataFrame(data = list, columns = ["Dataset", "Attribute", "Features", "Accuracy", "Model", "Class"])
         master_df = pd.DataFrame(data = list, columns = ["Dataset", "Attribute", "Features", "Accuracy", "Model"])
-        #print(master_df)
+        #filtered = master_df[master_df["Accuracy"] > 0.63]
+        #print(filtered.iloc[:, :])
+
         idk = sns.relplot(x="Features", y="Accuracy", hue="Model", kind="line", data=master_df, hue_order = ["XGB", "SVM", "ANN", "Lupolova"])
         title_string = path_to_dir
 

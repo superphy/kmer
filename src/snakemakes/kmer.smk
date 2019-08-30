@@ -5,7 +5,7 @@
 RAW_GENOMES_PATH = "data/genomes/raw/"
 
 # Kmer length that you want to count
-KMER_SIZE = 11
+KMER_SIZE = 15
 
 # Data type of the resulting kmer matrix. Use uint8 if counts are
 # all under 256. Else use uint16 (kmer counts under 65536)
@@ -17,7 +17,7 @@ ids, = glob_wildcards(RAW_GENOMES_PATH+"{id}.fasta")
 
 rule all:
   input:
-    ".touchfile.txt"
+    expand("data/jellyfish_results15/{id}.fa", id=ids)
 """
 rule clean:
   input:
@@ -31,7 +31,7 @@ rule count:
   input:
     RAW_GENOMES_PATH+"{id}.fasta"
   output:
-    temp("data/jellyfish_results/{id}.jf")
+    temp("data/jellyfish_results15/{id}.jf")
   threads:
     2
   shell:
@@ -39,12 +39,13 @@ rule count:
 
 rule dump:
     input:
-        "data/jellyfish_results/{id}.jf"
+        "data/jellyfish_results15/{id}.jf"
     output:
-        "data/jellyfish_results/{id}.fa"
+        "data/jellyfish_results15/{id}.fa"
     shell:
         "jellyfish dump {input} > {output}"
 
+'''
 rule matrix:
     input:
         expand("data/jellyfish_results/{id}.fa", id=ids)
@@ -52,3 +53,4 @@ rule matrix:
         touch(".touchfile.txt")
     shell:
         "python src/parallel_matrix.py {KMER_SIZE} {MATRIX_DTYPE} data/jellyfish_results/ data/unfiltered/"
+'''

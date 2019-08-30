@@ -1,6 +1,6 @@
 import numpy as np
 
-arr1 = np.load("data/features/Serotype_110feats_XGBtrainedOnomnilog_testedOnomnilog_fold1.npy", allow_pickle = True)
+arr1 = np.load("data/features/Host_110feats_XGBtrainedOnomnilog_testedOnomnilog_fold1.npy", allow_pickle = True)
 
 all_feats = np.asarray(arr1)
 
