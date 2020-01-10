@@ -15,11 +15,10 @@ from tensorflow import set_random_seed
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import cpu_count
 
-os.environ['PYTHONHASHSEED'] = '0'
 
-session_conf = tensorflow.ConfigProto(intra_op_parallelism_threads=1,inter_op_parallelism_threads=1)
-tensorflow.set_random_seed(913824)
-sess = tensorflow.Session(config=session_conf)
+#session_conf = tensorflow.ConfigProto(intra_op_parallelism_threads=1,inter_op_parallelism_threads=1)
+#tensorflow.set_random_seed(913824)
+#sess = tensorflow.Session(config=session_conf)
 
 from hyperopt import Trials, STATUS_OK, tpe
 from keras.layers.convolutional import Conv1D
@@ -34,7 +33,6 @@ from hyperas.distributions import choice, uniform
 
 from sklearn import metrics
 from sklearn.externals import joblib
-from sklearn.cross_validation import train_test_split
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.metrics import matthews_corrcoef, confusion_matrix, classification_report
@@ -42,7 +40,7 @@ from sklearn.metrics import matthews_corrcoef, confusion_matrix, classification_
 from model_evaluators import *
 from data_transformers import *
 
-seed(913824)
+#seed(913824)
 #set_random_seed(913824)
 
 def eval_model(model, test_data, test_names):

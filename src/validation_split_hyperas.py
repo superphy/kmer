@@ -22,7 +22,7 @@ if __name__=='__main__':
     """
     dataset = sys.argv[1]
     attribute = sys.argv[2]
-    range = sys.argv[3]
+    range_num = sys.argv[3]
 
     # note that the uk_us only has classification data for Host
     if (dataset in ['uk','us','uk_us'] and attribute != 'Host'):
@@ -64,11 +64,11 @@ if __name__=='__main__':
     # possible label encodings are determined possible label strings
     # for example, we change Bovine, Human, Human to 0,1,1
 
-    le = preprocessing.LabelEncoder()
+    class_lst = list(set(Y))
+    print(class_lst)
 
-    # using fit with LabelEncoder isnt consistent across programs so we are going to manually set the attribute
-    le.classes_ = list(set(Y))
-    Y = le.transform(Y)
+    encdr = { class_lst[i] : i for i in range(0, len(class_lst)) }
+    Y = np.asarray([ encdr[i] for i in Y ])
 
     # this can be changed to 6 if need be
     cv = StratifiedKFold(n_splits=5, random_state=913824)
@@ -86,11 +86,11 @@ if __name__=='__main__':
 
 
         # save data
-        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data"+range+"/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, set_count)):
-            os.makedirs(os.path.abspath(os.path.curdir)+"/data"+range+"/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, set_count), exist_ok = True)
+        if not os.path.exists(os.path.abspath(os.path.curdir)+"/data"+range_num+"/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, set_count)):
+            os.makedirs(os.path.abspath(os.path.curdir)+"/data"+range_num+"/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, set_count), exist_ok = True)
 
 
-        save_path = "data"+range+"/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, str(set_count))
+        save_path = "data"+range_num+"/hyp_splits/{}-{}/splits/set{}".format(dataset, attribute, str(set_count))
         # This just saves the testing set, so the data is split into 5ths, each set is 1/5th of the data
 
         #print(x_test, y_test, z_test)

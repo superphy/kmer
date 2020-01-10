@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
 	num_classes = len(le.classes_)
 
-	num_threads = 64
+	num_threads = 16
 
 	cv = StratifiedKFold(n_splits=5, random_state=913824)
 	cvscores = []
@@ -257,11 +257,11 @@ if __name__ == "__main__":
 			try:
 				model.compile(loss=loss, metrics=['accuracy'], optimizer='adam')
 
-				model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
+				model.fit(x_train, y_train, epochs=100, verbose=0, callbacks=[early_stop, reduce_LR])
 			except:
 				model.compile(loss=other, metrics=['accuracy'], optimizer='adam')
 
-				model.fit(x_train, y_train, epochs=100, verbose=1, callbacks=[early_stop, reduce_LR])
+				model.fit(x_train, y_train, epochs=100, verbose=0, callbacks=[early_stop, reduce_LR])
 
 		else:
 			raise Exception('Unrecognized Model. Use XGB, SVM or ANN')
