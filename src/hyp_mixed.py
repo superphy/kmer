@@ -15,7 +15,7 @@ from tensorflow import set_random_seed
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import cpu_count
 
-os.environ['PYTHONHASHSEED'] = '0'
+#os.environ['PYTHONHASHSEED'] = '0'
 
 session_conf = tensorflow.ConfigProto(intra_op_parallelism_threads=1,inter_op_parallelism_threads=1)
 tensorflow.set_random_seed(913824)
@@ -34,7 +34,6 @@ from hyperas.distributions import choice, uniform
 
 from sklearn import metrics
 from sklearn.externals import joblib
-from sklearn.cross_validation import train_test_split
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.metrics import matthews_corrcoef, confusion_matrix, classification_report
@@ -42,7 +41,7 @@ from sklearn.metrics import matthews_corrcoef, confusion_matrix, classification_
 from model_evaluators import *
 from data_transformers import *
 
-seed(913824)
+#seed(913824)
 #set_random_seed(913824)
 
 def eval_model(model, test_data, test_names):
@@ -131,33 +130,50 @@ def data():
 	dataset = sys.argv[5]
 	testing_set = sys.argv[6]
 
-	# fold 1 uses sets 1,2,3 to train, 4 to test, fold 2 uses sets 2,3,4 to train, 5 to test, etc
+	# fold 1 uses sets 1,2,3,4 to train, 5 to test, fold 2 uses sets 2,3,4,5 to train, 1 to test, etc
 	train_sets = [(i+int(fold)-1)%5 for i in range(5)]
 	train_sets = [str(i+1) for i in train_sets]
 
+	if dataset not in ['uk','us'] or testing_set not in ['uk','us']:
+		raise Exception("Current setup forces num_classes to 2. Raising error for other datasets for transparency")
 
 
 	# load the relevant training sets and labels
 	x_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
 	x_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
 	x_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
+	x_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
+	x_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+
 	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
 	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
 	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
 	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
 	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+
 	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
 
-	# merge the 3 training sets into 1
-	x_train = np.vstack((x_train1, x_train2, x_train3))
-	y_train = np.concatenate((y_train1, y_train2, y_train3))
+	x_test = x_train5
+	y_test = y_train5
 
+	# merge the 4 training sets into 1
+	x_train = np.vstack((x_train1, x_train2, x_train3, x_train4))
+	y_train = np.concatenate((y_train1, y_train2, y_train3, y_train4))
 
+	x_val1 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(testing_set,attribute,train_sets[0]), allow_pickle = True)
+	x_val2 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(testing_set,attribute,train_sets[1]), allow_pickle = True)
+	x_val3 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(testing_set,attribute,train_sets[2]), allow_pickle = True)
+	x_val4 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(testing_set,attribute,train_sets[3]), allow_pickle = True)
+	x_val5 = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(testing_set,attribute,train_sets[4]), allow_pickle = True)
 
-	x_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(testing_set,attribute, train_sets[3]), allow_pickle = True)
-	y_test  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(testing_set,attribute, train_sets[3]), allow_pickle = True)
+	y_val1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(testing_set,attribute,train_sets[0]), allow_pickle = True)
+	y_val2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(testing_set,attribute,train_sets[1]), allow_pickle = True)
+	y_val3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(testing_set,attribute,train_sets[2]), allow_pickle = True)
+	y_val4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(testing_set,attribute,train_sets[3]), allow_pickle = True)
+	y_val5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(testing_set,attribute,train_sets[4]), allow_pickle = True)
 
-	x_val  = np.load('data/hyp_splits/{}-{}/splits/set{}/x.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+	x_val = np.vstack((x_val1, x_val2, x_val3, x_val4, x_val5))
+	y_val = np.concatenate((y_val1, y_val2, y_val3, y_val4, y_val5))
 
 	# hyperas asks for train and test so the validation set is what comes last, to check the final model
 	# we need to save it to be used later, because we have the sk_obj now.
@@ -166,12 +182,14 @@ def data():
 		x_train = sk_obj.fit_transform(x_train, y_train)
 		x_test  = sk_obj.transform(x_test)
 		x_val  = sk_obj.transform(x_val)
-		np.save('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), x_val)
+		np.save('data/hyp_splits/{}-{}/splits/val{}_{}_{}-test_x.npy'.format(dataset,attribute,fold,str(feats),testing_set), x_val)
+		np.save('data/hyp_splits/{}-{}/splits/val{}_{}_{}-test_y.npy'.format(dataset,attribute,fold,str(feats),testing_set), y_val)
 
-	num_classes = max(Counter(all_y_trains).keys()) + 1
+	#num_classes = max(Counter(all_y_trains).keys()) + 1
+	num_classes = 2
 	y_train = to_categorical(y_train, num_classes)
 
-	num_classes = max(Counter(y_test).keys()) + 2
+	#num_classes = max(Counter(y_test).keys()) + 2
 	y_test  = to_categorical(y_test, num_classes)
 
 	#print(y_test)
@@ -266,22 +284,21 @@ if __name__ == "__main__":
 	train_sets = [(i+int(fold)-1)%5 for i in range(5)]
 	train_sets = [str(i+1) for i in train_sets]
 
-	test_names  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
-	test_data = np.load('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), allow_pickle = True)
+	#test_names  = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
+	#test_data = np.load('data/hyp_splits/{}-{}/splits/val{}_{}.npy'.format(dataset,attribute,fold,str(feats)), allow_pickle = True)
+
+	val_data = np.load('data/hyp_splits/{}-{}/splits/val{}_{}_{}-test_x.npy'.format(dataset,attribute,fold,str(feats),testing_set))
+	val_names = np.load('data/hyp_splits/{}-{}/splits/val{}_{}_{}-test_y.npy'.format(dataset,attribute,fold,str(feats),testing_set))
+
 	from keras.utils import to_categorical
 	from collections import Counter
-	y_train1 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[0]), allow_pickle = True)
-	y_train2 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[1]), allow_pickle = True)
-	y_train3 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[2]), allow_pickle = True)
-	y_train4 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[3]), allow_pickle = True)
-	y_train5 = np.load('data/hyp_splits/{}-{}/splits/set{}/y.npy'.format(dataset,attribute,train_sets[4]), allow_pickle = True)
-	all_y_trains = np.concatenate((y_train1, y_train2, y_train3, y_train4, y_train5))
-	num_classes = max(Counter(all_y_trains).keys()) + 1
-	test_names = to_categorical(test_names, num_classes)
+
+	num_classes = 2
+	val_names = to_categorical(val_names, num_classes)
 
 	## Score #######################################################
-	score = best_model.evaluate(test_data, test_names)
-	score_1d = eval_model(best_model, test_data, test_names)
+	score = best_model.evaluate(val_data, val_names)
+	score_1d = eval_model(best_model, val_data, val_names)
 	y_true = score_1d[3]
 	y_true = y_true.astype(int)
 	y_pred = score_1d[2]
@@ -301,8 +318,8 @@ if __name__ == "__main__":
 		os.makedirs(os.path.abspath(os.path.curdir)+"/data/"+dataset+'_'+attribute, exist_ok = True)
 
 	# ann_1d -> returns: (perc, mcc, prediction, actual)
-	results = ann_1d(best_model, test_data, test_names, 0)
-	OBOResults = ann_1d(best_model, test_data, test_names, 1)
+	results = ann_1d(best_model, val_data, val_names, 0)
+	OBOResults = ann_1d(best_model, val_data, val_names, 1)
 
 	labels = np.arange(0,num_classes)
 	report = precision_recall_fscore_support(results[3], results[2], average=None, labels=labels)
@@ -323,7 +340,7 @@ if __name__ == "__main__":
 	running_sum = 0
 	t_string = 'aCrossValidation'
 	for row in result_df.values:
-		running_sum+=(row[1]*row[3]/(len(test_names)))
+		running_sum+=(row[1]*row[3]/(len(val_names)))
 
 	print("Predicting for", attribute)
 	print("on {} features using a {} trained on {} data, tested on {}".format(feats, 'ANN', dataset, testing_set))

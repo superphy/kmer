@@ -129,13 +129,13 @@ if __name__ == "__main__":
 		if(num_feats>= x_train.shape[1]):
 			num_feats = 0
 
-	# the omnilog crashes at 191, so 190 is our new 'all features'
-	if((num_feats == 0 or num_feats>190) and train=='omnilog'):
-		num_feats = 190
+	# the omnilog crashes at 189, so 188 is our new 'all features'
+	if((num_feats == 0 or num_feats>188) and train=='omnilog'):
+		num_feats = 188
 
 	num_classes = len(le.classes_)
 
-	num_threads = 16
+	num_threads = 8
 
 	cv = StratifiedKFold(n_splits=5, random_state=913824)
 	cvscores = []

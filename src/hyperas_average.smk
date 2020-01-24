@@ -1,8 +1,8 @@
-attributes = ["Host", "Serotype", "Otype", "Htype"]
+attributes = ["Host"]
 splits = ["1","2","3","4","5"]
 kmer_feats = [i for i in range(100,3000,100)]
 omnilog_feats = [i for i in range(10,190,10)]
-ranges = [i for i in range(1, 51, 1)]
+ranges = ['1']
 omnilog_dataset = "omnilog"
 kmer_dataset = "kmer"
 
@@ -22,7 +22,7 @@ rule kmer_average:
         kmer = '{kmer}',
         range = '{range}'
     shell:
-        'python src/hyp_average.py {params.kmer_feat} {params.attribute} {params.kmer} {params.range}'
+        'sbatch -c 1 --mem 2G --wrap="python src/hyp_average.py {params.kmer_feat} {params.attribute} {params.kmer} {params.range}"'
 
 rule omnilog_average:
     input:
@@ -35,4 +35,4 @@ rule omnilog_average:
         omnilog = '{omnilog}',
         range = '{range}'
     shell:
-        'python src/hyp_average.py {params.omnilog_feat} {params.attribute} {params.omnilog} {params.range}'
+        'sbatch -c 1 --mem 2G --wrap="python src/hyp_average.py {params.omnilog_feat} {params.attribute} {params.omnilog} {params.range}"'

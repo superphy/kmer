@@ -11,22 +11,26 @@ rule all:
         expand("data{range}/omnilog_{attribute}/{omnilog_feat}feats_{split}.pkl", attribute = attributes, omnilog_feat = omnilog_feats, range = ranges, split = splits)
 
 rule kmer_split:
+    input:
+        "data/filtered/{attribute}/kmer_matrix.npy"
     output:
         "data{range}/hyp_splits/kmer-{attribute}/splits/set{split}/"
     params:
         attribute = '{attribute}',
         range = '{range}'
     shell:
-        'sbatch -c 8 --mem 32G --wrap="python src/validation_split_hyperas.py kmer {params.attribute} {params.range}"'
+        'sbatch -c python src/validation_split_hyperas.py kmer {params.attribute} {params.range}'
 
 rule omnilog_split:
+    input:
+        "data/filtered/{attribute}/omnilog_matrix.npy"
     output:
         "data{range}/hyp_splits/omnilog-{attribute}/splits/set{split}/"
     params:
         attribute = '{attribute}',
         range = '{range}'
     shell:
-        'sbatch -c 8 --mem 32G --wrap="python src/validation_split_hyperas.py omnilog {params.attribute} {params.range}"'
+        'python src/validation_split_hyperas.py omnilog {params.attribute} {params.range}'
 
 rule kmer_hyperas:
     input:
@@ -39,7 +43,7 @@ rule kmer_hyperas:
         split = '{split}',
         range = '{range}'
     shell:
-        'sbatch -c 8 --mem 32G --wrap="python src/hyp.py {params.kmer_feat} {params.attribute} 10 {params.split} kmer {params.range}"'
+        'python src/hyp.py {params.kmer_feat} {params.attribute} 10 {params.split} kmer {params.range}'
 
 rule omnilog_hyperas:
     input:
@@ -52,4 +56,4 @@ rule omnilog_hyperas:
         split = '{split}',
         range = '{range}'
     shell:
-        'sbatch -c 8 --mem 32G --wrap="python src/hyp.py {params.omnilog_feat} {params.attribute} 10 {params.split} omnilog {params.range}"'
+        'python src/hyp.py {params.omnilog_feat} {params.attribute} 10 {params.split} omnilog {params.range}'

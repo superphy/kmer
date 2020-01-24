@@ -208,7 +208,7 @@ def create_model(x_train, y_train, x_test, y_test):
 		model.add(Dense(num_classes, kernel_initializer='uniform', activation='softmax'))
 
 	model.compile(loss='poisson', metrics=['accuracy'], optimizer='adam')
-	model.fit(x_train, y_train, epochs=100, verbose=0, callbacks=[early_stop, reduce_LR])
+	model.fit(x_train, y_train, epochs=100, verbose=0, batch_size = 1024, callbacks=[early_stop, reduce_LR])
 
 	score, acc = model.evaluate(x_test, y_test, verbose=0)
 	return {'loss': -acc, 'status': STATUS_OK, 'model': model}
@@ -292,8 +292,8 @@ if __name__ == "__main__":
 	################################################################
 
 
-	if not os.path.exists(os.path.abspath(os.path.curdir)+"/data"+run+"/"+dataset+'_'+attribute):
-		os.makedirs(os.path.abspath(os.path.curdir)+"/data"+run+"/"+dataset+'_'+attribute, exist_ok = True)
+	if not os.path.exists(os.path.abspath(os.path.curdir)+"/data/"+dataset+'_'+attribute):
+		os.makedirs(os.path.abspath(os.path.curdir)+"/data/"+dataset+'_'+attribute, exist_ok = True)
 
 	# ann_1d -> returns: (perc, mcc, prediction, actual)
 	results = ann_1d(best_model, test_data, test_names, 0)
@@ -324,6 +324,6 @@ if __name__ == "__main__":
 	print("on {} features using a {} trained on {} data, tested on {}".format(feats, 'ANN', dataset, t_string))
 	print("Accuracy:", running_sum)
 	print(result_df)
-	out = "data"+run+"/"+dataset+'_'+attribute+"/"
+	out = "data/"+dataset+'_'+attribute+"/"
 	out = out+str(feats)+'feats_'+fold+'.pkl'
 	result_df.to_pickle(out)
